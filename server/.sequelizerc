@@ -1,0 +1,9 @@
+// .sequelizerc
+const path = require("path");
+
+module.exports = {
+	config: path.resolve("libs/shared/", "config/config.js"),
+	"models-path": path.resolve("libs/shared/", "models"),
+	"seeders-path": path.resolve("", "seeders"),
+	"migrations-path": path.resolve("migrations"),
+};

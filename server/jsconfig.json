@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./",
+        "paths": {
+            "@models/*": ["./libs/shared/models/*"],
+            "@utils/*": ["./libs/shared/utils/*"],
+            "@middleware/*": ["./libs/shared/middleware/*"],
+            "@queues/*": ["./libs/shared/queues/*"]
+        }
+    }
+}

@@ -1,0 +1,25 @@
+### Format1  ###
+node_modules/
+uploads/
+src/uploads
+node_modules/
+package-lock.json
+*.txt
+*.zip
+.env
+.env.development
+.env.production
+!sequelize-commands.txt
+TODO.md
+# Ignore files directly under public/
+public/*
+
+# Except for the public/api directory and its contents
+!public/api/
+!public/api/*
+*.log
+**/*.log
+
+# IDEs
+.vscode/
+.idea/
