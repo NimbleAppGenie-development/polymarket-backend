@@ -1,0 +1,20 @@
+"use strict";
+
+const { Router } = require("express");
+
+const methodNotAllowed = require("@utils/methodNotAllowed");
+const {userLogin,userRegister,userLogout,getUserPrdicationData,userPrdication } = require("../../controller/userOperation");
+const { isAuthenticated } = require("@middleware/authValidatorUser");
+const upload = require("./uploadMiddleware");
+const router = new Router();
+
+router.route("/user-login").post(userLogin).all(methodNotAllowed);
+router.route("/user-register").post(userRegister).all(methodNotAllowed);
+router.route("/user-logout").post(isAuthenticated,userLogout).all(methodNotAllowed);
+router.route("/get-user-prdication-data/:userId").get(isAuthenticated,getUserPrdicationData).all(methodNotAllowed);
+router.route("/user-prdication").post(isAuthenticated,userPrdication).all(methodNotAllowed);
+
+
+
+
+module.exports = router;

@@ -1,0 +1,30 @@
+# Ignore like ex.
+storage/
+node_modules/
+package-lock.json
+.claude/
+tests/reports/
+tests/data/test-users.json
+tests/data/cognito-local/local_pool_id.json
+.env
+docker.env
+*.log
+**/*.log
+*.collection.json
+*.pdf
+*.txt
+*.xlsx
+*.jpg
+.idea/
+ecosystem.config.js
+package.json
+bash.exe.stackdump
+*.exe.*
+
+# Not to ignore cuz.... 
+!sequelize-commands.txt
+ecosystem.config.js
+.prettierignore
+*-firebase-adminsdk-*.json
+*serviceAccountKey*.json
+scripts/.staging-session.json

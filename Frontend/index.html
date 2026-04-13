@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/img/favicon.png" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Josefin+Slab:wght@700&family=Lily+Script+One&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/custom.css">
+    <link rel="stylesheet" href="/css/media.css">
+    <link rel="stylesheet" href="/css/owl.carousel.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+    <title>Poly Market</title>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+</body>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/custom.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/owl.carousel.min.js"></script>
+<script src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
+
+<script>
+    $(function () {
+        var chartData = [
+            {
+                type: "line",
+                axisYType: "secondary",
+                showInLegend: false,
+                markerSize: 0,
+                yValueFormatString: "$#,###k",
+                dataPoints: [
+                    { x: new Date(2014, 0, 1), y: 850 },
+                    { x: new Date(2014, 1, 1), y: 889 },
+                    { x: new Date(2014, 2, 1), y: 890 },
+                    { x: new Date(2014, 3, 1), y: 899 },
+                    { x: new Date(2017, 5, 1), y: 1170 }
+                ]
+            },
+            {
+                type: "line",
+                axisYType: "secondary",
+                showInLegend: false,
+                markerSize: 0,
+                yValueFormatString: "$#,###k",
+                dataPoints: [
+                    { x: new Date(2014, 0, 1), y: 1200 },
+                    { x: new Date(2014, 1, 1), y: 1200 },
+                    { x: new Date(2014, 2, 1), y: 1190 },
+                    { x: new Date(2014, 7, 1), y: 1300 },
+                    { x: new Date(2017, 5, 1), y: 1730 }
+                ]
+            },
+            {
+                type: "line",
+                axisYType: "secondary",
+                showInLegend: false,
+                markerSize: 0,
+                yValueFormatString: "$#,###k",
+                dataPoints: [
+                    { x: new Date(2014, 0, 1), y: 409 },
+                    { x: new Date(2014, 1, 1), y: 415 },
+                    { x: new Date(2014, 2, 1), y: 419 },
+                    { x: new Date(2017, 5, 1), y: 675 }
+                ]
+            },
+            {
+                type: "line",
+                axisYType: "secondary",
+                showInLegend: false,
+                markerSize: 0,
+                yValueFormatString: "$#,###k",
+                dataPoints: [
+                    { x: new Date(2014, 0, 1), y: 529 },
+                    { x: new Date(2014, 1, 1), y: 540 },
+                    { x: new Date(2014, 2, 1), y: 539 },
+                    { x: new Date(2014, 3, 1), y: 565 },
+                    { x: new Date(2017, 5, 1), y: 740 }
+                ]
+            }
+        ];
+
+        var chartIds = ["chartContainer", "chartContainerone", "chartContainertwo"];
+        var charts = [];
+
+        function createChart(containerId) {
+            return new CanvasJS.Chart(containerId, {
+                backgroundColor: "",
+                axisX: {
+                    valueFormatString: "MMM",
+                    lineColor: "#000",
+                    lineThickness: 1
+                },
+                axisY2: {
+                    lineThickness: 0,
+                    prefix: "$",
+                    suffix: "K"
+                },
+                legend: {
+                    visible: false,
+                    cursor: "pointer",
+                    verticalAlign: "top",
+                    horizontalAlign: "center",
+                    dockInsidePlotArea: true
+                },
+                data: chartData
+            });
+        }
+
+        var totalSlides = $("#home .owl_1 .item").length;
+        $("#owlTotalSlides").text(totalSlides);
+
+        chartIds.forEach(function (id) {
+            var chart = createChart(id);
+            chart.render();
+            charts.push(chart);
+        });
+
+        var $owl1 = $("#home .owl_1");
+
+        $owl1.owlCarousel({
+            loop: true,
+            dots: false,
+            nav: false,
+            margin: 0,
+            responsiveClass: true,
+            autoplay: true,
+            autoplayTimeout: 3000,
+            responsive: {
+                0: { items: 1 },
+                600: { items: 1 },
+                1000: { items: 1 },
+                1199: { items: 1 }
+            }
+        });
+
+        $owl1.on("translated.owl.carousel", function () {
+            var owl = $(this).data("owl.carousel");
+            var cur = owl.relative(owl.current()) + 1;
+            $("#owlCurrentSlide").text(cur);
+            charts.forEach(function (chart) { chart.render(); });
+        });
+
+        $(".owl-custom-prev").on("click", function () {
+            $owl1.trigger("prev.owl.carousel");
+        });
+
+        $(".owl-custom-next").on("click", function () {
+            $owl1.trigger("next.owl.carousel");
+        });
+
+        $(document).on("click", ".owl-item li", function () {
+            $(".owl-item li").removeClass("active");
+        });
+    });
+</script>
+
+
+</html>

@@ -1,0 +1,169 @@
+section.same-section {
+    padding: 80px 0;
+}
+
+.logo-wrapper {
+    margin: 0 0 40px;
+}
+
+.logo-wrapper a {
+    display: inline-block;
+}
+
+.logo-wrapper span {
+    color: rgba(0, 0, 0, 1);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+    display: block;
+    margin: 15px 0 0;
+}
+
+.same-content h3 {
+    color: rgba(0, 0, 0, 1);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin: 0 0 5px;
+}
+
+ul {
+    padding: 0;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    font-family: "Roboto", serif;
+}
+
+li {
+    text-decoration: none;
+    list-style: none;
+}
+
+a {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.same-content ul {
+    margin: 20px 0;
+}
+
+.same-content ul li {
+    color: rgba(51, 51, 51, 0.75);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.4;
+    margin: 0;
+    padding-left: 25px;
+    position: relative;
+}
+
+.same-content ul li img {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.same-content ul li + li {
+    margin-top: 15px;
+}
+
+.same-content p {
+    color: rgba(103, 98, 98, 1);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.6;
+    margin: 0 0 15px;
+}
+
+.same-content h5 {
+    color: rgba(80, 80, 80, 1);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.same-content h4 {
+    color: rgba(0, 0, 0, 1);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin: 0 0 10px;
+}
+
+@media screen and (max-width: 1199px) {
+    section.same-section {
+        padding: 60px 0;
+    }
+
+    .same-content h5 {
+        font-size: 18px;
+    }
+
+    .same-content p {
+        font-size: 16px;
+    }
+
+    .same-content h4, .same-content h3 {
+        font-size: 20px;
+    }
+
+    .same-content ul li {
+        font-size: 16px;
+    }
+
+    .same-content ul li img {
+        top: 2px;
+    }
+
+    .logo-wrapper span {
+        font-size: 16px;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .logo-wrapper span {
+        font-size: 14px;
+    }
+
+    .logo-wrapper {
+        margin: 0 0 30px;
+    }
+
+    .logo-wrapper img {
+        max-height: 50px;
+    }
+
+    section.same-section {
+        padding: 40px 0;
+    }
+
+    section.same-section .container {
+        max-width: 100%;
+    }
+
+    .same-content h5 {
+        font-size: 16px;
+    }
+
+    .same-content p {
+        font-size: 14px;
+    }
+
+    .same-content h4, .same-content h3 {
+        font-size: 18px;
+    }
+
+    .same-content ul li {
+        font-size: 14px;
+    }
+
+    .same-content ul li img {
+        top: 0;
+    }
+}

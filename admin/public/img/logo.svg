@@ -1,0 +1,24 @@
+<svg width="420" height="120" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="polyBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EC1FF"/>
+      <stop offset="100%" stop-color="#4DA6FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon -->
+
+  <g transform="translate(20,25)">
+    <polygon points="0,25 45,0 45,18 18,30 45,42 45,60" 
+             fill="url(#polyBlue)" />
+  </g>
+
+  <!-- Text -->
+
+<text x="95" y="72"
+     font-family="Poppins, Segoe UI, Arial, sans-serif"
+     font-size="34"
+     font-weight="600"
+     fill="#f5f6f8"
+     letter-spacing="0.5">
+Polymarket </text> </svg>

@@ -1,0 +1,64 @@
+/* ✅ Table should scroll horizontally on smaller screens */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+  input.form-control{background-image: none !important;}
+
+/* ✅ Table itself */
+.table {
+  table-layout: auto; /* allow natural width per column */
+  width: 100%;
+  min-width: 900px; /* ensures table wider than screen if many columns */
+}
+
+/* ✅ Prevent text wrapping in cells */
+.table th,
+.table td {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* ✅ Handle ellipsis for long text (optional) */
+.table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px; /* adjust per design */
+}
+
+/* ✅ Let action dropdown remain visible */
+.table td:last-child {
+  overflow: visible;
+}
+
+/* ✅ Ensure dropdown shows above everything */
+.dropdown-menu {
+  z-index: 9999 !important;
+}
+
+
+.d-flex.align-items-center .form-label {
+  font-weight: 500;
+  margin-right: 10px; /* space between label and checkbox */
+}
+
+.form-check-input {
+  margin-top: 0; /* fix default vertical offset */
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.form-control {
+  appearance: none;        /* Remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* Bigger arrow icon */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='gray' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center; /* place to far right */
+  background-size: 25px 25px; /* make it bigger */
+  
+  padding-right: 40px; /* space so text doesn't overlap */
+}

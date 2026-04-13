@@ -1,0 +1,188 @@
+@media screen and (max-width: 1699px) {
+}
+
+@media screen and (max-width: 1599px) {
+}
+
+@media screen and (max-width: 1499px) {
+    :global(.banner-top.text-center h1) {
+        font-size: 46px;
+    }
+    :global(.banner-top.text-center p) {
+        font-size: 20px;
+        margin: 0px 0 0px;
+    }
+    :global(.banner-form-parent) {
+        margin: 30px 0 0;
+    }
+    :global(.email-input-box .form-control) {
+        padding: 12px 15px;
+        font-size: 16px;
+    }
+    :global(.btn-primaryx) {
+        padding: 12px 15px;
+        font-size: 16px;
+        min-width: 180px;
+    }
+    :global(.check-box-parent .form-check label.form-check-label) {
+        font-size: 16px;
+    }
+    :global(.check-box-parent) {
+        margin: 20px 0 0;
+    }
+    header {
+        padding: 20px 0;
+    }
+    :global(.col.logo img) {
+        max-width: 80px;
+    }
+    :global(.col.menu ul li img) {
+        max-width: 30px;
+    }
+    :global(.col.menu ul li + li) {
+        margin-left: 20px;
+    }
+    :global(.banner-section) {
+        padding: 8rem 0 0;
+    }
+}
+
+@media screen and (max-width: 1399px) {
+}
+
+@media screen and (max-width: 1299px) {
+}
+
+@media screen and (max-width: 1199px) {
+}
+
+@media screen and (max-width: 991px) {
+    :global(.container),
+    :global(.container-md),
+    :global(.container-sm) {
+        max-width: 100%;
+    }
+    :global(.banner-top.text-center h1) {
+        font-size: 36px;
+    }
+    :global(.banner-top.text-center p) {
+        font-size: 18px;
+    }
+    :global(.email-input-box) {
+        width: 380px;
+    }
+    :global(.col.logo img) {
+        max-width: 70px;
+    }
+    :global(.col.menu ul li img) {
+        max-width: 25px;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    header {
+        z-index: 999;
+    }
+    :global(.banner-top.text-center h1) {
+        font-size: 32px;
+    }
+    :global(.banner-top.text-center p) {
+        font-size: 16px;
+        margin: 10px 0 0;
+    }
+    :global(.btn-primaryx) {
+        padding: 10px 10px;
+        font-size: 14px;
+        min-width: 140px;
+    }
+    :global(.email-input-box .form-control) {
+        padding: 10px 10px;
+        font-size: 14px;
+    }
+    :global(.banner-section) {
+        padding: 6rem 0 0;
+        position: relative;
+        height: 100vh;
+    }
+    :global(.email-input-box) {
+        width: 300px;
+    }
+    :global(.check-box-parent .form-check label.form-check-label) {
+        font-size: 14px;
+    }
+    :global(.check-box-parent .form-check input) {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+    }
+    :global(.check-box-parent .form-check) {
+        padding-left: 30px;
+    }
+    :global(.banner-image-wrapper) {
+        margin: 50px 0 0;
+        display: none;
+    }
+    :global(.banner-middle-image.text-center) {
+        position: relative;
+        margin-bottom: -3px;
+    }
+    :global(.banner-top.text-center) {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: 15px;
+        right: 15px;
+    }
+}
+
+@media screen and (max-width: 620px) {
+}
+
+@media screen and (max-width: 576px) {
+    :global(.banner-top.text-center h1) {
+        font-size: 26px;
+    }
+    :global(.banner-top.text-center p) {
+        font-size: 14px;
+    }
+    :global(.col.logo img) {
+        max-width: 50px;
+    }
+    :global(.col.menu ul li img) {
+        max-width: 20px;
+    }
+    :global(.col.menu ul li + li) {
+        margin-left: 14px;
+    }
+    header {
+        padding: 10px 0;
+    }
+}
+
+@media screen and (max-width: 480px) {
+}
+
+@media screen and (max-width: 420px) {
+    :global(.banner-form-parent) {
+        flex-wrap: wrap;
+    }
+    :global(.email-input-box) {
+        width: 100%;
+    }
+    :global(.email-btn-box) {
+        margin-left: 0;
+        width: 100%;
+        margin-top: 10px;
+    }
+    :global(.btn-primaryx) {
+        min-width: initial;
+        width: 100%;
+        padding: 9px 10px;
+    }
+    :global(.check-box-parent) {
+        margin: 10px 0 0;
+    }
+}
+
+@media screen and (max-width: 380px) {
+}

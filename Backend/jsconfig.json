@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "ignoreDeprecations": "6.0",
+        "baseUrl": ".",
+        "paths": {
+            "@models/*": [
+                "libs/shared/models/*"
+            ],
+            "@utils/*": [
+                "libs/shared/utils/*"
+            ],
+            "@middleware/*": [
+                "libs/shared/middleware/*"
+            ]
+        }
+    }
+}
