@@ -1,30 +1,25 @@
-# Ignore like ex.
-storage/
+### Format1  ###
+node_modules/
+uploads/
+src/uploads
 node_modules/
 package-lock.json
-.claude/
-tests/reports/
-tests/data/test-users.json
-tests/data/cognito-local/local_pool_id.json
+*.txt
+*.zip
 .env
-docker.env
+.env.development
+.env.production
+!sequelize-commands.txt
+TODO.md
+# Ignore files directly under public/
+public/*
+
+# Except for the public/api directory and its contents
+!public/api/
+!public/api/*
 *.log
 **/*.log
-*.collection.json
-*.pdf
-*.txt
-*.xlsx
-*.jpg
-.idea/
-ecosystem.config.js
-package.json
-bash.exe.stackdump
-*.exe.*
 
-# Not to ignore cuz.... 
-!sequelize-commands.txt
-ecosystem.config.js
-.prettierignore
-*-firebase-adminsdk-*.json
-*serviceAccountKey*.json
-scripts/.staging-session.json
+# IDEs
+.vscode/
+.idea/
