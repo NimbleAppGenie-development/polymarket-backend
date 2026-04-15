@@ -3,8 +3,7 @@ const sequelize = require("."); // Assuming this is your Sequelize instance
 const Category = require("./Category"); // Assuming you have a User model
 const Questions = require("./question");
 
-class UserPredictedQuestion extends Model { }
-
+class UserPredictedQuestion extends Model {}
 
 UserPredictedQuestion.init(
     {
@@ -16,41 +15,40 @@ UserPredictedQuestion.init(
         },
         userId: {
             type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
-            allowNull: true,
+            allowNull: false 
         },
         categoryId: {
-            type: DataTypes.UUID, // Assuming User.id is UUID to match
-            references: {
-                model: Category,
-                key: "id",
-            },
+            type: DataTypes.UUID,
+            allowNull: false,
         },
         questionId: {
-            type: DataTypes.UUID, // Assuming User.id is UUID to match
-            references: {
-                model: Questions,
-                key: "id",
-            },
+            type: DataTypes.UUID,
+            allowNull: false,
         },
-        selectedOption: {
-            type: DataTypes.ENUM('optionA', 'optionB'),
-        },
-        pricePool: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        predictionAmount: {
-            type: DataTypes.DECIMAL(10,2),
+        selectedOptionId: {
+            type: DataTypes.UUID,
             allowNull: false
         },
-        userWinning: {
+        selectedOptionName: {
             type: DataTypes.STRING,
-            allowNull: true
+            allowNull: true,
+        },
+        multiplier: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: true,
+        },
+        entryAmount: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false,
         },
         winningCredited: {
-            type: DataTypes.STRING,
-            allowNull: true
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: true,
+        },
+        winningStatus: {
+            type: DataTypes.ENUM("WIN", "LOSS", "PENDING"),
+            allowNull: false,
+            defaultValue: "PENDING",
         },
     },
     {
@@ -58,8 +56,7 @@ UserPredictedQuestion.init(
         modelName: "UserPredictedQuestion",
         tableName: "userPredictedQuestions",
         timestamps: true,
-    }
-
+    },
 );
 
 UserPredictedQuestion.belongsTo(Category, { foreignKey: "categoryId", as: "category_data" });

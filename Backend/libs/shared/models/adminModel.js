@@ -7,45 +7,39 @@ dotenv.config();
 const sequelize = require(".");
 
 class Admin extends Model {
-
     async generateToken() {
         const secretName = process.env.SECRET_NAME;
-
 
         let JWT_SECRET_KEY;
         let JWT_REFRESH_SECRET_KEY;
 
-
         try {
-            JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "abcdefghijklmnopqrstuvwxyz"
-            JWT_REFRESH_SECRET_KEY = process.env.JWT_REFRESH_SECRET_KEY || "abcdefghijklmnopqrstuvwxyz"
+            JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "abcdefghijklmnopqrstuvwxyz";
+            JWT_REFRESH_SECRET_KEY = process.env.JWT_REFRESH_SECRET_KEY || "abcdefghijklmnopqrstuvwxyz";
         } catch (error) {
             console.warn("Failed to fetch secrets, using static env values.");
             JWT_SECRET_KEY = "abcdefghijklmnopqrstuvwxyz";
             JWT_REFRESH_SECRET_KEY = "abcdefghijklmnopqrstuvwxyz";
         }
 
-
-
-
         const accessToken = jwt.sign(
             {
                 id: this.id,
                 role: this.role,
-                tokenVersion: this.tokenVersion
+                tokenVersion: this.tokenVersion,
             },
             JWT_SECRET_KEY,
-            { expiresIn: "11d" }
+            { expiresIn: "11d" },
         );
 
         const refreshToken = jwt.sign(
             {
                 id: this.id,
                 role: this.role,
-                tokenVersion: this.tokenVersion
+                tokenVersion: this.tokenVersion,
             },
             JWT_REFRESH_SECRET_KEY,
-            { expiresIn: "31d" }
+            { expiresIn: "31d" },
         );
 
         this.accessToken = accessToken;
@@ -95,6 +89,11 @@ Admin.init(
             type: DataTypes.ENUM("admin"),
             defaultValue: "admin",
         },
+        walletBalance: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false,
+            defaultValue: 0.0
+        },
 
         accessToken: { type: DataTypes.TEXT },
         refreshToken: { type: DataTypes.TEXT },
@@ -111,9 +110,8 @@ Admin.init(
                     await admin.hashPassword();
                 }
             },
-
         },
-    }
+    },
 );
 
 module.exports = Admin;

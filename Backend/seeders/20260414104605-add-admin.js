@@ -1,4 +1,3 @@
-
 "use strict";
 const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
@@ -20,7 +19,7 @@ module.exports = {
                 role: "admin",
                 accessToken: null,
                 refreshToken: null,
-                tokenVersion: uuidv4(), // Initialize token version
+                tokenVersion: uuidv4(),
                 createdAt: new Date(),
                 updatedAt: new Date(),
             }

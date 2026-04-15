@@ -1,3 +1,5 @@
+@import "toastr";
+
 /* ✅ Table should scroll horizontally on smaller screens */
 .table-responsive {
   overflow-x: auto;

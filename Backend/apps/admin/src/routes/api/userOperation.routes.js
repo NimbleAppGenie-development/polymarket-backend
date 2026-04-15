@@ -66,4 +66,3 @@ router.route("/question/delete").post(isAuthenticated, deleteQuestion).all(metho
 
 
 module.exports = router;
-

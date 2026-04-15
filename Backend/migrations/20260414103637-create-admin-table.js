@@ -40,6 +40,11 @@ module.exports = {
                 defaultValue: "admin",
                 allowNull: false
             },
+            walletBalance: {
+              type: Sequelize.DECIMAL(10, 2),
+              allowNull: false,
+              defaultValue: 0.0
+            },
             accessToken: {
                 type: Sequelize.TEXT,
                 allowNull: true
@@ -68,7 +73,7 @@ module.exports = {
 
 
         await queryInterface.addIndex("admin", {
-            fields: ['email'], // no function wrapper
+            fields: ['email'], 
             unique: true,
             name: 'admins_email_unique'
         });

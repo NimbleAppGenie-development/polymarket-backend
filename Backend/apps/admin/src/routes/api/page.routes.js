@@ -11,9 +11,6 @@ const {
     getPageById,
     getPageForEdit,
     updatePageById,
-    getMostAskQuestionsList,
-    getMarketList,
-    getMarketDetail,
     getPage } = require("../../controller/page");
 const router = new Router();
 const { editPageValidator } = require("../../controller/validators/admin.validator");
@@ -23,7 +20,5 @@ router.route("/getPageById/:id").get(isAuthenticated, getPageById).all(methodNot
 router.route("/updatePageById").post(isAuthenticated, updatePageById).all(methodNotAllowed);
 router.route("/pages").get(getPage).all(methodNotAllowed);
 router.route("/staticPageData/:slug").get(getPageBySlug).all(methodNotAllowed);
-router.route("/get-market-list").get(getMarketList).all(methodNotAllowed);
-router.route("/get-market-detail/:id").get(getMarketDetail).all(methodNotAllowed);
 
 module.exports = router;

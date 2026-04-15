@@ -1,12 +1,12 @@
-
 const { Op } = require("sequelize");
-const { literal } = require('sequelize');
+const { literal } = require("sequelize");
 const Page = require("@models/page");
 const moment = require("moment");
-const statusCodes  = require("../../../../libs/shared/utils/statusCodes");
+const statusCodes = require("../../../../libs/shared/utils/statusCodes");
 const { successResponse, simpleResponse } = require("@utils/response");
 const Question = require("@models/question");
 const Category = require("@models/Category");
+const QuestionOptions = require("@models/questionOption");
 
 module.exports = {
     getMarketList: async (req, res, next) => {
@@ -17,37 +17,75 @@ module.exports = {
                     {
                         model: Category,
                         as: "category",
-                        attributes: ["id", "name", "image"]
-                    }
-                ]
+                        attributes: ["id", "name", "image"],
+                    },
+                    {
+                        model: QuestionOptions,
+                        as: "options",
+                        attributes: ["id", "questionId", "option", "multiplier", "resultStatus"],
+                    },
+                ],
             });
 
-            const total = marketList.length;
+            if (!marketList || marketList.length === 0) {
+                return res.status(statusCodes.OK).json(successResponse([], "No marketList found"));
+            }
+            const closedQuestions = await QuestionOptions.findAll({
+                where: { resultStatus: true },
+                attributes: ["questionId"],
+            });
+            const closedQuestionIds = closedQuestions.map((q) => q.questionId);
 
-            if (!marketList || marketList.length === 0) 
-                return res.status(statusCodes.OK).json(
-                    successResponse([], "No marketList found"
-                ));
+            const filteredMarketList = marketList.filter((item) => {
+                return !closedQuestionIds.includes(item.id);
+            });
 
-            const formatted = marketList.map(item => ({
-                id: item.id,
-                question: item.question,
-                description: item.description,
-                optionA: item.optionA,
-                optionB: item.optionB,
-                optionAValue: item.optionAValue,
-                optionBValue: item.optionBValue,
-                status: item.status,
-                category: item.category ? { id: item.category.id, name: item.category.name, image: item.category.image } : null,
-                createdAt: moment(item.createdAt).format('MM/DD/YYYY HH:mm:A')
-            }));
-            return res.status(statusCodes.OK).json(
-                successResponse(
-                    formatted,
-                    "Page content fetched")
-            );
+            // Convert Sequelize models → plain objects
+            /* const formatted = marketList.map((item) => {
+                const plainItem = item.get({ plain: true });
+
+                return {
+                    id: plainItem.id,
+                    question: plainItem.question,
+                    description: plainItem.description,
+                    status: plainItem.status,
+
+                    category: plainItem.category
+                        ? {
+                              id: plainItem.category.id,
+                              name: plainItem.category.name,
+                              image: plainItem.category.image,
+                          }
+                        : null,
+
+                    options: plainItem.options.map((opt) => ({
+                        id: opt.id,
+                        questionId: opt.questionId,
+                        option: opt.option,
+                        multiplier: opt.multiplier,
+                        resultStatus: opt.resultStatus,
+                    })),
+
+                    createdAt: moment(plainItem.createdAt).format("MM/DD/YYYY hh:mm A"),
+                };
+            }); */
+            const formatted = filteredMarketList.map((item) => {
+                const plainItem = item.get({ plain: true });
+
+                return {
+                    id: plainItem.id,
+                    question: plainItem.question,
+                    description: plainItem.description,
+                    status: plainItem.status,
+                    category: plainItem.category,
+                    options: plainItem.options,
+                    createdAt: moment(plainItem.createdAt).format("MM/DD/YYYY hh:mm A"),
+                };
+            });
+
+            return res.status(statusCodes.OK).json(successResponse(formatted, "Market list fetched"));
         } catch (error) {
-            console.error("getPage error:", error);
+            console.error("getMarketList error:", error);
             next(error);
         }
     },
@@ -55,7 +93,12 @@ module.exports = {
     getMarketDetail: async (req, res, next) => {
         try {
             const { id } = req.params;
-            if (!id) throw new BadRequest(simpleResponse(false, "ID is required"));
+            if (!id) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "ID is required",
+                });
+            }
 
             let query = { id: id.toLowerCase() };
 
@@ -65,9 +108,14 @@ module.exports = {
                     {
                         model: Category,
                         as: "category",
-                        attributes: ["id", "name", "image"]
-                    }
-                ]
+                        attributes: ["id", "name", "image"],
+                    },
+                    {
+                        model: QuestionOptions,
+                        as: "options",
+                        attributes: ["id", "questionId", "option", "multiplier", "resultStatus"],
+                    },
+                ],
             });
 
             let result = {};
@@ -76,71 +124,62 @@ module.exports = {
                     id: data.id,
                     question: data.question,
                     description: data.description,
-                    optionA: data.optionA,
-                    optionB: data.optionB,
-                    optionAValue: data.optionAValue,
-                    optionBValue: data.optionBValue,
                     status: data.status,
-                    category: data.category ? { id: data.category.id, name: data.category.name, image: data.category.image } : null,
-                    createdAt: moment(data.createdAt).format('MM/DD/YYYY HH:mm:A')
-                }
+
+                    category: data.category
+                        ? {
+                              id: data.category.id,
+                              name: data.category.name,
+                              image: data.category.image,
+                          }
+                        : null,
+
+                    options: data.options
+                        ? data.options.map((opt) => ({
+                              id: opt.id,
+                              option: opt.option,
+                              multiplier: opt.multiplier,
+                              resultStatus: opt.resultStatus,
+                          }))
+                        : [],
+
+                    createdAt: moment(data.createdAt).format("MM/DD/YYYY HH:mm:A"),
+                };
             }
 
-            return res.status(statusCodes.OK).json(successResponse(
-                result,
-                "Market fetched successfully"
-            ));
+            return res.status(statusCodes.OK).json(successResponse(result, "Market fetched successfully"));
         } catch (error) {
             console.log(error);
-            next(error)
+            next(error);
         }
     },
 
-    getTrendingList: async(req,res,next) => {
+    getTrendingList: async (req, res, next) => {
         try {
             const trendingList = await Question.findAll({
                 order: [["createdAt", "DESC"]],
                 where: {
-                    isTrending: "true"
-                }
-                /* include: [
-                    {
-                        model: Category,
-                        as: "category",
-                        attributes: ["id", "name", "image"]
-                    }
-                ] */
+                    isTrending: "true",
+                },
             });
-            console.log("================Backend======",trendingList)
-            
+
             const total = trendingList.length;
 
-            if (!trendingList || trendingList.length === 0) 
-                return res.status(statusCodes.OK).json(
-                    successResponse([], "No trendingList found"
-                ));
+            if (!trendingList || trendingList.length === 0)
+                return res.status(statusCodes.OK).json(successResponse([], "No trendingList found"));
 
-            const formatted = trendingList.map(item => ({
+            const formatted = trendingList.map((item) => ({
                 id: item.id,
                 question: item.question,
                 description: item.description,
-                optionA: item.optionA,
-                optionB: item.optionB,
-                optionAValue: item.optionAValue,
-                optionBValue: item.optionBValue,
                 status: item.status,
                 trending: item.isTrending,
-                createdAt: moment(item.createdAt).format('MM/DD/YYYY HH:mm:A')
+                createdAt: moment(item.createdAt).format("MM/DD/YYYY HH:mm:A"),
             }));
-            return res.status(statusCodes.OK).json(
-                successResponse(
-                    formatted,
-                    "Page content fetched")
-            );
+            return res.status(statusCodes.OK).json(successResponse(formatted, "Page content fetched"));
         } catch (error) {
             console.error("getPage error:", error);
             next(error);
         }
     },
-
 };

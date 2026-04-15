@@ -54,7 +54,7 @@ User.init(
         email: { type: DataTypes.STRING },
         phone: { type: DataTypes.STRING, defaultValue: null},
         password: { type: DataTypes.STRING },
-        wallet: { type: DataTypes.DECIMAL(10,2), allowNull: false, defaultValue: 0.00 },
+        walletBalance: { type: DataTypes.DECIMAL(10,2), allowNull: false, defaultValue: 0.00 },
         accessToken: { type: DataTypes.STRING },
         refreshToken: { type: DataTypes.STRING },
         isActive: { type: DataTypes.BOOLEAN, defaultValue: false },

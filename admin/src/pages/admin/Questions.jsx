@@ -341,6 +341,7 @@ export default function Questions() {
                                     <th>Status</th>
                                     <th>Trending</th>
                                     <th>Result status</th>
+                                    <th>Currect option</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -395,6 +396,7 @@ export default function Questions() {
                                                     <span className="badge bg-secondary">Not Declared</span>
                                                 )}
                                             </td>
+                                            <td>{item?.options?.find((opt) => opt.resultStatus)?.option || "-"}</td>
                                             <td>
                                                 <div className="dropdown">
                                                     <button
@@ -419,12 +421,18 @@ export default function Questions() {
                                                                 <i className="fa fa-trash me-2 text-danger" aria-hidden="true"></i> Delete
                                                             </button>
                                                         </li>
-                                                        <li>
-                                                            <Link to="#" className="dropdown-item" onClick={() => openWinnerModal(item.questionId)}>
-                                                                <i className="fa fa-trophy me-2 text-warning"></i>
-                                                                Announce Winner
-                                                            </Link>
-                                                        </li>
+                                                        {!item?.options?.some((opt) => opt.resultStatus) && (
+                                                            <li>
+                                                                <Link
+                                                                    to="#"
+                                                                    className="dropdown-item"
+                                                                    onClick={() => openWinnerModal(item.questionId)}
+                                                                >
+                                                                    <i className="fa fa-trophy me-2 text-warning"></i>
+                                                                    Announce Winner
+                                                                </Link>
+                                                            </li>
+                                                        )}
                                                     </ul>
                                                 </div>
                                             </td>

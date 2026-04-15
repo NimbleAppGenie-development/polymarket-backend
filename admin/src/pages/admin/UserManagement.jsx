@@ -336,11 +336,11 @@ export default function UserManagement() {
                     <table className="table table-hover">
                         <thead>
                             <tr>
-                                <th>S No.</th>
+                                <th>S.No</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 {/* <th>Phone Number</th> */}
-                                <th>Wallet</th>
+                                <th>Wallet Balance</th>
                                 <th>Created At</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -353,7 +353,7 @@ export default function UserManagement() {
                                     <td>{item.name == null ? "N/A" : item.name}</td>
                                     <td>{item.email == null ? "N/A" : item.email}</td>
                                     {/* <td>{item.countryCode && item.phoneNumber ? `${item.countryCode} ${item.phoneNumber}` : ""}</td> */}
-                                    <td>{item.wallet || 0}</td>
+                                    <td>{item.walletBalance || 0}</td>
                                     <td>{dateFormatter(item.createdAt, "perfectDateTime")}</td>
                                     <td>
                                         <span

@@ -30,6 +30,7 @@ export default function Home() {
             const services = new Service();
 
             const response = await services.get("/user/get-market-list", {}, false);
+
             if (response?.status) {
                 setMarketData(response?.data || []);
             } else {
@@ -44,6 +45,7 @@ export default function Home() {
             setLoading(false);
         }
     };
+
     const getPredictionData = async () => {
         if (!user?.id) {
             console.warn("User ID not available");
@@ -81,13 +83,14 @@ export default function Home() {
     }, [user]);
 
     const groupedData = marketData?.reduce((acc, item) => {
-        const categoryName = item.category.name;
+        const categoryName = item.category?.name || "Other";
 
         if (!acc[categoryName]) {
             acc[categoryName] = [];
         }
 
         acc[categoryName].push(item);
+
         return acc;
     }, {});
 
@@ -108,7 +111,6 @@ export default function Home() {
                 },
                 true,
             );
-
             if (response?.status) {
                 successToastr(response?.message || "Prediction submitted successfully");
 
@@ -123,7 +125,7 @@ export default function Home() {
         } catch (error) {
             console.error("FIRST OPTION ERROR:", error);
 
-            errorToastr(error?.message || "Failed to submit prediction");
+            errorToastr(error?.message || error?.response?.message || "Something went wrong");
         } finally {
             setLoading(false);
         }
@@ -380,25 +382,9 @@ export default function Home() {
                                                     <h3>
                                                         <a href={item.link || "#"}>{item.question}</a>
                                                     </h3>
-
-                                                    {/* <p className="option-row">
-                                                        <strong>{item.optionA}</strong>
-                                                        <span>{item.optionAValue}</span>
-                                                    </p> */}
-
-                                                    {/* <p className="option-row">
-                                                        <strong>{item.optionB}</strong>
-                                                        <span>{item.optionBValue}</span>
-                                                    </p> */}
                                                 </div>
 
-                                                <div className="trading-question-right">
-                                                    {/* <h3>{item.optionB} %</h3> */}
-
-                                                    {/* <a href={item.link || "#"}>
-                                                        <img src="img/arrow-top.svg" alt="icon" /> {item.count}
-                                                    </a> */}
-                                                </div>
+                                                <div className="trading-question-right"></div>
                                             </div>
                                         ))}
                                     </div>
@@ -436,89 +422,58 @@ export default function Home() {
                                                                 <p>{item.createdAt}</p>
 
                                                                 {user ? (
-                                                                    <div className="politics-btn-box">
-                                                                        {/* OPTION A */}
-                                                                        <button
-                                                                            className={`btn yesbtn ${prediction?.selectedOption === "optionA" ? "active" : ""}`}
-                                                                            // onMouseEnter={() => setHovered({ id: item.id, option: "A" })}
-                                                                            // onMouseLeave={() => setHovered({ id: null, option: null })}
+                                                                    <div className="politics-btn-box row">
+                                                                        {item.options?.map((opt) => {
+                                                                            const prediction = hasPredicted(item.id);
 
-                                                                            onClick={() => {
-                                                                                const alreadySelected = hasPredicted(item.id);
+                                                                            return (
+                                                                                <div className="col-6 mb-2" key={opt.id}>
+                                                                                    <button
+                                                                                        className={`btn option-btn w-100 ${
+                                                                                            prediction?.selectedOptionId === opt.id ? "active" : ""
+                                                                                        }`}
+                                                                                        onClick={() => {
+                                                                                            const alreadySelected = hasPredicted(item.id);
 
-                                                                                if (alreadySelected) {
-                                                                                    Swal.fire({
-                                                                                        icon: "warning",
-                                                                                        title: "Already Selected",
-                                                                                        text: "You have already predicted on this question",
-                                                                                    });
-                                                                                    return;
-                                                                                }
+                                                                                            if (alreadySelected) {
+                                                                                                Swal.fire({
+                                                                                                    icon: "warning",
+                                                                                                    title: "Already Selected",
+                                                                                                    text: "You have already predicted on this question",
+                                                                                                });
+                                                                                                return;
+                                                                                            }
 
-                                                                                setSelectedData({
-                                                                                    userId: user.id,
-                                                                                    categoryId: item.category.id,
-                                                                                    itemId: item.id,
-                                                                                    option: "optionA",
-                                                                                });
+                                                                                            setSelectedData({
+                                                                                                userId: user.id,
+                                                                                                categoryId: item.category.id,
+                                                                                                itemId: item.id,
+                                                                                                optionId: opt.id,
+                                                                                            });
 
-                                                                                setShowPopup(true);
-                                                                            }}
-                                                                        >
-                                                                            {hovered.id === item.id && hovered.option === "A"
-                                                                                ? `$${item.optionAValue}`
-                                                                                : item.optionA}
-                                                                        </button>
+                                                                                            setShowPopup(true);
+                                                                                        }}
+                                                                                    >
+                                                                                        {opt.option}
 
-                                                                        {/* OPTION B */}
-                                                                        <button
-                                                                            className={`btn nobtn ${prediction?.selectedOption === "optionB" ? "active" : ""}`}
-                                                                            // onMouseEnter={() => setHovered({ id: item.id, option: "B" })}
-                                                                            // onMouseLeave={() => setHovered({ id: null, option: null })}
-
-                                                                            onClick={() => {
-                                                                                const alreadySelected = hasPredicted(item.id);
-
-                                                                                if (alreadySelected) {
-                                                                                    Swal.fire({
-                                                                                        icon: "warning",
-                                                                                        title: "Already Selected",
-                                                                                        text: "You have already predicted on this question",
-                                                                                    });
-                                                                                    return;
-                                                                                }
-
-                                                                                setSelectedData({
-                                                                                    userId: user.id,
-                                                                                    categoryId: item.category.id,
-                                                                                    itemId: item.id,
-                                                                                    option: "optionB",
-                                                                                });
-
-                                                                                setShowPopup(true);
-                                                                            }}
-                                                                        >
-                                                                            {hovered.id === item.id && hovered.option === "B"
-                                                                                ? `$${item.optionBValue}`
-                                                                                : item.optionB}
-                                                                        </button>
+                                                                                        <span className="ms-1 text-muted">x{opt.multiplier}</span>
+                                                                                    </button>
+                                                                                </div>
+                                                                            );
+                                                                        })}
                                                                     </div>
                                                                 ) : (
                                                                     <div className="politics-btn-box">
-                                                                        <button
-                                                                            className="btn yesbtn"
-                                                                            data-bs-toggle="modal"
-                                                                            data-bs-target="#exampleModal"
-                                                                        >
-                                                                            {item.optionA}
-                                                                        </button>
-                                                                        <button
-                                                                            className="btn nobtn"
-                                                                            data-bs-toggle="modal"
-                                                                            data-bs-target="#exampleModal"
-                                                                        >
-                                                                            {item.optionB}
-                                                                        </button>
+                                                                        {item.options?.map((opt) => (
+                                                                            <button
+                                                                                key={opt.id}
+                                                                                className="btn option-btn"
+                                                                                data-bs-toggle="modal"
+                                                                                data-bs-target="#exampleModal"
+                                                                            >
+                                                                                {opt.option}
+                                                                            </button>
+                                                                        ))}
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -551,7 +506,7 @@ export default function Home() {
                                                                     selectedData.userId,
                                                                     selectedData.categoryId,
                                                                     selectedData.itemId,
-                                                                    selectedData.option,
+                                                                    selectedData.optionId,
                                                                     amount,
                                                                 );
 

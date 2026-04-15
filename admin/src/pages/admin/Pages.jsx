@@ -42,7 +42,7 @@ export default function Pages() {
                                 <table className="table">
                                     <thead>
                                         <tr>
-                                            <th>#</th>
+                                            <th>S.No</th>
                                             <th>Title</th>
                                             <th>Slug</th>
                                             <th style={{ width: "1000px" }}>Description</th>

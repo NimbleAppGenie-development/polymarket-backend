@@ -1,9 +1,9 @@
-'use strict';
+"use strict";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('userPredictedQuestions', {
+        await queryInterface.createTable("userPredictedQuestions", {
             id: {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
@@ -20,27 +20,32 @@ module.exports = {
             },
             questionId: {
                 type: Sequelize.UUID,
-                allowNull: false
-            },
-            selectedOption: {
-                type: Sequelize.ENUM('optionA', 'optionB'),
                 allowNull: false,
             },
-            predictionAmount: {
+            selectedOptionId: {
+                type: Sequelize.UUID,
+                allowNull: false,
+            },
+            selectedOptionName: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
+            multiplier: {
+                type: Sequelize.DECIMAL(10, 2),
+                allowNull: true,
+            },
+            entryAmount: {
                 type: Sequelize.DECIMAL(10, 2),
                 allowNull: false,
             },
-            pricePool: {
-                type: Sequelize.STRING,
-                allowNull: true
-            },
-            userWinning: {
-                type: Sequelize.STRING,
-                allowNull: true
-            },
             winningCredited: {
-                type: Sequelize.STRING,
-                allowNull: true
+                type: Sequelize.DECIMAL(10, 2),
+                allowNull: true,
+            },
+            winningStatus: {
+                type: Sequelize.ENUM("WIN", "LOSS", "PENDING"),
+                allowNull: false,
+                defaultValue: "PENDING",
             },
             createdAt: {
                 type: Sequelize.DATE,
@@ -56,6 +61,6 @@ module.exports = {
     },
 
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('userPredictedQuestions');
-    }
+        await queryInterface.dropTable("userPredictedQuestions");
+    },
 };

@@ -12,6 +12,7 @@ export default function Home() {
     const { user } = useContext(AuthContext);
     const [marketData, setMarketData] = useState([]);
     const [predictionData, setPredictionData] = useState([]);
+    const [total, setTotal] = useState([]);
     const [loading, setLoading] = useState(false);
     const { detailId } = useParams();
     const [showPopup, setShowPopup] = useState(false);
@@ -24,46 +25,43 @@ export default function Home() {
 
     const getMarketData = async () => {
         try {
-            const request = new HttpClient({
-                url: `/user/get-market-detail/${detailId}`,
-                auth: false,
-            });
+            setLoading(true);
 
-            const { data } = await request.get();
-
-            if (data?.status) {
-                setMarketData(data.data || []);
-                setTotal(total || 0);
+            const services = new Service();
+            const response = await services.get(`/user/get-market-detail/${detailId}`, {}, false);
+            
+            if (response?.status) {
+                setMarketData(response.data || []);
+                setTotal(response.total || 0);
             } else {
                 setMarketData([]);
                 setTotal(0);
             }
         } catch (error) {
-            errorToastr(error.message || error || "Failed to fetch Market");
+            errorToastr(error?.message || "Failed to fetch Market");
         } finally {
             setLoading(false);
         }
     };
 
     const getPredictionData = async () => {
-        if (user) {
-            try {
-                const request = new HttpClient({
-                    url: `/user/get-user-prdication-data/${user.id}`,
-                    auth: true,
-                });
-                const { data } = await request.get();
+        if (!user?.id) return;
 
-                if (data?.status) {
-                    setPredictionData(data.data || []);
-                } else {
-                    setPredictionData([]);
-                }
-            } catch (error) {
-                errorToastr(error.message || error || "Failed to fetch Market");
-            } finally {
-                setLoading(false);
+        try {
+            setLoading(true);
+
+            const services = new Service();
+            const response = await services.get(`/user/get-user-prdication-data/${user.id}`, {}, true);
+
+            if (response?.status) {
+                setPredictionData(response.data || []);
+            } else {
+                setPredictionData([]);
             }
+        } catch (error) {
+            errorToastr(error?.message || "Failed to fetch Prediction");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -84,16 +82,15 @@ export default function Home() {
                 amount,
             });
 
-            console.log("Option selected:", data);
-
             if (data?.status) {
                 getMarketData();
                 getPredictionData();
             }
         } catch (error) {
-            console.log(error);
+            console.log("Error in select option",error);
         }
     };
+
     useEffect(() => {
         getMarketData();
 
@@ -372,116 +369,62 @@ export default function Home() {
                                         <h4>{marketData?.question}</h4>
                                     </div>
                                     <br></br>
-                                    <div className="details-price-fillter-parent">
-                                        <ul>
-                                            <li>
-                                                <a href="#" className="grren-btn">
-                                                    Buy
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="#" className="offset-red-btn">
-                                                    Sell
-                                                </a>
-                                            </li>
-                                        </ul>
-                                        <select>
-                                            <option>Dollars</option>
-                                            <option>Dollars</option>
-                                            <option>Dollars</option>
-                                        </select>
-                                    </div>
+
                                     <div className="details-page-tbaing-right">
                                         <ul>
                                             {user ? (
                                                 <div className="politics-btn-box">
-                                                    {/* OPTION A */}
-                                                    <button
-                                                        className={`btn yesbtn ${prediction?.selectedOption === "optionA" ? "active" : ""}`}
-                                                        // onMouseEnter={() => setHovered({ id: marketData.id, option: "A" })}
-                                                        // onMouseLeave={() => setHovered({ id: null, option: null })}
+                                                    {marketData?.options?.map((opt) => {
+                                                        const alreadySelected = prediction?.selectedOptionId === opt.id;
 
-                                                        onClick={async () => {
-                                                            try {
-                                                                const alreadySelected = hasPredicted(marketData.id);
+                                                        return (
+                                                            <button
+                                                                key={opt.id}
+                                                                className={`btn ${alreadySelected ? "active" : ""}`}
+                                                                onClick={() => {
+                                                                    const alreadyPredicted = hasPredicted(marketData.id);
 
-                                                                if (alreadySelected) {
-                                                                    Swal.fire({
-                                                                        icon: "warning",
-                                                                        title: "Already Selected",
-                                                                        text: "You have already predicted on this question",
+                                                                    if (alreadyPredicted) {
+                                                                        Swal.fire({
+                                                                            icon: "warning",
+                                                                            title: "Already Selected",
+                                                                            text: "You have already predicted on this question",
+                                                                        });
+                                                                        return;
+                                                                    }
+
+                                                                    setSelectedData({
+                                                                        userId: user.id,
+                                                                        categoryId: marketData.category?.id,
+                                                                        questionId: marketData.id,
+                                                                        selectedOption: opt.id,
                                                                     });
-                                                                    return;
-                                                                }
 
-                                                                setSelectedData({
-                                                                    userId: user.id,
-                                                                    categoryId: marketData.category?.id,
-                                                                    itemId: marketData.id,
-                                                                    option: "optionA",
-                                                                });
-
-                                                                setShowPopup(true);
-                                                            } catch (err) {
-                                                                console.log(err);
-                                                            }
-                                                        }}
-                                                    >
-                                                        {hovered.id === marketData.id && hovered.option === "A"
-                                                            ? `$${marketData.optionAValue}`
-                                                            : marketData.optionA}
-                                                    </button>
-
-                                                    {/* OPTION B */}
-                                                    <button
-                                                        className={`btn nobtn ${prediction?.selectedOption === "optionB" ? "active" : ""}`}
-                                                        // onMouseEnter={() => setHovered({ id: marketData.id, option: "B" })}
-                                                        // onMouseLeave={() => setHovered({ id: null, option: null })}
-
-                                                        onClick={async () => {
-                                                            try {
-                                                                const alreadySelected = hasPredicted(marketData.id);
-
-                                                                if (alreadySelected) {
-                                                                    Swal.fire({
-                                                                        icon: "warning",
-                                                                        title: "Already Selected",
-                                                                        text: "You have already predicted on this question",
-                                                                    });
-                                                                    return;
-                                                                }
-
-                                                                setSelectedData({
-                                                                    userId: user.id,
-                                                                    categoryId: marketData.category?.id,
-                                                                    itemId: marketData.id,
-                                                                    option: "optionB",
-                                                                });
-
-                                                                setShowPopup(true);
-                                                            } catch (err) {
-                                                                console.log(err);
-                                                            }
-                                                        }}
-                                                    >
-                                                        {hovered.id === marketData.id && hovered.option === "B"
-                                                            ? `$${marketData.optionBValue}`
-                                                            : marketData.optionB}
-                                                    </button>
+                                                                    setShowPopup(true);
+                                                                }}
+                                                            >
+                                                                {opt.option}
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             ) : (
                                                 <div className="politics-btn-box">
-                                                    <button className="btn yesbtn" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                                        {marketData.optionA}
-                                                    </button>
-                                                    <button className="btn nobtn" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                                        {marketData.optionB}
-                                                    </button>
+                                                    {marketData?.options?.map((opt) => (
+                                                        <button
+                                                            key={opt.id}
+                                                            className="btn yesbtn"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#exampleModal"
+                                                        >
+                                                            {opt.option}
+                                                        </button>
+                                                    ))}
                                                 </div>
                                             )}
                                         </ul>
                                     </div>
-                                    <div className="amount-main-box">
+                                    {/* <div className="amount-main-box">
                                         <div className="amount-label-box">
                                             <span>Amount</span>
                                             <p>Earn 3.25% Interest</p>
@@ -489,10 +432,10 @@ export default function Home() {
                                         <div className="amount-label-box">
                                             <strong>$0</strong>
                                         </div>
-                                    </div>
-                                    <div className="price-box-btn">
+                                    </div> */}
+                                    {/* <div className="price-box-btn">
                                         <button>Sign up to trade</button>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                         </div>
@@ -518,7 +461,13 @@ export default function Home() {
                                             return;
                                         }
 
-                                        firstOption(selectedData.userId, selectedData.categoryId, selectedData.itemId, selectedData.option, amount);
+                                        firstOption(
+                                            selectedData.userId,
+                                            selectedData.categoryId,
+                                            selectedData.questionId,
+                                            selectedData.selectedOption,
+                                            amount,
+                                        );
 
                                         setShowPopup(false);
                                         setAmount("");

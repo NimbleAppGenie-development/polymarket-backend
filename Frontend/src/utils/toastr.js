@@ -20,6 +20,7 @@ toastr.options = {
 
 export const successToastr = (message, title = "") => {
     toastr.success(message, title);
+    
 };
 
 export const errorToastr = (message, title = "") => {

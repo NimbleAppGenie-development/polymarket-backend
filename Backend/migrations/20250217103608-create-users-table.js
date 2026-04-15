@@ -23,7 +23,7 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
-            wallet: {
+            walletBalance: {
                 type: Sequelize.DECIMAL(10, 2),
                 allowNull: false,
                 defaultValue: 0.00

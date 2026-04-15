@@ -4,13 +4,14 @@ const { literal } = require("sequelize");
 const User = require("@models/user");
 const moment = require("moment");
 const { BadRequest, Unauthorized, NotFound, Conflict } = require("../../../../libs/shared/utils/statusCodes");
-// const statusCode = require("../../../../libs/shared/utils/statusCodes");
 const { successResponse, simpleResponse, errorResponse } = require("@utils/response");
 const { dateGenerate } = require("../../../../libs/shared/utils/dates");
 const Category = require("@models/Category");
 const Question = require("@models/question");
 const QuestionOption = require("@models/questionOption");
 const statusCode = require("@utils/statusCodes");
+const UserPredictedQuestion = require("@models/userpredictedquestions");
+const  declareWinners = require( "../services/declareWinners.service")
 
 module.exports = {
     getStaticsCount: async (req, res, next) => {
@@ -54,7 +55,6 @@ module.exports = {
 
             let { search, page, limit, dateRange, filter } = req.query;
 
-            // Default values
             page = parseInt(page) || 1;
             limit = parseInt(limit) || 10;
 
@@ -173,7 +173,6 @@ module.exports = {
 
             const { name } = req.body;
 
-            // Handle uploaded files
             const image = req.file.filename || null;
             await Category.create({
                 name,
@@ -212,18 +211,16 @@ module.exports = {
                 });
             }
 
-            // Handle uploaded images
             const file = req.file || null;
 
             if (file) {
                 category.image = file.filename;
             }
-            // Update other fields
+
             category.name = name;
 
             await category.save();
 
-            // Respond immediately
             res.status(statusCode.OK).json(simpleResponse(true, "Category updated successfully"));
         } catch (error) {
             next(error);
@@ -329,6 +326,11 @@ module.exports = {
         }
     },
 
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     getQuestions: async (req, res, next) => {
         try {
             const admin = req.user;
@@ -345,14 +347,12 @@ module.exports = {
 
             let whereQuery = {};
 
-            // Category filter
             if (categoryId) {
                 whereQuery.categoryId = {
                     [Op.eq]: categoryId,
                 };
             }
 
-            // Date Range filter (FIXED)
             if (dateRange) {
                 const [startDate, endDate] = dateRange.split(" - ");
 
@@ -424,6 +424,12 @@ module.exports = {
             next(error);
         }
     },
+
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     addQuestion: async (req, res, next) => {
         try {
             const admin = req.user;
@@ -462,6 +468,11 @@ module.exports = {
         }
     },
 
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     updateQuestionStatus: async (req, res, next) => {
         try {
             const admin = req.user;
@@ -522,36 +533,11 @@ module.exports = {
         }
     },
 
-    /* getQuestionById: async (req, res, next) => {
-        try {
-            const admin = req.user;
-            if (!admin) {
-                return res.status(statusCode.BAD_REQUEST).json({
-                    stutus: false,
-                    message: "Admin not found",
-                });
-            }
-
-            const { id } = req.params;
-            console.log("QuestionId", id);
-
-            const question = await Question.findOne({ where: { id } });
-            const categoryN = question.categoryId;
-            const categoryData = await Category.findOne({ where: { id: categoryN } });
-            if (!question) throw new NotFound(simpleResponse(false, "Question not found"));
-
-            const formattedQuestion = {
-                categoryId: question.categoryId,
-                categoryName: `${categoryData.name}`,
-                question: question.question,
-                description: question.description,
-            };
-            return res.status(statusCode.OK).json(successResponse(formattedQuestion, "Question fetched successfully"));
-        } catch (error) {
-            next(error);
-        }
-    }, */
-
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     getQuestionById: async (req, res, next) => {
         try {
             const admin = req.user;
@@ -580,7 +566,6 @@ module.exports = {
                     },
                 ],
             });
-            console.log("===================quesiton===========", question);
             if (!question) {
                 throw new NotFound(simpleResponse(false, "Question not found"));
             }
@@ -603,36 +588,11 @@ module.exports = {
         }
     },
 
-    /* editQuestion: async (req, res, next) => {
-        try {
-            const admin = req.user;
-            if (!admin) {
-                return res.status(statusCode.BAD_REQUEST).json({
-                    stutus: false,
-                    message: "Admin not found",
-                });
-            }
-
-            const { categoryId, question, description, optionA, optionB, optionAValue, optionBValue, id } = req.body;
-
-            const questionExists = await Question.findOne({ where: { id } });
-            if (!questionExists) throw new NotFound(simpleResponse(false, "Question not found"));
-
-            ((questionExists.categoryId = categoryId),
-                (questionExists.question = question),
-                (questionExists.optionA = optionA),
-                (questionExists.optionB = optionB),
-                (questionExists.optionAValue = optionAValue),
-                (questionExists.optionBValue = optionBValue),
-                (questionExists.description = description),
-                await questionExists.save());
-
-            return res.status(statusCode.OK).json(simpleResponse(true, "Question updated successfully"));
-        } catch (error) {
-            next(error);
-        }
-    }, */
-
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     editQuestion: async (req, res, next) => {
         try {
             const admin = req.user;
@@ -646,26 +606,22 @@ module.exports = {
 
             const { id, categoryId, question, description, options } = req.body;
 
-            // 1️⃣ CHECK QUESTION EXISTS
             const questionExists = await Question.findOne({ where: { id } });
 
             if (!questionExists) {
                 throw new NotFound(simpleResponse(false, "Question not found"));
             }
 
-            // 2️⃣ UPDATE MAIN QUESTION
             questionExists.categoryId = categoryId;
             questionExists.question = question;
             questionExists.description = description;
 
             await questionExists.save();
 
-            // 3️⃣ DELETE OLD OPTIONS
             await QuestionOption.destroy({
                 where: { questionId: id },
             });
 
-            // 4️⃣ INSERT NEW OPTIONS
             if (Array.isArray(options) && options.length > 0) {
                 const formattedOptions = options.map((opt) => ({
                     questionId: id,
@@ -682,6 +638,11 @@ module.exports = {
         }
     },
 
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     deleteQuestion: async (req, res, next) => {
         try {
             const admin = req.user;
@@ -694,7 +655,7 @@ module.exports = {
             const { questionId } = req.body;
             const questionData = await Question.findOne({ where: { id: questionId } });
             if (!questionData) {
-                return res.status(404).json(simpleResponse(false, "Question not found"));
+                return res.status(statusCode.NOT_FOUND).json(simpleResponse(false, "Question not found"));
             }
 
             const question = await Question.destroy({ where: { id: questionId } });
@@ -708,6 +669,12 @@ module.exports = {
             next(error);
         }
     },
+
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     getQuestionForWinner: async (req, res, next) => {
         try {
             const { id } = req.params;
@@ -724,13 +691,13 @@ module.exports = {
             });
 
             if (!question) {
-                return res.status(404).json({
+                return res.status(statusCode.NOT_FOUND).json({
                     status: false,
                     message: "Question not found",
                 });
             }
 
-            return res.status(200).json({
+            return res.status(statusCode.OK).json({
                 status: true,
                 data: question,
             });
@@ -738,14 +705,18 @@ module.exports = {
             next(error);
         }
     },
+
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     announceWinner: async (req, res, next) => {
         try {
             const { questionId, optionId } = req.body;
 
-            // ❌ reset all options first
             await QuestionOption.update({ resultStatus: false }, { where: { questionId } });
 
-            // ✅ mark selected option as winner
             await QuestionOption.update(
                 { resultStatus: true },
                 {
@@ -756,7 +727,9 @@ module.exports = {
                 },
             );
 
-            return res.status(200).json({
+            declareWinners({ questionId, answerId: optionId }).then(console.log);
+
+            return res.status(statusCode.OK).json({
                 status: true,
                 message: "Winner announced successfully",
             });
