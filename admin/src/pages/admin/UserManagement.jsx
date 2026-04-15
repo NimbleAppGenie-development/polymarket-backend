@@ -152,7 +152,7 @@ export default function UserManagement() {
             fullName: user.name || "",
             // countryCode: user.countryCode || "",
             // phoneNumber: user.phoneNumber || "",
-            wallet: user.wallet || 0,
+            wallet: user.walletBalance || 0,
             email: user.email || "",
             active: user.isActive === true ? "true" : "false" || "",
             // isWhatsappMessagesAllow: user.isWhatsappMessagesAllow || false,

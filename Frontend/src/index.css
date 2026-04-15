@@ -63,3 +63,73 @@
   
   padding-right: 40px; /* space so text doesn't overlap */
 }
+
+.btn.active {
+    background-color: #28a745 !important;
+    color: #fff !important;
+}
+
+.account-info-box p {
+    margin: 8px 0;
+    color: #333;
+    font-size: 14px;
+}
+
+.wallet-box {
+    text-align: center;
+    padding: 20px;
+}
+
+.wallet-box h3 {
+    font-size: 32px;
+    color: #28a745;
+    margin-bottom: 5px;
+}
+
+.account-form label {
+    display: block;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #333;
+}
+
+.account-form input,
+.account-form select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+.option-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #000;
+  border-radius: 30px;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.option-text {
+  flex: 1;
+  text-align: left;
+}
+
+.option-multiplier {
+  width: 80px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.option-percentage {
+  width: 60px;
+  text-align: right;
+  color: #1a1818;
+}
+
+.option-row.active {
+  background-color: #d4edda;
+  border-color: green;
+}

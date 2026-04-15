@@ -29,7 +29,7 @@ export default function Home() {
 
             const services = new Service();
             const response = await services.get(`/user/get-market-detail/${detailId}`, {}, false);
-            
+            console.log("======response==========", response.data);
             if (response?.status) {
                 setMarketData(response.data || []);
                 setTotal(response.total || 0);
@@ -68,7 +68,7 @@ export default function Home() {
     const hasPredicted = (questionId) => {
         return predictionData?.find((item) => item.questionId === questionId);
     };
-    const prediction = hasPredicted(marketData?.id);
+    const prediction = predictionData?.find((p) => String(p.questionId) === String(marketData?.id));
 
     const firstOption = async (userId, categoryId, questionId, selectedOption, amount) => {
         try {
@@ -87,7 +87,7 @@ export default function Home() {
                 getPredictionData();
             }
         } catch (error) {
-            console.log("Error in select option",error);
+            console.log("Error in select option", error);
         }
     };
 
@@ -97,7 +97,7 @@ export default function Home() {
         if (user?.id) {
             getPredictionData();
         }
-    }, [user?.id]);
+    }, [user?.id, marketData?.id]);
 
     return (
         <div className="home-page">
@@ -366,16 +366,17 @@ export default function Home() {
                                                 alt="image"
                                             />
                                         </figure>
-                                        <h4>{marketData?.question}</h4>
+                                        <h6>{marketData?.question}</h6>
+                                        <h5>{marketData?.description}</h5>
                                     </div>
-                                    <br></br>
 
                                     <div className="details-page-tbaing-right">
                                         <ul>
                                             {user ? (
                                                 <div className="politics-btn-box">
                                                     {marketData?.options?.map((opt) => {
-                                                        const alreadySelected = prediction?.selectedOptionId === opt.id;
+                                                        // const alreadySelected = prediction?.selectedOptionId === opt.id;
+                                                        const alreadySelected = String(prediction?.selectedOptionId) === String(opt.id);
 
                                                         return (
                                                             <button
@@ -410,16 +411,39 @@ export default function Home() {
                                                 </div>
                                             ) : (
                                                 <div className="politics-btn-box">
-                                                    {marketData?.options?.map((opt) => (
-                                                        <button
-                                                            key={opt.id}
-                                                            className="btn yesbtn"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#exampleModal"
-                                                        >
-                                                            {opt.option}
-                                                        </button>
-                                                    ))}
+                                                    {marketData?.options?.map((opt) => {
+                                                        const alreadySelected = String(prediction?.selectedOptionId) === String(opt.id);
+
+                                                        return (
+                                                            <button
+                                                                key={opt.id}
+                                                                className={`btn ${alreadySelected ? "active" : ""}`}
+                                                                onClick={() => {
+                                                                    const alreadyPredicted = hasPredicted(marketData.id);
+
+                                                                    if (alreadyPredicted) {
+                                                                        Swal.fire({
+                                                                            icon: "warning",
+                                                                            title: "Already Selected",
+                                                                            text: "You have already predicted on this question",
+                                                                        });
+                                                                        return;
+                                                                    }
+
+                                                                    setSelectedData({
+                                                                        userId: user.id,
+                                                                        categoryId: marketData.category?.id,
+                                                                        questionId: marketData.id,
+                                                                        selectedOption: opt.id,
+                                                                    });
+
+                                                                    setShowPopup(true);
+                                                                }}
+                                                            >
+                                                                {opt.option}
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             )}
                                         </ul>

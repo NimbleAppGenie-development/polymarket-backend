@@ -17,12 +17,10 @@ export default function Home() {
     const [showPopup, setShowPopup] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
     const [amount, setAmount] = useState("");
-    const [hovered, setHovered] = useState({
-        id: null,
-        option: null,
-    });
+    const [hovered, setHovered] = useState({ id: null, option: null });
     const [loading, setLoading] = useState(false);
-
+    const [selectedOptions, setSelectedOptions] = useState({});
+    
     const getMarketList = async () => {
         try {
             setLoading(true);
@@ -157,7 +155,7 @@ export default function Home() {
     }, []);
 
     const hasPredicted = (questionId) => {
-        return predictionData?.find((item) => item.questionId === questionId);
+        return predictionData?.find((item) => String(item.questionId) === String(questionId));
     };
 
     return (
@@ -422,42 +420,44 @@ export default function Home() {
                                                                 <p>{item.createdAt}</p>
 
                                                                 {user ? (
-                                                                    <div className="politics-btn-box row">
+                                                                    <div className="politics-btn-box d-flex flex-column">
                                                                         {item.options?.map((opt) => {
-                                                                            const prediction = hasPredicted(item.id);
+                                                                            const alreadySelected =
+                                                                                String(prediction?.selectedOptionId) === String(opt.id);
 
                                                                             return (
-                                                                                <div className="col-6 mb-2" key={opt.id}>
-                                                                                    <button
-                                                                                        className={`btn option-btn w-100 ${
-                                                                                            prediction?.selectedOptionId === opt.id ? "active" : ""
-                                                                                        }`}
-                                                                                        onClick={() => {
-                                                                                            const alreadySelected = hasPredicted(item.id);
+                                                                                <div
+                                                                                    key={opt.id}
+                                                                                    className={`option-row ${alreadySelected ? "active" : ""}`}
+                                                                                    onClick={() => {
+                                                                                        const alreadyPredicted = hasPredicted(item.id);
 
-                                                                                            if (alreadySelected) {
-                                                                                                Swal.fire({
-                                                                                                    icon: "warning",
-                                                                                                    title: "Already Selected",
-                                                                                                    text: "You have already predicted on this question",
-                                                                                                });
-                                                                                                return;
-                                                                                            }
-
-                                                                                            setSelectedData({
-                                                                                                userId: user.id,
-                                                                                                categoryId: item.category.id,
-                                                                                                itemId: item.id,
-                                                                                                optionId: opt.id,
+                                                                                        if (alreadyPredicted) {
+                                                                                            Swal.fire({
+                                                                                                icon: "warning",
+                                                                                                title: "Already Selected",
+                                                                                                text: "You have already predicted on this question",
                                                                                             });
+                                                                                            return;
+                                                                                        }
 
-                                                                                            setShowPopup(true);
-                                                                                        }}
-                                                                                    >
-                                                                                        {opt.option}
+                                                                                        setSelectedData({
+                                                                                            userId: user.id,
+                                                                                            categoryId: item.category?.id,
+                                                                                            questionId: item.id,
+                                                                                            selectedOption: opt.id,
+                                                                                        });
 
-                                                                                        <span className="ms-1 text-muted">x{opt.multiplier}</span>
-                                                                                    </button>
+                                                                                        setShowPopup(true);
+                                                                                    }}
+                                                                                >
+                                                                                    <span className="option-text">{opt.option}</span>
+
+                                                                                    <span className="option-multiplier">
+                                                                                        {opt.multiplier || "1x"}
+                                                                                    </span>
+
+                                                                                    <span className="option-percentage">{opt.percentage || 0}%</span>
                                                                                 </div>
                                                                             );
                                                                         })}
@@ -505,8 +505,8 @@ export default function Home() {
                                                                 firstOption(
                                                                     selectedData.userId,
                                                                     selectedData.categoryId,
-                                                                    selectedData.itemId,
-                                                                    selectedData.optionId,
+                                                                    selectedData.questionId,
+                                                                    selectedData.selectedOption,
                                                                     amount,
                                                                 );
 

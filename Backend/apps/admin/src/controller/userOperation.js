@@ -397,7 +397,8 @@ module.exports = {
                     },
                 ],
             });
-
+            const totalQuestion = await Question.count()
+            
             let questionsData = rows.map((q) => ({
                 questionId: q.id,
                 categoryId: q.categoryId,
@@ -412,10 +413,10 @@ module.exports = {
 
             let response = {
                 questions: questionsData,
-                total: count,
+                total: totalQuestion,
                 currentPage: defaultPage,
-                firstItem: count === 0 ? 0 : (defaultPage - 1) * finalLimit + 1,
-                lastItem: Math.min(defaultPage * finalLimit, count),
+                firstItem: totalQuestion === 0 ? 0 : (defaultPage - 1) * finalLimit + 1,
+                lastItem: Math.min(defaultPage * finalLimit, totalQuestion),
             };
 
             return res.status(statusCode.OK).json(successResponse(response, "Question fetched successfully"));

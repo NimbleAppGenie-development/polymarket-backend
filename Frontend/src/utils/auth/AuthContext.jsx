@@ -19,10 +19,9 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = (userData) => {
-        console.log("-----------",userData)
         localStorage.setItem("user", JSON.stringify(userData));
         setUser(userData);
-        toastr.success("Admin logged in successfully");
+        toastr.success("User logged in successfully");
     };
 
     const logout = async () => {

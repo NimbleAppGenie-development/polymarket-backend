@@ -7,6 +7,8 @@ const { successResponse, simpleResponse } = require("@utils/response");
 const Question = require("@models/question");
 const Category = require("@models/Category");
 const QuestionOptions = require("@models/questionOption");
+const UserPredictedQuestion = require("@models/userpredictedquestions");
+const { Sequelize } = require("sequelize");
 
 module.exports = {
     getMarketList: async (req, res, next) => {
@@ -30,6 +32,18 @@ module.exports = {
             if (!marketList || marketList.length === 0) {
                 return res.status(statusCodes.OK).json(successResponse([], "No marketList found"));
             }
+
+            const predictions = await UserPredictedQuestion.findAll({
+                attributes: ["selectedOptionId", [Sequelize.fn("COUNT", Sequelize.col("selectedOptionId")), "count"]],
+                group: ["selectedOptionId"],
+                raw: true,
+            });
+
+            const countMap = {};
+
+            predictions.forEach((p) => {
+                countMap[p.selectedOptionId] = parseInt(p.count);
+            });
             const closedQuestions = await QuestionOptions.findAll({
                 where: { resultStatus: true },
                 attributes: ["questionId"],
@@ -40,45 +54,28 @@ module.exports = {
                 return !closedQuestionIds.includes(item.id);
             });
 
-            // Convert Sequelize models → plain objects
-            /* const formatted = marketList.map((item) => {
-                const plainItem = item.get({ plain: true });
-
-                return {
-                    id: plainItem.id,
-                    question: plainItem.question,
-                    description: plainItem.description,
-                    status: plainItem.status,
-
-                    category: plainItem.category
-                        ? {
-                              id: plainItem.category.id,
-                              name: plainItem.category.name,
-                              image: plainItem.category.image,
-                          }
-                        : null,
-
-                    options: plainItem.options.map((opt) => ({
-                        id: opt.id,
-                        questionId: opt.questionId,
-                        option: opt.option,
-                        multiplier: opt.multiplier,
-                        resultStatus: opt.resultStatus,
-                    })),
-
-                    createdAt: moment(plainItem.createdAt).format("MM/DD/YYYY hh:mm A"),
-                };
-            }); */
             const formatted = filteredMarketList.map((item) => {
                 const plainItem = item.get({ plain: true });
+                const totalVotes = plainItem.options.reduce((sum, opt) => {
+                    return sum + (countMap[opt.id] || 0);
+                }, 0);
 
+                const optionsWithPercentage = plainItem.options.map((opt) => {
+                    const count = countMap[opt.id] || 0;
+
+                    return {
+                        ...opt,
+                        count,
+                        percentage: totalVotes ? ((count / totalVotes) * 100).toFixed(0) : 0,
+                    };
+                });
                 return {
                     id: plainItem.id,
                     question: plainItem.question,
                     description: plainItem.description,
                     status: plainItem.status,
                     category: plainItem.category,
-                    options: plainItem.options,
+                    options: optionsWithPercentage,
                     createdAt: moment(plainItem.createdAt).format("MM/DD/YYYY hh:mm A"),
                 };
             });

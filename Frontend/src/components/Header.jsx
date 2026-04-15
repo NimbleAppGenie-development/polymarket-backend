@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HttpClient } from "../utils/request";
 import { errorToastr } from "../utils/toastr.js";
 import Swal from "sweetalert2";
@@ -181,9 +181,9 @@ export default function Header() {
                                 {user ? (
                                     <>
                                         <li>
-                                            <a href="#" className="btn login-btn">
+                                            <Link to="/account" className="btn login-btn">
                                                 Account
-                                            </a>
+                                            </Link>
                                         </li>
                                         <li>
                                             <button onClick={logout} className="btn login-btn">
@@ -364,7 +364,12 @@ export default function Header() {
                                         <div className="form-group">
                                             <label htmlFor="password">Password:</label>
                                             <div className="password-fields" style={{ position: "relative" }}>
-                                                <input type={showPassword ? "text" : "password"} className="form-control" name="password" placeholder="Enter Password"/>
+                                                <input
+                                                    type={showPassword ? "text" : "password"}
+                                                    className="form-control"
+                                                    name="password"
+                                                    placeholder="Enter Password"
+                                                />
                                                 <span
                                                     onClick={() => setShowPassword(!showPassword)}
                                                     className={`fa fa-fw ${showPassword ? "fa-eye" : "fa-eye-slash"} field-icon`}

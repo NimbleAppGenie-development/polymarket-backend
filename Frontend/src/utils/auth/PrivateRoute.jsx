@@ -10,7 +10,5 @@ export const PrivateRoute = ({ children }) => {
         return <Loader />;
     }
 
-    console.log("Auth====================",user);
-
     return user ? children : <Navigate to="/" />;
 };

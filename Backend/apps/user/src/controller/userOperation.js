@@ -11,6 +11,7 @@ const { dateGenerate } = require("../../../../libs/shared/utils/dates");
 const Question = require("@models/question");
 const QuestionOption = require("@models/questionOption");
 const Admin = require("@models/adminModel");
+const Transaction = require("@models/transaction");
 
 module.exports = {
     userLogin: async (req, res, next) => {
@@ -71,13 +72,39 @@ module.exports = {
     userRegister: async (req, res, next) => {
         try {
             const { name, email, password } = req.body;
-            const existingUser = await User.findOne({ where: { email } });
-            if (existingUser) {
-                res.json(errorResponse([], "Email is already registered."));
-                return;
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+            if (!email || !emailRegex.test(email)) {
+                return res.json(errorResponse([], "Please enter a valid email address."));
             }
 
-            const newUser = await User.create({ name, email, password, isActive: true });
+            const normalizedEmail = email.toLowerCase().trim();
+
+            // Password validation
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+            if (!password || !passwordRegex.test(password)) {
+                return res.json(
+                    errorResponse(
+                        [],
+                        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
+                    ),
+                );
+            }
+
+            const existingUser = await User.findOne({ where: { email: normalizedEmail } });
+            if (existingUser) {
+                return res.json(errorResponse([], "Email is already registered."));
+            }
+
+            const newUser = await User.create({
+                name,
+                email: normalizedEmail,
+                password,
+                isActive: true,
+            });
+
             const token = jwt.sign({ userId: newUser.id, email: newUser.email }, process.env.JWT_SECRET || "secret", {
                 expiresIn: "7d",
             });
@@ -101,6 +128,106 @@ module.exports = {
         } catch (error) {
             console.error(error);
             res.json(errorResponse([], "An error occurred while registering the user."));
+        }
+    },
+
+    userAccountDetails: async (req, res, next) => {
+        try {
+            const { id } = req.params;
+
+            if (!id) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "ID not found",
+                });
+            }
+
+            const user = await User.findOne({
+                where: { id },
+            });
+
+            if (!user) {
+                return res.status(statusCodes.NOT_FOUND).json({
+                    status: false,
+                    message: "User not found",
+                });
+            }
+
+            return res.json({
+                status: true,
+                data: {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    walletBalance: user.walletBalance,
+                },
+            });
+        } catch (error) {
+            console.error("userAccountDetails ERROR:", error);
+
+            return res.status(500).json({
+                status: false,
+                message: "Internal server error",
+            });
+        }
+    },
+
+    addMoney: async (req, res, next) => {
+        try {
+            const { userId, amount } = req.body;
+
+            if (!userId || !amount) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "All fields are required",
+                });
+            }
+
+            const addAmount = Number(amount);
+
+            if (isNaN(addAmount) || addAmount <= 0) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "Invalid amount",
+                });
+            }
+
+            const user = await User.findOne({
+                where: { id: userId },
+            });
+
+            if (!user) {
+                return res.status(statusCodes.NOT_FOUND).json({
+                    status: false,
+                    message: "User not found",
+                });
+            }
+
+            const newBalance = Number(user.walletBalance || 0) + addAmount;
+
+            await User.update({ walletBalance: newBalance }, { where: { id: userId } });
+            await Transaction.create({
+                userId,
+                amount,
+                type: "DEPOSIT",
+                status: "SUCCESS",
+                response: JSON.stringify({ userId }),
+            });
+
+            return res.json({
+                status: true,
+                message: "Money added successfully",
+                data: {
+                    walletBalance: newBalance,
+                },
+            });
+        } catch (error) {
+            console.error("addMoney ERROR:", error);
+
+            return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({
+                status: false,
+                message: "Internal server error",
+            });
         }
     },
 
@@ -149,12 +276,31 @@ module.exports = {
                 return res.json(errorResponse([], "All fields are required."));
             }
 
-            if (isNaN(amount) || Number(amount) <= 0) {
+            const betAmount = Number(amount);
+
+            if (isNaN(betAmount) || betAmount <= 0) {
                 return res.status(statusCodes.BAD_REQUEST).json({
                     status: false,
                     message: "Invalid amount",
                 });
             }
+
+            const user = await User.findOne({ where: { id: userId } });
+
+            if (!user) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "User not found",
+                });
+            }
+
+            if (Number(user.walletBalance || 0) < betAmount) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "Insufficient wallet balance",
+                });
+            }
+
             const questionOptions = await QuestionOption.findAll({
                 where: { questionId },
             });
@@ -167,10 +313,9 @@ module.exports = {
                     message: "Betting already closed for this question",
                 });
             }
+
             const optionData = await QuestionOption.findOne({
-                where: {
-                    id: selectedOption,
-                },
+                where: { id: selectedOption },
             });
 
             if (!optionData) {
@@ -180,14 +325,8 @@ module.exports = {
                 });
             }
 
-            const optionPlain = optionData.get({ plain: true });
-
             const existUserOption = await UserPredictedQuestion.findOne({
-                where: {
-                    userId,
-                    categoryId,
-                    questionId,
-                },
+                where: { userId, categoryId, questionId },
             });
 
             if (existUserOption) {
@@ -197,13 +336,33 @@ module.exports = {
                 });
             }
 
+            const optionPlain = optionData.get({ plain: true });
+
+            await User.update(
+                {
+                    walletBalance: Number(user.walletBalance) - betAmount,
+                },
+                {
+                    where: { id: userId },
+                },
+            );
+
+            // transaction log
+            await Transaction.create({
+                userId,
+                amount: betAmount,
+                type: "ENTRY",
+                status: "SUCCESS",
+                response: JSON.stringify({ questionId, selectedOption }),
+            });
+
             await UserPredictedQuestion.create({
                 userId,
                 categoryId,
                 questionId,
                 selectedOptionId: optionPlain.id,
                 selectedOptionName: optionPlain.option,
-                entryAmount: amount,
+                entryAmount: betAmount,
                 multiplier: optionPlain.multiplier,
                 winningStatus: "PENDING",
             });
@@ -211,14 +370,12 @@ module.exports = {
             const admin = await Admin.findOne();
 
             await admin.increment("walletBalance", {
-                by: Number(amount),
+                by: betAmount,
             });
 
             return res.json(successResponse([], "Prediction submitted successfully."));
         } catch (error) {
-            console.error("userPrdication ERROR FULL:", error);
-            console.error("userPrdication ERROR MSG:", error.message);
-            console.error("userPrdication ERROR STACK:", error.stack);
+            console.error("userPrdication ERROR:", error);
 
             return res.json(errorResponse([], error.message));
         }

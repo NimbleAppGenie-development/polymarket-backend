@@ -3,6 +3,7 @@ const sequelize = require("@models/index");
 const User = require("@models/user");
 const Admin = require("@models/adminModel");
 const UserPredictedQuestion = require("@models/userpredictedquestions");
+const Transaction = require("@models/transaction");
 
 async function declareWinners({ questionId, answerId }) {
     const t = await sequelize.transaction();
@@ -14,7 +15,7 @@ async function declareWinners({ questionId, answerId }) {
             {
                 where: { questionId, selectedOptionId: answerId },
                 transaction: t,
-            }
+            },
         );
 
         // LOSS
@@ -26,7 +27,7 @@ async function declareWinners({ questionId, answerId }) {
                     selectedOptionId: { [Op.ne]: answerId },
                 },
                 transaction: t,
-            }
+            },
         );
 
         // Get winners
@@ -46,22 +47,27 @@ async function declareWinners({ questionId, answerId }) {
 
         let totalPayout = 0;
 
-        // Process winners
+        // winners
         for (const bet of winners) {
-            const winningAmount =
-                Number(bet.entryAmount) * Number(bet.multiplier || 1);
+            const winningAmount = Number(bet.entryAmount) * Number(bet.multiplier || 1);
 
             totalPayout += winningAmount;
 
-            await bet.update(
-                { winningCredited: winningAmount },
-                { transaction: t }
-            );
+            await bet.update({ winningCredited: winningAmount }, { transaction: t });
 
             await User.increment("walletBalance", {
                 by: winningAmount,
                 where: { id: bet.userId },
                 transaction: t,
+            });
+
+            await Transaction.create({
+                userId : bet.userId,
+                amount: winningAmount,
+                type: "WINNING",
+                status: "SUCCESS",
+                response: JSON.stringify({ userId: bet.userId }),
+
             });
         }
 
