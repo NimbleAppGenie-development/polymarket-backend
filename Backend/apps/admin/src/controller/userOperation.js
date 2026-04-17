@@ -1,3 +1,5 @@
+const { v4: uuidv4 } = require("uuid");
+
 const { Op, where, Sequelize } = require("sequelize");
 const paginator = require("../../../../libs/shared/utils/paginator");
 const { literal } = require("sequelize");
@@ -12,6 +14,7 @@ const QuestionOption = require("@models/questionOption");
 const statusCode = require("@utils/statusCodes");
 const UserPredictedQuestion = require("@models/userpredictedquestions");
 const declareWinners = require("../services/declareWinners.service");
+const NONE_OPTION_ID = "62758fdf-b62e-4cb7-a755-d189e4b8afa0";
 
 module.exports = {
     getStaticsCount: async (req, res, next) => {
@@ -479,6 +482,13 @@ module.exports = {
             }));
 
             await QuestionOption.bulkCreate(optionData);
+            await QuestionOption.create({
+                id: uuidv4(),
+                questionId: newQuestion.id,
+                option: "None of the Above",
+                multiplier: 0,
+                image: null,
+            });
 
             return res.status(statusCode.OK).json(simpleResponse(true, "Question created successfully"));
         } catch (error) {
@@ -582,6 +592,11 @@ module.exports = {
                         model: QuestionOption,
                         as: "options",
                         attributes: ["id", "option", "multiplier", "image"],
+                        where: {
+                            option: {
+                                [Op.ne]: "None of the Above",
+                            },
+                        },
                     },
                 ],
             });
@@ -650,7 +665,12 @@ module.exports = {
             await questionExists.save();
 
             await QuestionOption.destroy({
-                where: { questionId: id },
+                where: {
+                    questionId: id,
+                    option: {
+                        [Op.ne]: "None of the Above",
+                    },
+                },
             });
 
             let parsedOptions = typeof options === "string" ? JSON.parse(options) : options;
@@ -704,6 +724,8 @@ module.exports = {
             }
 
             const question = await Question.destroy({ where: { id: questionId } });
+            await QuestionOption.destroy({ where: { questionId } });
+
             if (!question) throw new NotFound(simpleResponse(false, "Question not found"));
 
             return res.status(statusCode.OK).json({
@@ -762,7 +784,7 @@ module.exports = {
 
             await QuestionOption.update({ resultStatus: false }, { where: { questionId } });
 
-            await QuestionOption.update(
+            /* await QuestionOption.update(
                 { resultStatus: true },
                 {
                     where: {
@@ -770,7 +792,18 @@ module.exports = {
                         questionId,
                     },
                 },
-            );
+            ); */
+            if (optionId !== NONE_OPTION_ID) {
+                await QuestionOption.update(
+                    { resultStatus: true },
+                    {
+                        where: {
+                            id: optionId,
+                            questionId,
+                        },
+                    },
+                );
+            }
 
             declareWinners({ questionId, answerId: optionId }).then(console.log);
 

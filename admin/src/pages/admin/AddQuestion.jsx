@@ -222,7 +222,7 @@ export default function CreateQuestion() {
                                     <label htmlFor="description" className="form-label">
                                         Description
                                     </label>
-                                    <input type="text" className="form-control" name="description" required maxLength={100} />
+                                    <input type="text" className="form-control" name="description" required maxLength={1500} />
                                 </div>
 
                                 <div className="mb-3">
@@ -234,7 +234,7 @@ export default function CreateQuestion() {
                                         name="marketRules"
                                         id="marketRules"
                                         rows="4"
-                                        maxLength={500}
+                                        maxLength={5000}
                                         placeholder="Enter market rules"
                                         required
                                     ></textarea>

@@ -432,56 +432,62 @@ export default function Home() {
 
                                                                 {user ? (
                                                                     <div className="politics-btn-box d-flex flex-column">
-                                                                        {item.options?.map((opt) => {
-                                                                            const alreadySelected =
-                                                                                String(prediction?.selectedOptionId) === String(opt.id);
+                                                                        {item.options
+                                                                            ?.filter((opt) => opt.option !== "None of the Above")
+                                                                            .map((opt) => {
+                                                                                const alreadySelected =
+                                                                                    String(prediction?.selectedOptionId) === String(opt.id);
 
-                                                                            return (
-                                                                                <div
-                                                                                    key={opt.id}
-                                                                                    className={`option-row-parent ${alreadySelected ? "active" : ""}`}
-                                                                                    onClick={() => {
-                                                                                        const alreadyPredicted = hasPredicted(item.id);
+                                                                                return (
+                                                                                    <div
+                                                                                        key={opt.id}
+                                                                                        className={`option-row-parent ${alreadySelected ? "active" : ""}`}
+                                                                                        onClick={() => {
+                                                                                            const alreadyPredicted = hasPredicted(item.id);
 
-                                                                                        if (alreadyPredicted) {
-                                                                                            Swal.fire({
-                                                                                                icon: "warning",
-                                                                                                title: "Already Selected",
-                                                                                                text: "You have already predicted on this question",
+                                                                                            if (alreadyPredicted) {
+                                                                                                Swal.fire({
+                                                                                                    icon: "warning",
+                                                                                                    title: "Already Selected",
+                                                                                                    text: "You have already predicted on this question",
+                                                                                                });
+                                                                                                return;
+                                                                                            }
+
+                                                                                            setTradeData({
+                                                                                                userId: user.id,
+                                                                                                categoryId: item.category?.id,
+                                                                                                questionId: item.id,
+                                                                                                question: item.question,
+                                                                                                options: item.options?.filter(
+                                                                                                    (opt) => opt.option !== "None of the Above",
+                                                                                                ),
                                                                                             });
-                                                                                            return;
-                                                                                        }
 
-                                                                                        setTradeData({
-                                                                                            userId: user.id,
-                                                                                            categoryId: item.category?.id,
-                                                                                            questionId: item.id,
-                                                                                            question: item.question,
-                                                                                            options: item.options,
-                                                                                        });
+                                                                                            setSelectedOption(opt.id);
 
-                                                                                        setSelectedOption(opt.id); 
+                                                                                            setShowPopup(true);
+                                                                                        }}
+                                                                                    >
+                                                                                        <div className="option-row">
+                                                                                            <img
+                                                                                                src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
+                                                                                                alt={opt.option}
+                                                                                                className="option-img"
+                                                                                            />
+                                                                                        </div>
+                                                                                        <span className="option-text">{opt.option}</span>
 
-                                                                                        setShowPopup(true);
-                                                                                    }}
-                                                                                >
-                                                                                    <div className="option-row">
-                                                                                        <img
-                                                                                            src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
-                                                                                            alt={opt.option}
-                                                                                            className="option-img"
-                                                                                        />
+                                                                                        <span className="option-multiplier">
+                                                                                            {opt.multiplier || "1x"}x
+                                                                                        </span>
+
+                                                                                        <span className="option-percentage">
+                                                                                            {opt.percentage || 0}%
+                                                                                        </span>
                                                                                     </div>
-                                                                                    <span className="option-text">{opt.option}</span>
-
-                                                                                    <span className="option-multiplier">
-                                                                                        {opt.multiplier || "1x"}x
-                                                                                    </span>
-
-                                                                                    <span className="option-percentage">{opt.percentage || 0}%</span>
-                                                                                </div>
-                                                                            );
-                                                                        })}
+                                                                                );
+                                                                            })}
                                                                     </div>
                                                                 ) : (
                                                                     <div className="politics-btn-box">

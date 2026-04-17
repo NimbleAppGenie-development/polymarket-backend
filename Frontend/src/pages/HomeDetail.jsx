@@ -101,6 +101,8 @@ export default function Home() {
         }
     }, [user?.id, marketData?.id]);
 
+    const filterOptions = (options = []) => options.filter((opt) => opt.option !== "None of the Above");
+
     return (
         <div className="home-page">
             <Header />
@@ -250,7 +252,7 @@ export default function Home() {
                                                         <p>Chance</p>
                                                     </div>
                                                     <div>
-                                                        {marketData?.options?.map((opt) => {
+                                                        {filterOptions(marketData?.options).map((opt) => {
                                                             return (
                                                                 <div
                                                                     key={opt.id}
@@ -323,7 +325,7 @@ export default function Home() {
                                         <ul>
                                             {user ? (
                                                 <div className="politics-btn-box d-flex flex-column">
-                                                    {marketData?.options?.map((opt) => {
+                                                    {filterOptions(marketData?.options).map((opt) => {
                                                         const alreadySelected = String(prediction?.selectedOptionId) === String(opt.id);
 
                                                         return (
@@ -347,7 +349,7 @@ export default function Home() {
                                                                         categoryId: marketData.category?.id,
                                                                         questionId: marketData.id,
                                                                         question: marketData.question,
-                                                                        options: marketData.options,
+                                                                        options: filterOptions(marketData.options),
                                                                     });
 
                                                                     setSelectedOption(opt.id);
@@ -378,7 +380,7 @@ export default function Home() {
                                                 </div>
                                             ) : (
                                                 <div className="politics-btn-box">
-                                                    {marketData?.options?.map((opt) => {
+                                                    {filterOptions(marketData?.options).map((opt) => {
                                                         const alreadySelected = String(prediction?.selectedOptionId) === String(opt.id);
 
                                                         return (
@@ -402,7 +404,7 @@ export default function Home() {
                                                                         categoryId: marketData.category?.id,
                                                                         questionId: marketData.id,
                                                                         question: marketData.question,
-                                                                        options: marketData.options,
+                                                                        options: filterOptions(marketData.options),
                                                                     });
 
                                                                     setSelectedOption(opt.id);
@@ -460,7 +462,7 @@ export default function Home() {
 
                             {/* OPTIONS */}
                             <div className="d-flex flex-column gap-2 mb-3">
-                                {tradeData.options.map((opt) => (
+                                {filterOptions(tradeData.options).map((opt) => (
                                     <div
                                         key={opt.id}
                                         onClick={() => setSelectedOption(opt.id)}

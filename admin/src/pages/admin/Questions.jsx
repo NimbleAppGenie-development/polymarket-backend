@@ -340,6 +340,7 @@ export default function Questions() {
                                     <th>Description</th>
                                     <th>Status</th>
                                     <th>Trending</th>
+                                    <th>Show in Slider</th>
                                     <th>Result status</th>
                                     <th>Currect option</th>
                                     <th>Action</th>
@@ -380,6 +381,14 @@ export default function Questions() {
                                                         Inactive
                                                     </span>
                                                 )}
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={item.trending}
+                                                    onChange={() => updateTrending(item.questionId)}
+                                                    style={{ cursor: "pointer", width: "20px", height: "20px" }}
+                                                />
                                             </td>
                                             <td>
                                                 <input
