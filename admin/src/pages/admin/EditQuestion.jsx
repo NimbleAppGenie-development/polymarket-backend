@@ -15,15 +15,59 @@ export default function QuestionEdit() {
         categoryId: "",
         question: "",
         description: "",
+        marketRules: "",
     });
     const [options, setOptions] = useState([
-        { option: "", multiplier: "" },
-        { option: "", multiplier: "" },
+        { option: "", multiplier: "", image: "" },
+        { option: "", multiplier: "", image: "" },
     ]);
     const [allCategory, setAllCategory] = useState([]);
     const [firstCategoryId, setFirstCategoryId] = useState("");
     const addOption = () => {
-        setOptions([...options, { option: "", multiplier: "" }]);
+        setOptions([...options, { option: "", multiplier: "", image: "" }]);
+    };
+    const [formErrors, setFormErrors] = useState({});
+
+    const validateForm = () => {
+        const errors = {};
+
+        if (!QuestionData.categoryId) {
+            errors.categoryId = "Category is required";
+        }
+
+        if (!QuestionData.question?.trim()) {
+            errors.question = "Question required";
+        }
+
+        if (!QuestionData.description?.trim()) {
+            errors.description = "Description required";
+        }
+
+        if (!QuestionData.marketRules?.trim()) {
+            errors.marketRules = "Market rules required";
+        }
+
+        if (!options || options.length < 2) {
+            errors.options = "Minimum 2 options required";
+        }
+
+        options.forEach((opt, i) => {
+            if (!opt.option?.trim()) {
+                errors[`option_${i}`] = "Option required";
+            }
+
+            if (!opt.multiplier || Number(opt.multiplier) <= 0) {
+                errors[`multiplier_${i}`] = "Valid multiplier required";
+            }
+
+            const hasImage = (typeof opt.image === "string" && opt.image.trim() !== "") || opt.image instanceof File;
+
+            if (!hasImage) {
+                errors[`image_${i}`] = "Image is required";
+            }
+        });
+
+        return errors;
     };
 
     const removeOption = (index) => {
@@ -38,8 +82,26 @@ export default function QuestionEdit() {
         updated[index][field] = value;
         setOptions(updated);
     };
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
-    // Fetch matches — return the list so caller can immediately use it
+    const handleFileChange = (index, file) => {
+        if (!file) return;
+
+        if (!allowedTypes.includes(file.type)) {
+            errorToastr("Only JPG, PNG, WEBP images are allowed");
+
+            const updated = [...options];
+            updated[index].image = "";
+            setOptions(updated);
+            return;
+        }
+
+        const updated = [...options];
+        updated[index].image = file;
+        setOptions(updated);
+    };
+
+    // Fetch matches
     const fetchCategory = async () => {
         try {
             const services = new Service();
@@ -73,14 +135,13 @@ export default function QuestionEdit() {
 
             const question = response?.data || {};
 
-            // BASIC DATA SET
             setQuestionData({
                 categoryId: question.categoryId,
                 question: question.question,
                 description: question.description,
+                marketRules: question.marketRules,
             });
 
-            // CATEGORY SELECT HANDLING (SIMPLIFIED)
             const matchesToUse = Array.isArray(categoryParam) ? categoryParam : allCategory;
 
             if (matchesToUse?.length > 0) {
@@ -89,19 +150,18 @@ export default function QuestionEdit() {
                 setFirstCategoryId(found?.categoryId || question.categoryId || "");
             }
 
-            // IMPORTANT: OPTIONS SET
             if (Array.isArray(question.options) && question.options.length > 0) {
                 setOptions(
                     question.options.map((opt) => ({
                         option: opt.option,
                         multiplier: opt.multiplier,
+                        image: opt.image,
                     })),
                 );
             } else {
-                // fallback: always minimum 2 options
                 setOptions([
-                    { option: "", multiplier: "" },
-                    { option: "", multiplier: "" },
+                    { option: "", multiplier: "", image: "" },
+                    { option: "", multiplier: "", image: "" },
                 ]);
             }
         } catch (error) {
@@ -112,37 +172,63 @@ export default function QuestionEdit() {
     //Submit handler
     const handleSubmitting = async (event) => {
         event.preventDefault();
-        const form = new FormData(event.target);
 
-        const formObject = {
-            id: questionId,
-            categoryId: form.get("categoryId"),
-            question: form.get("question"),
-            description: form.get("description"),
-            options: options,
-        };
+        const errors = validateForm();
+
+        setFormErrors(errors);
+
+        if (Object.keys(errors).length > 0) {
+            errorToastr("Please fix validation errors");
+            return;
+        }
+        for (let i = 0; i < options.length; i++) {
+            const opt = options[i];
+
+            if (opt.image instanceof File) {
+                if (!allowedTypes.includes(opt.image.type)) {
+                    errorToastr(`Invalid image at option ${i + 1}`);
+                    return;
+                }
+            }
+        }
+
+        const formData = new FormData();
+
+        formData.append("id", questionId);
+        formData.append("categoryId", QuestionData.categoryId);
+        formData.append("question", QuestionData.question);
+        formData.append("description", QuestionData.description);
+        formData.append("marketRules", QuestionData.marketRules);
+
+        formData.append("options", JSON.stringify(options));
+
+        options.forEach((opt, index) => {
+            if (opt.image instanceof File) {
+                formData.append("optionImages", opt.image);
+                formData.append("imageIndexes", index);
+            }
+        });
 
         try {
             const services = new Service();
-            const response = await services.post("/admin/question/edit", formObject, true);
+            const response = await services.post("/admin/question/edit", formData, true);
+
             if (response?.status) {
-                successToastr(response?.message || "Question updated successfully");
+                successToastr("Question updated successfully");
                 navigate("/questions", { replace: true });
             } else {
-                errorToastr(response?.message || "Failed to update question");
+                errorToastr(response?.message || "Failed");
             }
         } catch (error) {
             errorToastr(error.message);
         }
     };
 
-    //Load matches first, then question (avoid race condition)
     useEffect(() => {
         (async () => {
             const matches = await fetchCategory();
             await fetchQuestion(matches);
         })();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [questionId]);
 
     return (
@@ -173,7 +259,6 @@ export default function QuestionEdit() {
                                         value={QuestionData?.categoryId || firstCategoryId || ""}
                                         required
                                     >
-                                        {/* Show placeholder when no matches */}
                                         {allCategory.length === 0 && (
                                             <option value="" disabled>
                                                 No ctegory available for selected type
@@ -226,36 +311,92 @@ export default function QuestionEdit() {
                                         required
                                     />
                                 </div>
+                                {/* Market Rules */}
+                                <div className="mb-3">
+                                    <label htmlFor="marketRules" className="form-label">
+                                        Market Rules
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="marketRules"
+                                        id="marketRules"
+                                        onChange={(e) => setQuestionData((prev) => ({ ...prev, marketRules: e.target.value }))}
+                                        value={QuestionData?.marketRules || ""}
+                                        placeholder="Enter marketRules"
+                                        minLength="3"
+                                        required
+                                    />
+                                </div>
+
                                 <div className="mb-3">
                                     <label className="form-label">Options</label>
 
                                     {options.map((opt, index) => (
-                                        <div key={index} className="d-flex gap-2 mb-2">
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                placeholder="Option"
-                                                value={opt.option}
-                                                onChange={(e) => handleOptionChange(index, "option", e.target.value)}
-                                            />
+                                        <div key={index} className="mb-3">
+                                            <div className="d-flex gap-2 align-items-center">
+                                                <input
+                                                    type="file"
+                                                    className="form-control"
+                                                    accept=".jpg,.jpeg,.png,.webp"
+                                                    onChange={(e) => handleFileChange(index, e.target.files[0])}
+                                                />
 
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                className="form-control"
-                                                placeholder="Multiplier"
-                                                value={opt.multiplier}
-                                                onChange={(e) => handleOptionChange(index, "multiplier", e.target.value)}
-                                            />
+                                                {/* SHOW EXISTING IMAGE */}
+                                                {typeof opt.image === "string" && opt.image && (
+                                                    <img
+                                                        src={`${import.meta.env.VITE_STATIC_URL}/public/question/${opt.image}`}
+                                                        width="40"
+                                                        height="40"
+                                                        style={{ objectFit: "cover", borderRadius: "6px" }}
+                                                    />
+                                                )}
 
-                                            <button
-                                                type="button"
-                                                className="btn btn-danger"
-                                                onClick={() => removeOption(index)}
-                                                disabled={options.length <= 2}
-                                            >
-                                                ❌
-                                            </button>
+                                                {/* SHOW NEW SELECTED IMAGE PREVIEW */}
+                                                {opt.image instanceof File && (
+                                                    <img
+                                                        src={URL.createObjectURL(opt.image)}
+                                                        width="40"
+                                                        height="40"
+                                                        style={{ objectFit: "cover", borderRadius: "6px" }}
+                                                    />
+                                                )}
+
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Option"
+                                                    value={opt.option}
+                                                    onChange={(e) => handleOptionChange(index, "option", e.target.value)}
+                                                />
+
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    className="form-control"
+                                                    placeholder="Multiplier"
+                                                    value={opt.multiplier}
+                                                    onChange={(e) => handleOptionChange(index, "multiplier", e.target.value)}
+                                                />
+
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-danger"
+                                                    onClick={() => removeOption(index)}
+                                                    disabled={options.length <= 2}
+                                                >
+                                                    ❌
+                                                </button>
+                                            </div>
+                                            <div className="mt-1">
+                                                {formErrors[`option_${index}`] && <div className="text-danger">{formErrors[`option_${index}`]}</div>}
+
+                                                {formErrors[`multiplier_${index}`] && (
+                                                    <div className="text-danger">{formErrors[`multiplier_${index}`]}</div>
+                                                )}
+
+                                                {formErrors[`image_${index}`] && <div className="text-danger">{formErrors[`image_${index}`]}</div>}
+                                            </div>
                                         </div>
                                     ))}
 

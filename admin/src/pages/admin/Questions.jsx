@@ -355,7 +355,7 @@ export default function Questions() {
                                                 {item?.options?.length > 0
                                                     ? item.options.map((opt, i) => (
                                                           <div key={i}>
-                                                              <strong>{opt.option}</strong> - {opt.multiplier}
+                                                              <strong>{opt.option}</strong> - {opt.multiplier}x
                                                           </div>
                                                       ))
                                                     : "-"}

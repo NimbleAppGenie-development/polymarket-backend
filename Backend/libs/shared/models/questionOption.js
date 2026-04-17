@@ -14,25 +14,29 @@ QuestionOption.init(
         },
         questionId: {
             type: DataTypes.UUID, // UUID to category
-            allowNull: false
+            allowNull: false,
+        },
+        image: {
+            type: DataTypes.STRING,
+            defaultValue: true,
         },
         option: {
             type: DataTypes.STRING,
         },
         multiplier: {
-            type: DataTypes.DECIMAL(10,2),  
+            type: DataTypes.DECIMAL(10, 2),
         },
         resultStatus: {
             type: DataTypes.BOOLEAN,
-            defaultValue: false
-        }
+            defaultValue: false,
+        },
     },
-     {
+    {
         sequelize,
         modelName: "QuestionOption",
         tableName: "questionOptions",
         timestamps: true,
-    }
+    },
 );
 
 // QuestionOption.belongsTo(Question, { foreignKey: "questionId", as: "question"});
@@ -42,7 +46,7 @@ QuestionOption.associate = () => {
 
     QuestionOption.belongsTo(Question, {
         foreignKey: "questionId",
-        as: "question"
+        as: "question",
     });
 };
 module.exports = QuestionOption;

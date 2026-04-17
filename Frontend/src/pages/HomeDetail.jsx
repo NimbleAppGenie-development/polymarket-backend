@@ -22,6 +22,9 @@ export default function Home() {
         id: null,
         option: null,
     });
+    const [tradeData, setTradeData] = useState(null);
+    const [selectedOption, setSelectedOption] = useState(null);
+    const [open, setOpen] = useState(true);
 
     const getMarketData = async () => {
         try {
@@ -29,7 +32,6 @@ export default function Home() {
 
             const services = new Service();
             const response = await services.get(`/user/get-market-detail/${detailId}`, {}, false);
-            console.log("======response==========", response.data);
             if (response?.status) {
                 setMarketData(response.data || []);
                 setTotal(response.total || 0);
@@ -132,8 +134,8 @@ export default function Home() {
                                                 alt="image"
                                             />
                                         </figure>
-                                        <h4>{marketData?.question}</h4>
-                                        <h3>{marketData?.description}</h3>
+                                        <h3>{marketData?.question}</h3>
+                                        <h4>{marketData?.description}</h4>
                                     </div>
                                     <div className="details-user-right-parent">
                                         <ul>
@@ -247,57 +249,31 @@ export default function Home() {
                                                     <div className="center-box">
                                                         <p>Chance</p>
                                                     </div>
-                                                    <div className="details-page-tbaing-content-box">
-                                                        <div className="details-page-tbaing-left">
-                                                            <p>At least 50 days</p>
-                                                            <span>Past 10AM 4/5</span>
-                                                        </div>
-                                                        <div className="forecast-main-box">
-                                                            57 %
-                                                            <span>
-                                                                <img src="/img/arrow-top.svg" alt="icon" /> 38.3
-                                                            </span>
-                                                        </div>
-                                                        <div className="details-page-tbaing-right">
-                                                            <ul>
-                                                                <li>
-                                                                    <a href="#" className="grren-btn">
-                                                                        Yes 52$
-                                                                    </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="#" className="offset-red-btn">
-                                                                        No 49$
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                    <div className="details-page-tbaing-content-box">
-                                                        <div className="details-page-tbaing-left">
-                                                            <p>At least 50 days</p>
-                                                            <span>Past 10AM 4/5</span>
-                                                        </div>
-                                                        <div className="forecast-main-box">
-                                                            57 %
-                                                            <span>
-                                                                <img src="/img/arrow-top.svg" alt="icon" /> 38.3
-                                                            </span>
-                                                        </div>
-                                                        <div className="details-page-tbaing-right">
-                                                            <ul>
-                                                                <li>
-                                                                    <a href="#" className="grren-btn">
-                                                                        Yes 52$
-                                                                    </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="#" className="offset-red-btn">
-                                                                        No 49$
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
+                                                    <div>
+                                                        {marketData?.options?.map((opt) => {
+                                                            return (
+                                                                <div
+                                                                    key={opt.id}
+                                                                    style={{
+                                                                        display: "flex",
+                                                                        alignItems: "center",
+                                                                        justifyContent: "space-between",
+                                                                        border: "1px solid #ddd",
+                                                                        padding: "10px",
+                                                                        borderRadius: "8px",
+                                                                        marginBottom: "8px",
+                                                                    }}
+                                                                >
+                                                                    <span>{opt.option}</span>
+
+                                                                    <span>{opt.multiplier}x</span>
+
+                                                                    <div style={{ display: "flex", gap: "15px" }}>
+                                                                        <span>{opt.percentage}%</span>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
 
                                                     <div className="details-page-tbaing-content-box">
@@ -308,44 +284,17 @@ export default function Home() {
                                                             <div className="accordion-item">
                                                                 <h2 className="accordion-header" id="headingOne">
                                                                     <button
-                                                                        className="accordion-button"
+                                                                        className={`accordion-button ${open ? "" : "collapsed"}`}
                                                                         type="button"
-                                                                        data-bs-toggle="collapse"
-                                                                        data-bs-target="#collapseOne"
-                                                                        aria-expanded="true"
-                                                                        aria-controls="collapseOne"
+                                                                        onClick={() => setOpen((prev) => !prev)}
                                                                     >
                                                                         Market Rules
                                                                     </button>
                                                                 </h2>
-                                                                <div
-                                                                    id="collapseOne"
-                                                                    className="accordion-collapse collapse show"
-                                                                    aria-labelledby="headingOne"
-                                                                    data-bs-parent="#accordionExample"
-                                                                >
+
+                                                                <div className={`accordion-collapse collapse ${open ? "show" : ""}`}>
                                                                     <div className="accordion-body">
-                                                                        <p>
-                                                                            <strong>Lorem dolor</strong> sit amet, consetetur sadipscing elitr, sed
-                                                                            diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam
-                                                                            erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
-                                                                            rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum
-                                                                            dolor sit amet. Lorem ipsum.
-                                                                        </p>
-                                                                        <p>
-                                                                            Dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
-                                                                            invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
-                                                                            vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
-                                                                            gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem
-                                                                            ipsum.
-                                                                        </p>
-                                                                        <p>
-                                                                            Dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
-                                                                            invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
-                                                                            vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
-                                                                            gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem
-                                                                            ipsum.
-                                                                        </p>
+                                                                        <p>{marketData?.marketRules}</p>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -366,22 +315,21 @@ export default function Home() {
                                                 alt="image"
                                             />
                                         </figure>
-                                        <h6>{marketData?.question}</h6>
-                                        <h5>{marketData?.description}</h5>
+                                        {/* <h6>{marketData?.question}</h6> */}
+                                        <h5>{marketData?.question}</h5>
                                     </div>
 
                                     <div className="details-page-tbaing-right">
                                         <ul>
                                             {user ? (
-                                                <div className="politics-btn-box">
+                                                <div className="politics-btn-box d-flex flex-column">
                                                     {marketData?.options?.map((opt) => {
-                                                        // const alreadySelected = prediction?.selectedOptionId === opt.id;
                                                         const alreadySelected = String(prediction?.selectedOptionId) === String(opt.id);
 
                                                         return (
-                                                            <button
+                                                            <div
                                                                 key={opt.id}
-                                                                className={`btn ${alreadySelected ? "active" : ""}`}
+                                                                className={`option-row-parent ${alreadySelected ? "active" : ""}`}
                                                                 onClick={() => {
                                                                     const alreadyPredicted = hasPredicted(marketData.id);
 
@@ -394,18 +342,37 @@ export default function Home() {
                                                                         return;
                                                                     }
 
-                                                                    setSelectedData({
+                                                                    setTradeData({
                                                                         userId: user.id,
                                                                         categoryId: marketData.category?.id,
                                                                         questionId: marketData.id,
-                                                                        selectedOption: opt.id,
+                                                                        question: marketData.question,
+                                                                        options: marketData.options,
                                                                     });
+
+                                                                    setSelectedOption(opt.id);
 
                                                                     setShowPopup(true);
                                                                 }}
                                                             >
-                                                                {opt.option}
-                                                            </button>
+                                                                {/* IMAGE */}
+                                                                <div className="option-row">
+                                                                    <img
+                                                                        src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
+                                                                        alt={opt.option}
+                                                                        className="option-img"
+                                                                    />
+                                                                </div>
+
+                                                                {/* OPTION NAME */}
+                                                                <span className="option-text">{opt.option}</span>
+
+                                                                {/* MULTIPLIER */}
+                                                                <span className="option-multiplier">{opt.multiplier || "1x"}x</span>
+
+                                                                {/* PERCENTAGE */}
+                                                                <span className="option-percentage">{opt.percentage || 0}%</span>
+                                                            </div>
                                                         );
                                                     })}
                                                 </div>
@@ -430,12 +397,15 @@ export default function Home() {
                                                                         return;
                                                                     }
 
-                                                                    setSelectedData({
+                                                                    setTradeData({
                                                                         userId: user.id,
                                                                         categoryId: marketData.category?.id,
                                                                         questionId: marketData.id,
-                                                                        selectedOption: opt.id,
+                                                                        question: marketData.question,
+                                                                        options: marketData.options,
                                                                     });
+
+                                                                    setSelectedOption(opt.id);
 
                                                                     setShowPopup(true);
                                                                 }}
@@ -466,61 +436,76 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-            {showPopup && (
-                <div className="modal fade show d-block">
+            {showPopup && tradeData && (
+                <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
                     <div className="modal-dialog modal-dialog-centered modal-md">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Enter Amount</h5>
-                                <button className="btn-close" onClick={() => setShowPopup(false)}></button>
-                            </div>
+                        <div className="modal-content p-3">
+                            {/* HEADER */}
+                            <div className="modal-header border-0">
+                                <div>
+                                    <h5 className="modal-title">{tradeData.options?.map((opt) => opt.option).join(" / ")}</h5>
+                                    <small className="text-muted">Select an option to trade</small>
+                                </div>
 
-                            <div className="modal-body">
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-
-                                        if (!amount || amount <= 0) {
-                                            alert("Enter valid amount");
-                                            return;
-                                        }
-
-                                        firstOption(
-                                            selectedData.userId,
-                                            selectedData.categoryId,
-                                            selectedData.questionId,
-                                            selectedData.selectedOption,
-                                            amount,
-                                        );
-
+                                <button
+                                    className="btn-close"
+                                    onClick={() => {
                                         setShowPopup(false);
+                                        setTradeData(null);
+                                        setSelectedOption(null);
                                         setAmount("");
                                     }}
-                                >
-                                    <div className="login-form-parent">
-                                        <div className="form-group">
-                                            <div className="mb-3">
-                                                <label>Amount</label>
-                                                <input
-                                                    type="number"
-                                                    className="form-control"
-                                                    placeholder="Enter amount"
-                                                    value={amount}
-                                                    step={1}
-                                                    min={1}
-                                                    onChange={(e) => setAmount(e.target.value)}
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="form-group">
-                                        <button className="btn btn-primaryx" type="submit">
-                                            Confirm
-                                        </button>
-                                    </div>
-                                </form>
+                                />
                             </div>
+
+                            {/* OPTIONS */}
+                            <div className="d-flex flex-column gap-2 mb-3">
+                                {tradeData.options.map((opt) => (
+                                    <div
+                                        key={opt.id}
+                                        onClick={() => setSelectedOption(opt.id)}
+                                        style={{
+                                            padding: "12px",
+                                            border: "1px solid #ddd",
+                                            borderRadius: "10px",
+                                            cursor: "pointer",
+                                            background: selectedOption === opt.id ? "#e6fff2" : "#fff",
+                                            borderColor: selectedOption === opt.id ? "#00c853" : "#ddd",
+                                        }}
+                                    >
+                                        <strong>{opt.option}</strong>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* AMOUNT */}
+                            <input
+                                type="number"
+                                className="form-control mb-3"
+                                placeholder="Enter amount"
+                                value={amount}
+                                min={1}
+                                onChange={(e) => setAmount(e.target.value)}
+                            />
+
+                            {/* CONFIRM */}
+                            <button
+                                className="btn btn-success w-100"
+                                disabled={!selectedOption}
+                                onClick={() => {
+                                    if (!amount) return errorToastr("Enter amount");
+                                    if (!selectedOption) return errorToastr("Select option");
+
+                                    firstOption(tradeData.userId, tradeData.categoryId, tradeData.questionId, selectedOption, amount);
+
+                                    setShowPopup(false);
+                                    setAmount("");
+                                    setTradeData(null);
+                                    setSelectedOption(null);
+                                }}
+                            >
+                                Confirm
+                            </button>
                         </div>
                     </div>
                 </div>

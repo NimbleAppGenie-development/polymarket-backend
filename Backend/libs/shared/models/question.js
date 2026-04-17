@@ -1,7 +1,7 @@
 const { DataTypes, Model } = require("sequelize");
 const sequelize = require("."); // Assuming this is your Sequelize instance
 const Category = require("./Category");
-const QuestionOption = require("./questionOption")
+const QuestionOption = require("./questionOption");
 
 class Question extends Model {}
 
@@ -22,7 +22,11 @@ Question.init(
         },
         description: {
             type: DataTypes.TEXT,
-            defaultValue: false,
+            allowNull: true,
+        },
+        marketRules: {
+            type: DataTypes.TEXT,
+            allowNull: true,
         },
         status: {
             type: DataTypes.BOOLEAN,
@@ -43,5 +47,5 @@ Question.init(
 );
 
 Question.belongsTo(Category, { foreignKey: "categoryId", as: "category" });
-Question.hasMany(QuestionOption, { foreignKey: "questionId", as: "options",});
+Question.hasMany(QuestionOption, { foreignKey: "questionId", as: "options" });
 module.exports = Question;

@@ -14,12 +14,16 @@ module.exports = {
                 type: Sequelize.UUID,
                 allowNull: false,
             },
+            image: {
+                type: Sequelize.STRING,
+                defaultValue: true,
+            },
 
             option: Sequelize.STRING,
-            multiplier: Sequelize.DECIMAL(10,2),
+            multiplier: Sequelize.DECIMAL(10, 2),
             resultStatus: {
                 type: Sequelize.BOOLEAN,
-                defaultValue: false
+                defaultValue: false,
             },
             createdAt: {
                 allowNull: false,

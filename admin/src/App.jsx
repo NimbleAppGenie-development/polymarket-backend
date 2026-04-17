@@ -6,6 +6,7 @@ import NewsLetter from "./pages/Newsletter";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/login";
 import Dashboard from "./pages/admin/Dashboard";
+import AdminWallet from "./pages/admin/AdminWallet.jsx";
 import Pages from "./pages/admin/Pages.jsx";
 import PageEdit from "./pages/admin/PageEdit.jsx";
 import Category from "./pages/admin/Category.jsx";
@@ -29,6 +30,7 @@ export default function App() {
                 </Route>
 
                 <Route path="/dashboard" element={ <PrivateRoute> <Dashboard /> </PrivateRoute> } />
+                <Route path="/adminWallet" element={ <PrivateRoute> <AdminWallet /> </PrivateRoute> } />
 
                 <Route path="/user" element={ <PrivateRoute> <UserManagement /> </PrivateRoute> } />
                 <Route path="/category" element={ <PrivateRoute> <Category /> </PrivateRoute> } />

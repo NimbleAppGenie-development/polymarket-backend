@@ -24,6 +24,14 @@ export default function Sidebar() {
             urls: [],
         },
         {
+            url: "/adminWallet",
+            active: "",
+            name: "Admin Wallet",
+            icon: <i className="fas fa-wallet" />,
+            levels: [],
+            urls: [],
+        },
+        {
             url: "/user",
             active: "",
             name: "User Management",

@@ -62,3 +62,6 @@
   
   padding-right: 40px; /* space so text doesn't overlap */
 }
+.text-danger {
+  font-size: 12px;
+}

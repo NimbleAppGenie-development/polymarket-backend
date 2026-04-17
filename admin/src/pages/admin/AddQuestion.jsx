@@ -13,12 +13,12 @@ export default function CreateQuestion() {
     const [filteredCategory, setFilteredCategory] = useState([]); // shown in dropdown
     const [firstCategoryId, setFirstCategoryId] = useState("");
     const [options, setOptions] = useState([
-        { option: "", multiplier: "" },
-        { option: "", multiplier: "" },
+        { option: "", multiplier: "", image: null },
+        { option: "", multiplier: "", image: null },
     ]);
 
     const addOption = () => {
-        setOptions([...options, { option: "", multiplier: "" }]);
+        setOptions([...options, { option: "", multiplier: "", image: null }]);
     };
 
     const removeOption = (index) => {
@@ -28,25 +28,48 @@ export default function CreateQuestion() {
         setOptions(updated);
     };
 
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    const handleFileChange = (index, file) => {
+        if (!file) return;
+
+        if (!allowedTypes.includes(file.type)) {
+            errorToastr("Only JPG, PNG, WEBP images are allowed");
+
+            const updated = [...options];
+            updated[index].image = null;
+            setOptions(updated);
+            return;
+        }
+
+        const updated = [...options];
+        updated[index].image = file;
+        setOptions(updated);
+    };
+
     const handleOptionChange = (index, field, value) => {
         const updated = [...options];
         updated[index][field] = value;
         setOptions(updated);
     };
 
-    const validateForm = (formData) => {
+    const validateForm = (formData, optionsData) => {
         const errors = {};
+
         const categoryId = formData.get("categoryId");
         const question = formData.get("question");
         const description = formData.get("description");
+        const marketRules = formData.get("marketRules");
 
         if (!categoryId) errors.categoryId = "Match ID is required";
         if (!question || question.length < 3) errors.question = "Question must be at least 3 characters";
         if (!description || description.length < 3) errors.description = "Description must be at least 3 characters";
-        if (options.length < 2) {
+        if (!marketRules || marketRules.length < 3) errors.marketRules = "Market Rules must be at least 3 characters";
+
+        if (!optionsData || optionsData.length < 2) {
             errors.options = "Minimum 2 options required";
         }
-        options.forEach((opt, i) => {
+
+        optionsData.forEach((opt, i) => {
             if (!opt.option?.trim()) {
                 errors[`option_${i}`] = "Option required";
             }
@@ -54,13 +77,16 @@ export default function CreateQuestion() {
             if (!opt.multiplier || Number(opt.multiplier) <= 0) {
                 errors[`multiplier_${i}`] = "Valid multiplier required";
             }
+
+            if (!opt.image) {
+                errors[`image_${i}`] = "Image is required";
+            }
         });
 
         setFormErrors(errors);
         return errors;
     };
 
-    // Fetch all matches (live + pre)
     const fetchCategory = async (page = 1, limit = 10, search = "", dateRange = "", filter = "All") => {
         try {
             const services = new Service();
@@ -83,7 +109,6 @@ export default function CreateQuestion() {
 
                 setFilteredCategory(categoryData);
 
-                // First category id safely
                 setFirstCategoryId(categoryData?.[0]?.categoryId || "");
             }
         } catch (error) {
@@ -91,36 +116,44 @@ export default function CreateQuestion() {
         }
     };
 
-    // Submit form
     const handleSubmitting = async (event) => {
         event.preventDefault();
 
         const form = new FormData(event.target);
 
-        const errors = validateForm(form);
+        const errors = validateForm(form, options);
 
-        // Stop if validation errors exist
         if (Object.keys(errors).length > 0) {
             errorToastr("Please fix the errors in the form");
 
             return;
         }
 
-        // Convert FormData → JSON object
-        const formObject = {
-            categoryId: form.get("categoryId"),
+        const formData = new FormData();
 
-            question: form.get("question"),
+        formData.append("categoryId", form.get("categoryId"));
+        formData.append("question", form.get("question"));
+        formData.append("description", form.get("description"));
+        formData.append("marketRules", form.get("marketRules"));
 
-            description: form.get("description"),
+        const cleanOptions = options.map((opt) => ({
+            option: opt.option,
+            multiplier: opt.multiplier,
+            hasImage: !!opt.image,
+        }));
 
-            options: options,
-        };
+        formData.append("options", JSON.stringify(cleanOptions));
+
+        options.forEach((opt) => {
+            if (opt.image) {
+                formData.append("optionImages", opt.image);
+            }
+        });
 
         try {
             const services = new Service();
 
-            const response = await services.post("/admin/question/add", formObject, true);
+            const response = await services.post("/admin/question/add", formData, true, true);
 
             if (response?.status) {
                 successToastr(response.message || "Question added successfully");
@@ -152,7 +185,6 @@ export default function CreateQuestion() {
                         </div>
                         <form onSubmit={handleSubmitting}>
                             <div className="card-body">
-                                {/* Category SELECT (filtered dynamically) */}
                                 <div className="mb-3">
                                     <label htmlFor="categoryId" className="form-label">
                                         Select Category
@@ -161,8 +193,9 @@ export default function CreateQuestion() {
                                         name="categoryId"
                                         id="categoryId"
                                         className="form-control"
-                                        value={firstCategoryId || ""}
-                                        onChange={(e) => setFirstCategoryId(e.target.value)}
+                                        // value={firstCategoryId || ""}
+                                        // onChange={(e) => setFirstCategoryId(e.target.value)}
+                                        defaultValue={firstCategoryId}
                                         required
                                     >
                                         {filteredCategory.length === 0 && <option value="">No Category available</option>}
@@ -193,39 +226,72 @@ export default function CreateQuestion() {
                                 </div>
 
                                 <div className="mb-3">
+                                    <label htmlFor="marketRules" className="form-label">
+                                        Market Rules
+                                    </label>
+                                    <textarea
+                                        className="form-control"
+                                        name="marketRules"
+                                        id="marketRules"
+                                        rows="4"
+                                        maxLength={500}
+                                        placeholder="Enter market rules"
+                                        required
+                                    ></textarea>
+                                </div>
+
+                                <div className="mb-3">
                                     <label className="form-label">Options</label>
 
                                     {options.map((opt, index) => (
-                                        <div key={index} className="d-flex gap-2 mb-2">
-                                            <input
-                                                type="text"
-                                                placeholder="Option"
-                                                className="form-control"
-                                                value={opt.option}
-                                                onChange={(e) => handleOptionChange(index, "option", e.target.value)}
-                                            />
+                                        <div key={index} className="d-flex gap-2 mb-2 flex-column">
+                                            <div className="d-flex gap-2">
+                                                <input
+                                                    type="file"
+                                                    className="form-control"
+                                                    accept=".jpg,.jpeg,.png,.webp"
+                                                    onChange={(e) => handleFileChange(index, e.target.files[0])}
+                                                />
 
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="Multiplier"
-                                                className="form-control"
-                                                min={0}
-                                                value={opt.multiplier}
-                                                onChange={(e) => handleOptionChange(index, "multiplier", e.target.value)}
-                                            />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Option"
+                                                    className="form-control"
+                                                    value={opt.option}
+                                                    onChange={(e) => handleOptionChange(index, "option", e.target.value)}
+                                                />
 
-                                            <button
-                                                type="button"
-                                                className="btn btn-danger"
-                                                onClick={() => removeOption(index)}
-                                                disabled={options.length <= 2}
-                                            >
-                                                ❌
-                                            </button>
-                                            {formErrors.options && <div className="text-danger">{formErrors.options}</div>}
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="Multiplier"
+                                                    className="form-control"
+                                                    min={0}
+                                                    value={opt.multiplier}
+                                                    onChange={(e) => handleOptionChange(index, "multiplier", e.target.value)}
+                                                />
+
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-danger"
+                                                    onClick={() => removeOption(index)}
+                                                    disabled={options.length <= 2}
+                                                >
+                                                    ❌
+                                                </button>
+                                            </div>
+
+                                            {formErrors[`option_${index}`] && <div className="text-danger">{formErrors[`option_${index}`]}</div>}
+
+                                            {formErrors[`multiplier_${index}`] && (
+                                                <div className="text-danger">{formErrors[`multiplier_${index}`]}</div>
+                                            )}
+
+                                            {formErrors[`image_${index}`] && <div className="text-danger">{formErrors[`image_${index}`]}</div>}
                                         </div>
                                     ))}
+
+                                    {formErrors.options && <div className="text-danger">{formErrors.options}</div>}
 
                                     <button type="button" className="btn btn-success mt-2" onClick={addOption}>
                                         + Add Option

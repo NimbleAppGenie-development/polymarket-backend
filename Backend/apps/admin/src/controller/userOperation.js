@@ -11,7 +11,7 @@ const Question = require("@models/question");
 const QuestionOption = require("@models/questionOption");
 const statusCode = require("@utils/statusCodes");
 const UserPredictedQuestion = require("@models/userpredictedquestions");
-const  declareWinners = require( "../services/declareWinners.service")
+const declareWinners = require("../services/declareWinners.service");
 
 module.exports = {
     getStaticsCount: async (req, res, next) => {
@@ -95,9 +95,6 @@ module.exports = {
                     [Op.iLike]: `%${search.trim()}%`,
                 };
             }
-            // =========================
-            // Fetch Rows FIRST
-            // =========================
 
             const rows = await Category.findAll({
                 where: whereQuery,
@@ -111,17 +108,11 @@ module.exports = {
                 raw: true,
             });
 
-            // =========================
-            // Count Separately (Faster)
-            // =========================
-
             const count = await Category.count({
                 where: whereQuery,
             });
 
-            // =========================
             // Format Data
-            // =========================
 
             let enrichedCategories = rows.map((category) => ({
                 categoryId: category.id,
@@ -397,8 +388,8 @@ module.exports = {
                     },
                 ],
             });
-            const totalQuestion = await Question.count()
-            
+            const totalQuestion = await Question.count();
+
             let questionsData = rows.map((q) => ({
                 questionId: q.id,
                 categoryId: q.categoryId,
@@ -434,38 +425,65 @@ module.exports = {
     addQuestion: async (req, res, next) => {
         try {
             const admin = req.user;
-            if (!admin) {
-                // throw new BadRequest(simpleResponse(false, "Admin not found"));
+            const files = req.files || [];
+            let options = [];
+            let { categoryId, question, description, marketRules } = req.body;
+
+            const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+
+            files.forEach((file) => {
+                if (!allowedMimeTypes.includes(file.mimetype)) {
+                    throw new Error("Invalid file type. Only JPG, PNG, WEBP allowed");
+                }
+            });
+
+            if (!categoryId || !question || !description || !marketRules) {
                 return res.status(statusCode.BAD_REQUEST).json({
-                    stutus: false,
+                    status: false,
+                    message: "Required fields missing",
+                });
+            }
+
+            if (!admin) {
+                return res.status(statusCode.BAD_REQUEST).json({
+                    status: false,
                     message: "Admin not found",
                 });
             }
 
-            let { categoryId, question, description, options } = req.body;
+            try {
+                options = JSON.parse(req.body.options || "[]");
+            } catch (err) {
+                options = [];
+            }
 
+            if (!options || !Array.isArray(options) || options.length < 2) {
+                throw new Error("At least 2 options required");
+            }
+
+            // create question
             const newQuestion = await Question.create({
                 categoryId,
                 question,
                 description,
+                marketRules,
                 status: true,
                 isTrending: true,
             });
-            if (!options || !Array.isArray(options) || options.length < 2) {
-                throw new Error("At least 2 options required");
-            }
-            const optionData = options.map((opt) => ({
+
+            const optionData = options.map((opt, index) => ({
                 questionId: newQuestion.id,
                 option: opt.option,
                 multiplier: opt.multiplier,
+                image: files[index] ? files[index].filename : null,
             }));
 
             await QuestionOption.bulkCreate(optionData);
 
             return res.status(statusCode.OK).json(simpleResponse(true, "Question created successfully"));
         } catch (error) {
-            next(error);
             console.log("Add question error : ", error);
+            next(error);
         }
     },
 
@@ -563,7 +581,7 @@ module.exports = {
                     {
                         model: QuestionOption,
                         as: "options",
-                        attributes: ["id", "option", "multiplier"],
+                        attributes: ["id", "option", "multiplier", "image"],
                     },
                 ],
             });
@@ -577,9 +595,11 @@ module.exports = {
                 categoryName: question.category?.name || null,
                 question: question.question,
                 description: question.description,
+                marketRules: question.marketRules,
                 options: question.options.map((opt) => ({
                     option: opt.option,
                     multiplier: opt.multiplier,
+                    image: opt.image,
                 })),
             };
 
@@ -597,6 +617,7 @@ module.exports = {
     editQuestion: async (req, res, next) => {
         try {
             const admin = req.user;
+            const files = req.files || [];
 
             if (!admin) {
                 return res.status(statusCode.BAD_REQUEST).json({
@@ -605,7 +626,15 @@ module.exports = {
                 });
             }
 
-            const { id, categoryId, question, description, options } = req.body;
+            const { id, categoryId, question, description, options, marketRules } = req.body;
+
+            const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+
+            files.forEach((file) => {
+                if (!allowedMimeTypes.includes(file.mimetype)) {
+                    throw new Error("Invalid file type. Only JPG, PNG, WEBP allowed");
+                }
+            });
 
             const questionExists = await Question.findOne({ where: { id } });
 
@@ -616,6 +645,7 @@ module.exports = {
             questionExists.categoryId = categoryId;
             questionExists.question = question;
             questionExists.description = description;
+            questionExists.marketRules = marketRules;
 
             await questionExists.save();
 
@@ -623,15 +653,29 @@ module.exports = {
                 where: { questionId: id },
             });
 
-            if (Array.isArray(options) && options.length > 0) {
-                const formattedOptions = options.map((opt) => ({
+            let parsedOptions = typeof options === "string" ? JSON.parse(options) : options;
+
+            const imageIndexes = req.body.imageIndexes || [];
+
+            const formattedOptions = parsedOptions.map((opt, index) => {
+                let fileIndex = -1;
+
+                if (Array.isArray(imageIndexes)) {
+                    fileIndex = imageIndexes.indexOf(index.toString());
+                } else if (imageIndexes == index) {
+                    fileIndex = 0;
+                }
+
+                return {
                     questionId: id,
                     option: opt.option,
                     multiplier: opt.multiplier,
-                }));
+                    image:
+                        fileIndex !== -1 ? files[fileIndex].filename : typeof opt.image === "string" ? opt.image : null,
+                };
+            });
 
-                await QuestionOption.bulkCreate(formattedOptions);
-            }
+            await QuestionOption.bulkCreate(formattedOptions);
 
             return res.status(statusCode.OK).json(simpleResponse(true, "Question updated successfully"));
         } catch (error) {

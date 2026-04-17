@@ -4,10 +4,12 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { errorToastr, successToastr } from "../utils/toastr.js";
 import { HttpClient } from "../utils/request";
-import { Link } from "react-router";
+// import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import AuthContext from "../utils/auth/AuthContext.jsx";
 import Service from "../services/Http.js";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
     const { user } = useContext(AuthContext);
@@ -20,7 +22,9 @@ export default function Home() {
     const [hovered, setHovered] = useState({ id: null, option: null });
     const [loading, setLoading] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState({});
-    
+    const navigate = useNavigate();
+    const [tradeData, setTradeData] = useState(null);
+    const [selectedOption, setSelectedOption] = useState(null);
     const getMarketList = async () => {
         try {
             setLoading(true);
@@ -402,21 +406,28 @@ export default function Home() {
                                                     const prediction = hasPredicted(item.id);
 
                                                     return (
-                                                        <div className="col-lg-6" key={index}>
-                                                            <div className="politics-main-box">
-                                                                <a href={`/home-detail/${item.id}`}>
-                                                                    <div className="politics-header-box">
-                                                                        <figure>
-                                                                            <img
-                                                                                src={`${import.meta.env.VITE_IMAGE_URL}/public/category/${item.category.image}`}
-                                                                                alt="image"
-                                                                            />
-                                                                        </figure>
-                                                                        <h4 className="text-uppercase">{item.category.name}</h4>
-                                                                    </div>
-                                                                </a>
+                                                        <div
+                                                            className="col-lg-6"
+                                                            key={index}
+                                                            onClick={(e) => {
+                                                                if (e.target.closest(".option-row-parent")) return;
 
-                                                                <h3>{item.description}</h3>
+                                                                navigate(`/home-detail/${item.id}`);
+                                                            }}
+                                                            style={{ cursor: "pointer" }}
+                                                        >
+                                                            <div className="politics-main-box">
+                                                                <div className="politics-header-box">
+                                                                    <figure>
+                                                                        <img
+                                                                            src={`${import.meta.env.VITE_IMAGE_URL}/public/category/${item.category.image}`}
+                                                                            alt="image"
+                                                                        />
+                                                                    </figure>
+                                                                    <h4 className="text-uppercase">{item.category.name}</h4>
+                                                                </div>
+
+                                                                <h3>{item.question}</h3>
                                                                 <p>{item.createdAt}</p>
 
                                                                 {user ? (
@@ -428,7 +439,7 @@ export default function Home() {
                                                                             return (
                                                                                 <div
                                                                                     key={opt.id}
-                                                                                    className={`option-row ${alreadySelected ? "active" : ""}`}
+                                                                                    className={`option-row-parent ${alreadySelected ? "active" : ""}`}
                                                                                     onClick={() => {
                                                                                         const alreadyPredicted = hasPredicted(item.id);
 
@@ -441,20 +452,30 @@ export default function Home() {
                                                                                             return;
                                                                                         }
 
-                                                                                        setSelectedData({
+                                                                                        setTradeData({
                                                                                             userId: user.id,
                                                                                             categoryId: item.category?.id,
                                                                                             questionId: item.id,
-                                                                                            selectedOption: opt.id,
+                                                                                            question: item.question,
+                                                                                            options: item.options,
                                                                                         });
+
+                                                                                        setSelectedOption(opt.id); 
 
                                                                                         setShowPopup(true);
                                                                                     }}
                                                                                 >
+                                                                                    <div className="option-row">
+                                                                                        <img
+                                                                                            src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
+                                                                                            alt={opt.option}
+                                                                                            className="option-img"
+                                                                                        />
+                                                                                    </div>
                                                                                     <span className="option-text">{opt.option}</span>
 
                                                                                     <span className="option-multiplier">
-                                                                                        {opt.multiplier || "1x"}
+                                                                                        {opt.multiplier || "1x"}x
                                                                                     </span>
 
                                                                                     <span className="option-percentage">{opt.percentage || 0}%</span>
@@ -483,61 +504,82 @@ export default function Home() {
                                             </div>
                                         </div>
                                     ))}
-                                    {showPopup && (
-                                        <div className="modal fade show d-block">
+                                    {showPopup && tradeData && (
+                                        <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
                                             <div className="modal-dialog modal-dialog-centered modal-md">
-                                                <div className="modal-content">
-                                                    <div className="modal-header">
-                                                        <h5 className="modal-title">Enter Amount</h5>
-                                                        <button className="btn-close" onClick={() => setShowPopup(false)}></button>
-                                                    </div>
+                                                <div className="modal-content p-3">
+                                                    {/* Title */}
+                                                    <div className="modal-header border-0">
+                                                        <div>
+                                                            {/* <h5 className="modal-title">{tradeData.question}</h5> */}
+                                                            <h5 className="modal-title">{tradeData.options?.map((opt) => opt.option).join(" / ")}</h5>
+                                                            <small className="text-muted">Select an option to trade</small>
+                                                        </div>
 
-                                                    <div className="modal-body">
-                                                        <form
-                                                            onSubmit={(e) => {
-                                                                e.preventDefault();
-
-                                                                if (!amount || amount <= 0) {
-                                                                    alert("Enter valid amount");
-                                                                    return;
-                                                                }
-
-                                                                firstOption(
-                                                                    selectedData.userId,
-                                                                    selectedData.categoryId,
-                                                                    selectedData.questionId,
-                                                                    selectedData.selectedOption,
-                                                                    amount,
-                                                                );
-
+                                                        <button
+                                                            className="btn-close"
+                                                            onClick={() => {
                                                                 setShowPopup(false);
-                                                                setAmount("");
+                                                                setTradeData(null);
+                                                                setSelectedOption(null);
                                                             }}
-                                                        >
-                                                            <div className="login-form-parent">
-                                                                <div className="form-group">
-                                                                    <div className="mb-3">
-                                                                        <label>Amount</label>
-                                                                        <input
-                                                                            type="number"
-                                                                            className="form-control"
-                                                                            placeholder="Enter amount"
-                                                                            value={amount}
-                                                                            step={1}
-                                                                            min={1}
-                                                                            onChange={(e) => setAmount(e.target.value)}
-                                                                            required
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="form-group">
-                                                                <button className="btn btn-primaryx" type="submit">
-                                                                    Confirm
-                                                                </button>
-                                                            </div>
-                                                        </form>
+                                                        />
                                                     </div>
+
+                                                    {/* OPTIONS LIST (IMPORTANT PART) */}
+                                                    <div className="d-flex flex-column gap-2 mb-3">
+                                                        {tradeData.options.map((opt) => (
+                                                            <div
+                                                                key={opt.id}
+                                                                onClick={() => setSelectedOption(opt.id)}
+                                                                style={{
+                                                                    padding: "12px",
+                                                                    border: "1px solid #ddd",
+                                                                    borderRadius: "10px",
+                                                                    cursor: "pointer",
+                                                                    background: selectedOption === opt.id ? "#e6fff2" : "#fff",
+                                                                    borderColor: selectedOption === opt.id ? "#00c853" : "#ddd",
+                                                                }}
+                                                            >
+                                                                <strong>{opt.option}</strong>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Amount */}
+                                                    <input
+                                                        type="number"
+                                                        className="form-control mb-3"
+                                                        placeholder="Enter amount"
+                                                        value={amount}
+                                                        min={1}
+                                                        onChange={(e) => setAmount(e.target.value)}
+                                                    />
+
+                                                    {/* Confirm */}
+                                                    <button
+                                                        className="btn btn-success w-100"
+                                                        disabled={!selectedOption}
+                                                        onClick={() => {
+                                                            if (!amount) return errorToastr("Enter amount");
+                                                            if (!selectedOption) return errorToastr("Select option");
+
+                                                            firstOption(
+                                                                tradeData.userId,
+                                                                tradeData.categoryId,
+                                                                tradeData.questionId,
+                                                                selectedOption,
+                                                                amount,
+                                                            );
+
+                                                            setShowPopup(false);
+                                                            setAmount("");
+                                                            setTradeData(null);
+                                                            setSelectedOption(null);
+                                                        }}
+                                                    >
+                                                        Confirm
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>

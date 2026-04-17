@@ -24,7 +24,7 @@ module.exports = {
                     {
                         model: QuestionOptions,
                         as: "options",
-                        attributes: ["id", "questionId", "option", "multiplier", "resultStatus"],
+                        attributes: ["id", "questionId", "option", "multiplier", "resultStatus", "image"],
                     },
                 ],
             });
@@ -76,6 +76,7 @@ module.exports = {
                     status: plainItem.status,
                     category: plainItem.category,
                     options: optionsWithPercentage,
+                    image: plainItem.image,
                     createdAt: moment(plainItem.createdAt).format("MM/DD/YYYY hh:mm A"),
                 };
             });
@@ -87,7 +88,7 @@ module.exports = {
         }
     },
 
-    getMarketDetail: async (req, res, next) => {
+    /* getMarketDetail: async (req, res, next) => {
         try {
             const { id } = req.params;
             if (!id) {
@@ -110,7 +111,7 @@ module.exports = {
                     {
                         model: QuestionOptions,
                         as: "options",
-                        attributes: ["id", "questionId", "option", "multiplier", "resultStatus"],
+                        attributes: ["id", "questionId", "option", "multiplier", "resultStatus","image"],
                     },
                 ],
             });
@@ -121,6 +122,7 @@ module.exports = {
                     id: data.id,
                     question: data.question,
                     description: data.description,
+                    marketRules: data.marketRules,
                     status: data.status,
 
                     category: data.category
@@ -137,6 +139,7 @@ module.exports = {
                               option: opt.option,
                               multiplier: opt.multiplier,
                               resultStatus: opt.resultStatus,
+                              image: opt.image
                           }))
                         : [],
 
@@ -149,8 +152,89 @@ module.exports = {
             console.log(error);
             next(error);
         }
-    },
+    }, */
 
+    getMarketDetail: async (req, res, next) => {
+        try {
+            const { id } = req.params;
+
+            if (!id) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "ID is required",
+                });
+            }
+
+            const data = await Question.findOne({
+                where: { id },
+                include: [
+                    {
+                        model: Category,
+                        as: "category",
+                        attributes: ["id", "name", "image"],
+                    },
+                    {
+                        model: QuestionOptions,
+                        as: "options",
+                        attributes: ["id", "questionId", "option", "multiplier", "resultStatus", "image"],
+                    },
+                ],
+            });
+
+            if (!data) {
+                return res.status(statusCodes.OK).json(successResponse({}, "No data found"));
+            }
+
+            // ✅ prediction count
+            const predictions = await UserPredictedQuestion.findAll({
+                attributes: ["selectedOptionId", [Sequelize.fn("COUNT", Sequelize.col("selectedOptionId")), "count"]],
+                group: ["selectedOptionId"],
+                raw: true,
+            });
+
+            const countMap = {};
+            predictions.forEach((p) => {
+                countMap[p.selectedOptionId] = parseInt(p.count);
+            });
+
+            // ✅ total votes
+            const totalVotes = data.options.reduce((sum, opt) => {
+                return sum + (countMap[opt.id] || 0);
+            }, 0);
+
+            // ✅ options with %
+            const optionsWithPercentage = data.options.map((opt) => {
+                const count = countMap[opt.id] || 0;
+
+                return {
+                    id: opt.id,
+                    option: opt.option,
+                    multiplier: opt.multiplier,
+                    resultStatus: opt.resultStatus,
+                    image: opt.image,
+                    count,
+                    percentage: totalVotes ? ((count / totalVotes) * 100).toFixed(0) : 0,
+                };
+            });
+
+            const result = {
+                id: data.id,
+                question: data.question,
+                description: data.description,
+                marketRules: data.marketRules,
+                status: data.status,
+                category: data.category,
+                options: optionsWithPercentage,
+                createdAt: moment(data.createdAt).format("MM/DD/YYYY HH:mm:A"),
+            };
+
+            return res.status(statusCodes.OK).json(successResponse(result, "Market fetched successfully"));
+        } catch (error) {
+            console.log(error);
+            next(error);
+        }
+    },
+    
     getTrendingList: async (req, res, next) => {
         try {
             const trendingList = await Question.findAll({

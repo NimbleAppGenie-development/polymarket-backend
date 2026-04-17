@@ -12,7 +12,14 @@ module.exports = {
             },
 
             question: Sequelize.STRING,
-            description: Sequelize.TEXT,
+            description: {
+                type: Sequelize.TEXT,
+                allowNull: true,
+            },
+            marketRules: {
+                type: Sequelize.TEXT,
+                allowNull: true,
+            },
 
             status: Sequelize.BOOLEAN,
             isTrending: {
