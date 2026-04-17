@@ -37,6 +37,11 @@ Question.init(
             defaultValue: false,
             allowNull: false,
         },
+        showInSlider: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            allowNull: false,
+        },
     },
     {
         sequelize,

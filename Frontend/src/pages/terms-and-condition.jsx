@@ -6,14 +6,14 @@ export default function TermsAndCondition() {
             <div className="container">
                 <div className={tncCss["same-content"]}>
                     <p>
-                        Welcome to <strong>Poly Market!</strong> These Terms and Conditions govern your use of our app and services. By accessing
-                        or using Poly Market, you agree to comply with these terms. If you do not agree, please do not use our platform.
+                        Welcome to <strong>Target!</strong> These Terms and Conditions govern your use of our app and services. By accessing
+                        or using Target, you agree to comply with these terms. If you do not agree, please do not use our platform.
                     </p>
 
                     <h4>01. Acceptance of Terms</h4>
                     <ul>
                         <li>
-                            <img src="/img/list-icon.svg" alt="icon" /> By creating an account, accessing, or using Poly Market, you agree to be
+                            <img src="/img/list-icon.svg" alt="icon" /> By creating an account, accessing, or using Target, you agree to be
                             bound by these Terms and our Privacy Policy.
                         </li>
                         <li>
@@ -32,12 +32,12 @@ export default function TermsAndCondition() {
                             account.
                         </li>
                         <li>
-                            <img src="/img/list-icon.svg" alt="icon" /> Poly Market reserves the right to suspend or terminate accounts that
+                            <img src="/img/list-icon.svg" alt="icon" /> Target reserves the right to suspend or terminate accounts that
                             violate these terms.
                         </li>
                     </ul>
                     <h4>03. Acceptable Use</h4>
-                    <p>By using Poly Market, you agree:</p>
+                    <p>By using Target, you agree:</p>
                     <ul>
                         <li>
                             <img src="/img/list-icon.svg" alt="icon" /> Not to engage in harassment, hate speech, or harmful behavior.
@@ -56,17 +56,17 @@ export default function TermsAndCondition() {
                     <ul>
                         <li>
                             <img src="/img/list-icon.svg" alt="icon" /> You retain ownership of any content you post. However, by posting, you grant
-                            Poly Market a non-exclusive, royalty-free license to use, display, and share your content within the platform.
+                            Target a non-exclusive, royalty-free license to use, display, and share your content within the platform.
                         </li>
                         <li>
-                            <img src="/img/list-icon.svg" alt="icon" /> Poly Market reserves the right to remove any content that violates these
+                            <img src="/img/list-icon.svg" alt="icon" /> Target reserves the right to remove any content that violates these
                             Terms.
                         </li>
                     </ul>
                     <h4>05. Safety & Community Guidelines</h4>
                     <ul>
                         <li>
-                            <img src="/img/list-icon.svg" alt="icon" /> Users should exercise caution when meeting others in person. Poly Market
+                            <img src="/img/list-icon.svg" alt="icon" /> Users should exercise caution when meeting others in person. Target
                             is not responsible for any interactions outside the app.
                         </li>
                         <li>
@@ -83,7 +83,7 @@ export default function TermsAndCondition() {
                     <h4>07. Limitation of Liability</h4>
                     <ul>
                         <li>
-                            <img src="/img/list-icon.svg" alt="icon" /> Poly Market is provided "as is," and we make no guarantees about uptime,
+                            <img src="/img/list-icon.svg" alt="icon" /> Target is provided "as is," and we make no guarantees about uptime,
                             availability, or uninterrupted service.
                         </li>
                         <li>

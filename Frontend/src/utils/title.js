@@ -5,12 +5,12 @@ export default function useTitle(title, setSuffix = true, prevailOnUnmount = fal
     const defaultTitle = useRef(document.title);
 
     useEffect(() => {
-        document.title = `${title} ${setSuffix ? "| Poly Market ⚡" : ""}`;
+        document.title = `${title} ${setSuffix ? "| Target ⚡" : ""}`;
     }, [title, setSuffix]);
 
     useEffect(() => {
         if (prevailOnUnmount) {
-            document.title = `${defaultTitle.current} | Poly Market ⚡`;
+            document.title = `${defaultTitle.current} | Target ⚡`;
         }
     }, [prevailOnUnmount]);
 }

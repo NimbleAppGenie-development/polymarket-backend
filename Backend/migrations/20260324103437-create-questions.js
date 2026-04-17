@@ -27,6 +27,11 @@ module.exports = {
                 defaultValue: false,
                 allowNull: false
             },
+            showInSlider: {
+                type: Sequelize.BOOLEAN,
+                defaultValue: false,
+                allowNull: false
+            },
             
             createdAt: Sequelize.DATE,
             updatedAt: Sequelize.DATE

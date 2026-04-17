@@ -249,7 +249,7 @@ export default function Home() {
                                                                 </div>
                                                             </div>
                                                             <div className="col-lg-6">
-                                                                <div id="chartContainer" style={{ height: 370, width: "100%" }}></div>
+                                                                <div id="chartContainer" style={{ height: "370px", width: "100%" }}></div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -378,21 +378,18 @@ export default function Home() {
                                             <div className="trading-content-right-box-inner" key={item.id || index}>
                                                 <div className="trading-question-left">
                                                     <span>{index + 1}.</span>
-
-                                                    <p className="date-text">{item.createdAt}</p>
-
                                                     <h3>
                                                         <a href={item.link || "#"}>{item.question}</a>
                                                     </h3>
+                                                    <p className="date-text">{item.createdAt}</p>
                                                 </div>
-
                                                 <div className="trading-question-right"></div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-lg-8">
+                            <div className="col-lg-12">
                                 <div className="trending-main-parent politics-main-content-parent">
                                     {Object.entries(groupedData || {}).map(([categoryName, items]) => (
                                         <div key={categoryName}>
@@ -407,7 +404,7 @@ export default function Home() {
 
                                                     return (
                                                         <div
-                                                            className="col-lg-6"
+                                                            className="col-lg-4"
                                                             key={index}
                                                             onClick={(e) => {
                                                                 if (e.target.closest(".option-row-parent")) return;
@@ -469,14 +466,14 @@ export default function Home() {
                                                                                             setShowPopup(true);
                                                                                         }}
                                                                                     >
-                                                                                        <div className="option-row">
+                                                                                        <div className="option-row flex-parent">
                                                                                             <img
                                                                                                 src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
                                                                                                 alt={opt.option}
                                                                                                 className="option-img"
                                                                                             />
+                                                                                            <span className="option-text">{opt.option}</span>
                                                                                         </div>
-                                                                                        <span className="option-text">{opt.option}</span>
 
                                                                                         <span className="option-multiplier">
                                                                                             {opt.multiplier || "1x"}x
@@ -592,94 +589,11 @@ export default function Home() {
                                     )}
                                 </div>
                             </div>
-                            {/* <div className="col-lg-4">
-                                <div className="trending-main-parent margin-top-default">
-                                    <h2>
-                                        New <img src="img/rightarrow.svg" alt="icon" />
-                                    </h2>
-                                    <div className="trading-content-right-box">
-                                        <div className="trading-content-right-box-inner">
-                                            <div className="trading-question-left">
-                                                <span>1.</span>
-                                                <h3>
-                                                    <a href="#">How long will the government shutdown last?</a>
-                                                </h3>
-                                                <p>At least 60 days</p>
-                                            </div>
-                                            <div className="trading-question-right">
-                                                <h3>50 %</h3>
-                                                <a href="#">
-                                                    <img src="img/arrow-top.svg" alt="icon" /> 2
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div className="trading-content-right-box-inner">
-                                            <div className="trading-question-left">
-                                                <span>2.</span>
-                                                <h3>
-                                                    <a href="#">When will DHS be funded again?</a>
-                                                </h3>
-                                                <p>Before Apr 1, 2026</p>
-                                            </div>
-                                            <div className="trading-question-right">
-                                                <h3>50 %</h3>
-                                                <a href="#">
-                                                    <img src="img/arrow-top.svg" alt="icon" /> 2
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div className="trading-content-right-box-inner">
-                                            <div className="trading-question-left">
-                                                <span>3.</span>
-                                                <h3>
-                                                    <a href="#">Who will win the 2026 Nepal House of Representatives election?</a>
-                                                </h3>
-                                                <p>RSP</p>
-                                            </div>
-                                            <div className="trading-question-right">
-                                                <h3>50 %</h3>
-                                                <a href="#">
-                                                    <img src="img/arrow-top.svg" alt="icon" /> 2
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div className="trading-content-right-box-inner">
-                                            <div className="trading-question-left">
-                                                <span>4.</span>
-                                                <h3>
-                                                    <a href="#">How long will the government shutdown last?</a>
-                                                </h3>
-                                                <p>At least 60 days</p>
-                                            </div>
-                                            <div className="trading-question-right">
-                                                <h3>50 %</h3>
-                                                <a href="#">
-                                                    <img src="img/arrow-top.svg" alt="icon" /> 2
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div className="trading-content-right-box-inner">
-                                            <div className="trading-question-left">
-                                                <span>5.</span>
-                                                <h3>
-                                                    <a href="#">How long will the government shutdown last?</a>
-                                                </h3>
-                                                <p>At least 60 days</p>
-                                            </div>
-                                            <div className="trading-question-right">
-                                                <h3>50 %</h3>
-                                                <a href="#">
-                                                    <img src="img/arrow-top.svg" alt="icon" /> 2
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> */}
                         </div>
                     </div>
                 </div>
             </section>
+
             <Footer />
         </div>
     );

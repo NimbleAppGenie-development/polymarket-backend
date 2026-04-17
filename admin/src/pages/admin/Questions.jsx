@@ -164,6 +164,22 @@ export default function Questions() {
             errorToastr(error?.message || "Failed to update trending");
         }
     };
+    const updateShowInSlider = async (id) => {
+        try {
+            const services = new Service();
+            const response = await services.get(`/admin/question/show-in-slider/${id}`, {}, true);
+            if (response?.status) {
+                successToastr(response.message || "Slider updated successfully");
+                await fetchQuestions();
+            } else {
+                errorToastr(response?.message || "Failed to update slider");
+            }
+        } catch (error) {
+            console.error("UPDATE QUESTION SLIDER ERROR:", error);
+
+            errorToastr(error?.message || "Failed to update slider");
+        }
+    };
 
     const createQuestion = () => {
         window.location.href = "/question/add";
@@ -247,6 +263,7 @@ export default function Questions() {
                                             <th>Description</th>
                                             <th>Status</th>
                                             <td>Trending</td>
+                                            <td>Show In Slider</td>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -299,8 +316,16 @@ export default function Questions() {
                                                 <td>
                                                     <input
                                                         type="checkbox"
-                                                        checked={item.isTrending === true || item.isTrending === "true"} // handle boolean or string
+                                                        checked={item.isTrending === true || item.isTrending === "true"} 
                                                         onChange={() => updateTrending(item.questionId)}
+                                                        style={{ cursor: "pointer", width: "20px", height: "20px" }}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={item.showInSlider === true || item.showInSlider === "true"} 
+                                                        onChange={() => updateShowInSlider(item.questionId)}
                                                         style={{ cursor: "pointer", width: "20px", height: "20px" }}
                                                     />
                                                 </td>
@@ -340,7 +365,7 @@ export default function Questions() {
                                     <th>Description</th>
                                     <th>Status</th>
                                     <th>Trending</th>
-                                    <th>Show in Slider</th>
+                                    <th>Show In Slider</th>
                                     <th>Result status</th>
                                     <th>Currect option</th>
                                     <th>Action</th>
@@ -393,8 +418,8 @@ export default function Questions() {
                                             <td>
                                                 <input
                                                     type="checkbox"
-                                                    checked={item.trending}
-                                                    onChange={() => updateTrending(item.questionId)}
+                                                    checked={item.showInSlider}
+                                                    onChange={() => updateShowInSlider(item.questionId)}
                                                     style={{ cursor: "pointer", width: "20px", height: "20px" }}
                                                 />
                                             </td>

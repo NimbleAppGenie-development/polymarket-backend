@@ -10,7 +10,7 @@ import "../assets/css/newsletter/media.css";
 import { useNavigate } from "react-router";
 
 export default function NewsLetter() {
-    useTitle("Poly Market", false);
+    useTitle("Target", false);
     const [stylesLoaded, setStylesLoaded] = useState(false);
     const naviagate = useNavigate();
 

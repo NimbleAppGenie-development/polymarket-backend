@@ -6,12 +6,12 @@ export default function PrivacyPolicy() {
             <div className="container">
                 <div className={privacypolicycss["same-content"]}>
                     <p>
-                        Welcome to <strong>Poly Market!</strong> Your privacy is important to us. This Privacy Policy explains how we collect,
+                        Welcome to <strong>Target!</strong> Your privacy is important to us. This Privacy Policy explains how we collect,
                         use, and protect your personal data when you use our app and services.
                     </p>
 
                     <h4>01. Information We Collect</h4>
-                    <p>When you use My Poly Market, we may collect the following types of information:</p>
+                    <p>When you use My Target, we may collect the following types of information:</p>
                     <h5>Personal Information You Provide</h5>
                     <ul>
                         <li>
@@ -50,7 +50,7 @@ export default function PrivacyPolicy() {
                     <p>We use the collected data to:</p>
                     <ul>
                         <li>
-                            <img src="/img/list-icon.svg" alt="icon" /> Provide and improve Poly Market services.
+                            <img src="/img/list-icon.svg" alt="icon" /> Provide and improve Target services.
                         </li>
                         <li>
                             <img src="/img/list-icon.svg" alt="icon" /> Personalize your experience and match you with relevant users.
@@ -112,7 +112,7 @@ export default function PrivacyPolicy() {
                     <h4>06. Children's Privacy</h4>
                     <ul>
                         <li>
-                            <img src="/img/list-icon.svg" alt="icon" /> Poly Market is not intended for users under the age of 18 (or the minimum
+                            <img src="/img/list-icon.svg" alt="icon" /> Target is not intended for users under the age of 18 (or the minimum
                             age in your country).
                         </li>
                         <li>
@@ -124,7 +124,7 @@ export default function PrivacyPolicy() {
                     <h4>07. Third-Party Links & Services</h4>
                     <ul>
                         <li>
-                            <img src="/img/list-icon.svg" alt="icon" /> Poly Market may contain links to third-party websites or services.
+                            <img src="/img/list-icon.svg" alt="icon" /> Target may contain links to third-party websites or services.
                         </li>
                         <li>
                             <img src="/img/list-icon.svg" alt="icon" /> We are not responsible for their privacy practices. Please review their

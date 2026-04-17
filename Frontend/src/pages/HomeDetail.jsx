@@ -251,26 +251,17 @@ export default function Home() {
                                                     <div className="center-box">
                                                         <p>Chance</p>
                                                     </div>
-                                                    <div>
+                                                    <div className="main-box-inner-details-box">
                                                         {filterOptions(marketData?.options).map((opt) => {
                                                             return (
                                                                 <div
                                                                     key={opt.id}
-                                                                    style={{
-                                                                        display: "flex",
-                                                                        alignItems: "center",
-                                                                        justifyContent: "space-between",
-                                                                        border: "1px solid #ddd",
-                                                                        padding: "10px",
-                                                                        borderRadius: "8px",
-                                                                        marginBottom: "8px",
-                                                                    }}
-                                                                >
+                                                                    >
                                                                     <span>{opt.option}</span>
 
                                                                     <span>{opt.multiplier}x</span>
 
-                                                                    <div style={{ display: "flex", gap: "15px" }}>
+                                                                    <div className="counter-box-btn">
                                                                         <span>{opt.percentage}%</span>
                                                                     </div>
                                                                 </div>

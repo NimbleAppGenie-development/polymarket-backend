@@ -402,6 +402,7 @@ module.exports = {
                 options: q.options || [],
                 status: q.status,
                 trending: q.isTrending,
+                showInSlider:q.showInSlider,
                 createdAt: q.createdAt,
             }));
 
@@ -472,6 +473,7 @@ module.exports = {
                 marketRules,
                 status: true,
                 isTrending: true,
+                showInSlider: true
             });
 
             const optionData = options.map((opt, index) => ({
@@ -561,6 +563,39 @@ module.exports = {
             next(error);
         }
     },
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
+    updateShowInSlider: async (req, res, next) => {
+        try {
+            const admin = req.user;
+            if (!admin) {
+                return res.status(statusCode.BAD_REQUEST).json({
+                    stutus: false,
+                    message: "Admin not found",
+                });
+            }
+
+            const { id } = req.params;
+            const question = await Question.findOne({ where: { id } });
+            if (!question) {
+                return res.status(statusCode.NOT_FOUND).json({
+                    stutus: false,
+                    message: "Question not found",
+                });
+            }
+
+            question.showInSlider = !question.showInSlider;
+            await question.save();
+
+            return res.status(statusCode.OK).json(simpleResponse(true, "Question slider update successfully"));
+        } catch (error) {
+            next(error);
+        }
+    },
+    
 
     /**
      * @param {import('express').Request} req
@@ -784,15 +819,6 @@ module.exports = {
 
             await QuestionOption.update({ resultStatus: false }, { where: { questionId } });
 
-            /* await QuestionOption.update(
-                { resultStatus: true },
-                {
-                    where: {
-                        id: optionId,
-                        questionId,
-                    },
-                },
-            ); */
             if (optionId !== NONE_OPTION_ID) {
                 await QuestionOption.update(
                     { resultStatus: true },

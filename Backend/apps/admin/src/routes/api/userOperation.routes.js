@@ -17,6 +17,7 @@ const {
     addQuestion,
     updateQuestionStatus,
     updateQuestionTrending,
+    updateShowInSlider,
     getQuestionById,
     editQuestion,
     deleteQuestion,
@@ -62,6 +63,7 @@ router.route("/question/add").post(isAuthenticated,upload("question").array("opt
 
 router.route("/question/update-status/:id").get(isAuthenticated, updateQuestionStatus).all(methodNotAllowed);
 router.route("/question/update-trending/:id").get(isAuthenticated, updateQuestionTrending).all(methodNotAllowed);
+router.route("/question/show-in-slider/:id").get(isAuthenticated, updateShowInSlider).all(methodNotAllowed);
 
 router.route("/questionById/:id").get(isAuthenticated, getQuestionById).all(methodNotAllowed);
 router.route("/question/winner/:id").get(isAuthenticated, getQuestionForWinner).all(methodNotAllowed);
