@@ -20,9 +20,9 @@ export default function AddCategory() {
 
         // Image validations
         const image = formData.get("image");
-        if (!image || image.size === 0) errors.image = "Please upload Team A image.";
-        else if (!allowedImageTypes.includes(image.type)) errors.image = "Invalid Team A image format. Only JPG, PNG, or WEBP allowed.";
-        else if (image.size > 2 * 1024 * 1024) errors.image = "Team A image size must not exceed 2MB.";
+        if (!image || image.size === 0) errors.image = "Please upload image.";
+        else if (!allowedImageTypes.includes(image.type)) errors.image = "Invalid image format. Only JPG, PNG, or WEBP allowed.";
+        else if (image.size > 2 * 1024 * 1024) errors.image = "Image size must not exceed 2MB.";
 
         setFormErrors(errors);
         return errors;

@@ -1,5 +1,5 @@
 // import privacypolicycss from "../assets/css/static-pages/privacy-policy.module.css";
-import { useContext, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { errorToastr, successToastr } from "../utils/toastr.js";
@@ -25,6 +25,7 @@ export default function Home() {
     const navigate = useNavigate();
     const [tradeData, setTradeData] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
+
     const getMarketList = async () => {
         try {
             setLoading(true);
@@ -381,7 +382,7 @@ export default function Home() {
                                                     <h3>
                                                         <a href={item.link || "#"}>{item.question}</a>
                                                     </h3>
-                                                    <p className="date-text">{item.createdAt}</p>
+                                                    {/* <p className="date-text">{item.createdAt}</p> */}
                                                 </div>
                                                 <div className="trading-question-right"></div>
                                             </div>
@@ -425,7 +426,7 @@ export default function Home() {
                                                                 </div>
 
                                                                 <h3>{item.question}</h3>
-                                                                <p>{item.createdAt}</p>
+                                                                {/* <p>{item.createdAt}</p> */}
 
                                                                 {user ? (
                                                                     <div className="politics-btn-box d-flex flex-column">
@@ -487,17 +488,33 @@ export default function Home() {
                                                                             })}
                                                                     </div>
                                                                 ) : (
-                                                                    <div className="politics-btn-box">
-                                                                        {item.options?.map((opt) => (
-                                                                            <button
-                                                                                key={opt.id}
-                                                                                className="btn option-btn"
-                                                                                data-bs-toggle="modal"
-                                                                                data-bs-target="#exampleModal"
-                                                                            >
-                                                                                {opt.option}
-                                                                            </button>
-                                                                        ))}
+                                                                    <div className="politics-btn-box d-flex flex-column">
+                                                                        {item.options
+                                                                            ?.filter((opt) => opt.option !== "None of the Above")
+                                                                            .map((opt) => (
+                                                                                <div
+                                                                                    key={opt.id}
+                                                                                    className="option-row-parent"
+                                                                                    data-bs-toggle="modal"
+                                                                                    data-bs-target="#exampleModal"
+                                                                                >
+                                                                                    <div className="option-row flex-parent">
+                                                                                        <img
+                                                                                            src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
+                                                                                            alt={opt.option}
+                                                                                            className="option-img"
+                                                                                        />
+
+                                                                                        <span className="option-text">{opt.option}</span>
+                                                                                    </div>
+
+                                                                                    <span className="option-multiplier">
+                                                                                        {opt.multiplier || "1x"}x
+                                                                                    </span>
+
+                                                                                    <span className="option-percentage">{opt.percentage || 0}%</span>
+                                                                                </div>
+                                                                            ))}
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -514,7 +531,6 @@ export default function Home() {
                                                     {/* Title */}
                                                     <div className="modal-header border-0">
                                                         <div>
-                                                            {/* <h5 className="modal-title">{tradeData.question}</h5> */}
                                                             <h5 className="modal-title">{tradeData.options?.map((opt) => opt.option).join(" / ")}</h5>
                                                             <small className="text-muted">Select an option to trade</small>
                                                         </div>
@@ -529,7 +545,6 @@ export default function Home() {
                                                         />
                                                     </div>
 
-                                                    {/* OPTIONS LIST (IMPORTANT PART) */}
                                                     <div className="d-flex flex-column gap-2 mb-3">
                                                         {tradeData.options.map((opt) => (
                                                             <div
@@ -559,7 +574,6 @@ export default function Home() {
                                                         onChange={(e) => setAmount(e.target.value)}
                                                     />
 
-                                                    {/* Confirm */}
                                                     <button
                                                         className="btn btn-success w-100"
                                                         disabled={!selectedOption}

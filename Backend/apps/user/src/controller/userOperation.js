@@ -117,7 +117,7 @@ module.exports = {
             res.json(
                 successResponse(
                     {
-                        userId: newUser.id,
+                        id: newUser.id,
                         name: newUser.name,
                         email: newUser.email,
                         tokens: { accessToken, refreshToken },

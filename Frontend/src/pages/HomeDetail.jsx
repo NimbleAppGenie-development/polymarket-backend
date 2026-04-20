@@ -8,6 +8,8 @@ import { Link, useParams } from "react-router";
 import AuthContext from "../utils/auth/AuthContext.jsx";
 import Swal from "sweetalert2";
 import Service from "../services/Http.js";
+import { useNavigate } from "react-router-dom";
+
 export default function Home() {
     const { user } = useContext(AuthContext);
     const [marketData, setMarketData] = useState([]);
@@ -25,6 +27,7 @@ export default function Home() {
     const [tradeData, setTradeData] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
     const [open, setOpen] = useState(true);
+    const navigate = useNavigate();
 
     const getMarketData = async () => {
         try {
@@ -254,9 +257,7 @@ export default function Home() {
                                                     <div className="main-box-inner-details-box">
                                                         {filterOptions(marketData?.options).map((opt) => {
                                                             return (
-                                                                <div
-                                                                    key={opt.id}
-                                                                    >
+                                                                <div key={opt.id}>
                                                                     <span>{opt.option}</span>
 
                                                                     <span>{opt.multiplier}x</span>
@@ -308,13 +309,14 @@ export default function Home() {
                                                 alt="image"
                                             />
                                         </figure>
-                                        {/* <h6>{marketData?.question}</h6> */}
-                                        <h5>{marketData?.question}</h5>
+                                        <h5>{marketData?.category?.name}</h5>
                                     </div>
+                                    <h3>{marketData?.question}</h3>
 
                                     <div className="details-page-tbaing-right">
                                         <ul>
                                             {user ? (
+                                                /* ✅ LOGGED IN USER */
                                                 <div className="politics-btn-box d-flex flex-column">
                                                     {filterOptions(marketData?.options).map((opt) => {
                                                         const alreadySelected = String(prediction?.selectedOptionId) === String(opt.id);
@@ -344,7 +346,6 @@ export default function Home() {
                                                                     });
 
                                                                     setSelectedOption(opt.id);
-
                                                                     setShowPopup(true);
                                                                 }}
                                                             >
@@ -370,43 +371,31 @@ export default function Home() {
                                                     })}
                                                 </div>
                                             ) : (
-                                                <div className="politics-btn-box">
-                                                    {filterOptions(marketData?.options).map((opt) => {
-                                                        const alreadySelected = String(prediction?.selectedOptionId) === String(opt.id);
+                                                /* NOT LOGGED IN USER */
+                                                <div className="politics-btn-box d-flex flex-column">
+                                                    {filterOptions(marketData?.options).map((opt) => (
+                                                        <div
+                                                            key={opt.id}
+                                                            className="option-row-parent"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#exampleModal"
+                                                            onClick={(e) => e.stopPropagation()} // ⭐ IMPORTANT
+                                                        >
+                                                            <div className="option-row flex-parent">
+                                                                <img
+                                                                    src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
+                                                                    alt={opt.option}
+                                                                    className="option-img"
+                                                                />
 
-                                                        return (
-                                                            <button
-                                                                key={opt.id}
-                                                                className={`btn ${alreadySelected ? "active" : ""}`}
-                                                                onClick={() => {
-                                                                    const alreadyPredicted = hasPredicted(marketData.id);
+                                                                <span className="option-text">{opt.option}</span>
+                                                            </div>
 
-                                                                    if (alreadyPredicted) {
-                                                                        Swal.fire({
-                                                                            icon: "warning",
-                                                                            title: "Already Selected",
-                                                                            text: "You have already predicted on this question",
-                                                                        });
-                                                                        return;
-                                                                    }
+                                                            <span className="option-multiplier">{opt.multiplier || "1x"}x</span>
 
-                                                                    setTradeData({
-                                                                        userId: user.id,
-                                                                        categoryId: marketData.category?.id,
-                                                                        questionId: marketData.id,
-                                                                        question: marketData.question,
-                                                                        options: filterOptions(marketData.options),
-                                                                    });
-
-                                                                    setSelectedOption(opt.id);
-
-                                                                    setShowPopup(true);
-                                                                }}
-                                                            >
-                                                                {opt.option}
-                                                            </button>
-                                                        );
-                                                    })}
+                                                            <span className="option-percentage">{opt.percentage || 0}%</span>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             )}
                                         </ul>

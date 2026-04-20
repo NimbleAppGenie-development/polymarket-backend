@@ -164,10 +164,18 @@ module.exports = {
                     message: "Admin not found",
                 });
             }
-
             const { name } = req.body;
-
             const image = req.file.filename || null;
+            const category = await Category.findAll();
+
+            const categoryExist = category?.map((opt) => opt.name);
+            
+            if (categoryExist.includes(name)) {
+                return res.status(statusCode.BAD_REQUEST).json({
+                    status: false,
+                    message: "Category already exist",
+                });
+            }
             await Category.create({
                 name,
                 image,
@@ -402,7 +410,7 @@ module.exports = {
                 options: q.options || [],
                 status: q.status,
                 trending: q.isTrending,
-                showInSlider:q.showInSlider,
+                showInSlider: q.showInSlider,
                 createdAt: q.createdAt,
             }));
 
@@ -473,7 +481,7 @@ module.exports = {
                 marketRules,
                 status: true,
                 isTrending: true,
-                showInSlider: true
+                showInSlider: true,
             });
 
             const optionData = options.map((opt, index) => ({
@@ -595,7 +603,6 @@ module.exports = {
             next(error);
         }
     },
-    
 
     /**
      * @param {import('express').Request} req
