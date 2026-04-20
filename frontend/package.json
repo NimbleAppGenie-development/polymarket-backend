@@ -12,6 +12,7 @@
     "dependencies": {
         "axios": "^1.7.9",
         "bootstrap": "^5.3.8",
+        "canvasjs-react-charts": "^1.0.5",
         "dotenv": "^16.4.7",
         "file-saver": "^2.0.5",
         "react": "^18.3.1",
@@ -19,7 +20,6 @@
         "react-loader-spinner": "^8.0.2",
         "react-router": "^7.1.5",
         "react-router-dom": "^7.13.2",
-        "recharts": "^3.8.1",
         "sweetalert2": "^11.26.24",
         "toastr": "^2.1.4",
         "xlsx": "^0.18.5"

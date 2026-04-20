@@ -53,7 +53,7 @@ const Account = () => {
                 },
                 true,
             );
-            console.log("==========response=========",response.data)
+            
             if (response?.status) {
                 // alert("Money added successfully");
 

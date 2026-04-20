@@ -10,6 +10,7 @@ import AuthContext from "../utils/auth/AuthContext.jsx";
 import Service from "../services/Http.js";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import CanvasChart from "../components/CanvasChart.jsx";
 
 export default function Home() {
     const { user } = useContext(AuthContext);
@@ -25,6 +26,10 @@ export default function Home() {
     const navigate = useNavigate();
     const [tradeData, setTradeData] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
+    const [graphData, setGraphData] = useState({});
+    const [activeChartId, setActiveChartId] = useState(null);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const activeItem = marketData[activeIndex];
 
     const getMarketList = async () => {
         try {
@@ -159,6 +164,58 @@ export default function Home() {
         getTrendingList();
     }, []);
 
+    const getGraphData = async (questionId) => {
+        try {
+            const services = new Service();
+
+            const response = await services.get(`/user/get-graph-data/${questionId}`, {}, false);
+
+            if (response?.status) {
+                const optionMap = {};
+
+                response.data.forEach((item) => {
+                    const name = item.option.trim();
+
+                    if (!optionMap[name]) {
+                        optionMap[name] = [];
+                    }
+
+                    optionMap[name].push({
+                        x: new Date(item.time.replace(" ", "T")), // ensure seconds
+                        y: Number(item.percentage),
+                    });
+                });
+
+                setGraphData((prev) => ({
+                    ...prev,
+                    [questionId]: optionMap,
+                }));
+            }
+        } catch (error) {
+            console.error("GRAPH ERROR:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (!marketData.length) return;
+
+        marketData.forEach((item) => {
+            if (!graphData[item.id]) {
+                getGraphData(item.id);
+            }
+        });
+    }, [marketData]);
+
+    // Already exists — but make sure it runs for ALL marketData items
+    useEffect(() => {
+        if (!marketData.length) return;
+        marketData.forEach((item) => {
+            if (!graphData[item.id]) {
+                getGraphData(item.id);
+            }
+        });
+    }, [marketData]);
+
     const hasPredicted = (questionId) => {
         return predictionData?.find((item) => String(item.questionId) === String(questionId));
     };
@@ -181,7 +238,7 @@ export default function Home() {
                                 aria-controls="home"
                                 aria-selected="true"
                             >
-                                Sports
+                                {activeItem?.category?.name || "Loading..."}
                             </button>
                         </li>
                     </ul>
@@ -189,181 +246,122 @@ export default function Home() {
                         <div className="row">
                             <div className="col-lg-8">
                                 <div className="treding-color-box-parent">
-                                    <div className="owl-custom-nav" id="owlCustomNav">
-                                        <button className="owl-custom-prev">
-                                            <i className="fa fa-angle-left"></i>
+                                    {/* Slider Header */}
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                            marginBottom: 12,
+                                            padding: "8px 4px",
+                                        }}
+                                    >
+                                        {/* Prev Button */}
+                                        <button
+                                            onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
+                                            disabled={activeIndex === 0}
+                                            style={{
+                                                background: activeIndex === 0 ? "#eee" : "#6366f1",
+                                                color: activeIndex === 0 ? "#aaa" : "#fff",
+                                                border: "none",
+                                                borderRadius: "50%",
+                                                width: 36,
+                                                height: 36,
+                                                cursor: activeIndex === 0 ? "not-allowed" : "pointer",
+                                                fontSize: 18,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            ‹
                                         </button>
-                                        <span className="owl-counter-text">
-                                            <span id="owlCurrentSlide">1</span> of <span id="owlTotalSlides">3</span>
-                                        </span>
-                                        <button className="owl-custom-next">
-                                            <i className="fa fa-angle-right"></i>
+
+                                        {/* Question Title + Counter */}
+                                        <div style={{ textAlign: "center", flex: 1, padding: "0 12px" }}>
+                                            <div style={{ fontSize: 13, color: "#aaa", marginBottom: 2 }}>
+                                                {activeIndex + 1} of {marketData.length}
+                                            </div>
+                                            <div
+                                                style={{
+                                                    fontWeight: 600,
+                                                    fontSize: 15,
+                                                    color: "#333",
+                                                    whiteSpace: "nowrap",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                }}
+                                            >
+                                                {activeItem?.question || ""}
+                                            </div>
+                                            {/* <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{activeItem?.category?.name || ""}</div> */}
+                                        </div>
+
+                                        {/* Next Button */}
+                                        <button
+                                            onClick={() => setActiveIndex((prev) => Math.min(prev + 1, marketData.length - 1))}
+                                            disabled={activeIndex === marketData.length - 1}
+                                            style={{
+                                                background: activeIndex === marketData.length - 1 ? "#eee" : "#6366f1",
+                                                color: activeIndex === marketData.length - 1 ? "#aaa" : "#fff",
+                                                border: "none",
+                                                borderRadius: "50%",
+                                                width: 36,
+                                                height: 36,
+                                                cursor: activeIndex === marketData.length - 1 ? "not-allowed" : "pointer",
+                                                fontSize: 18,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            ›
                                         </button>
                                     </div>
-                                    <div className="tab-content" id="myTabContent">
-                                        <div className="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                                            <div className="owl_1 owl-carousel owl-theme">
-                                                <div className="item">
-                                                    <div className="trending-banner-content">
-                                                        <h2>How long will the government shutdown last?</h2>
-                                                        <div className="row">
-                                                            <div className="col-lg-6">
-                                                                <div className="market-content-parent">
-                                                                    <ul>
-                                                                        <li>Market</li>
-                                                                        <li>Pays out</li>
-                                                                        <li>Odds</li>
-                                                                    </ul>
-                                                                    <ul>
-                                                                        <li>
-                                                                            <a href="#">Yes</a>
-                                                                        </li>
-                                                                        <li>1.93%</li>
-                                                                        <li>
-                                                                            <span>50%</span>
-                                                                        </li>
-                                                                    </ul>
-                                                                    <ul>
-                                                                        <li>
-                                                                            <a href="#" className="nobtn">
-                                                                                No
-                                                                            </a>
-                                                                        </li>
-                                                                        <li>0.93%</li>
-                                                                        <li>
-                                                                            <span>30%</span>
-                                                                        </li>
-                                                                    </ul>
-                                                                </div>
-                                                                <div className="market-bottom-content">
-                                                                    <p>$645,765 vol</p>
-                                                                    <p>11 markets</p>
-                                                                </div>
-                                                                <div className="markets-bottom-text">
-                                                                    <p>
-                                                                        <strong>News:</strong> dolor sit amet, consetetur sadipscing elitr, sed diam
-                                                                        nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed
-                                                                        diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
-                                                                        clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-                                                                        Lorem ipsum.
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="col-lg-6">
-                                                                <div id="chartContainer" style={{ height: "370px", width: "100%" }}></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="item">
-                                                    <div className="trending-banner-content">
-                                                        <h2>How long will the government shutdown last?</h2>
-                                                        <div className="row">
-                                                            <div className="col-lg-6">
-                                                                <div className="market-content-parent">
-                                                                    <ul>
-                                                                        <li>Market</li>
-                                                                        <li>Pays out</li>
-                                                                        <li>Odds</li>
-                                                                    </ul>
-                                                                    <ul>
-                                                                        <li>
-                                                                            <a href="#">Yes</a>
-                                                                        </li>
-                                                                        <li>1.93%</li>
-                                                                        <li>
-                                                                            <span>50%</span>
-                                                                        </li>
-                                                                    </ul>
-                                                                    <ul>
-                                                                        <li>
-                                                                            <a href="#" className="nobtn">
-                                                                                No
-                                                                            </a>
-                                                                        </li>
-                                                                        <li>0.93%</li>
-                                                                        <li>
-                                                                            <span>30%</span>
-                                                                        </li>
-                                                                    </ul>
-                                                                </div>
-                                                                <div className="market-bottom-content">
-                                                                    <p>$645,765 vol</p>
-                                                                    <p>11 markets</p>
-                                                                </div>
-                                                                <div className="markets-bottom-text">
-                                                                    <p>
-                                                                        <strong>News:</strong> dolor sit amet, consetetur sadipscing elitr, sed diam
-                                                                        nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed
-                                                                        diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
-                                                                        clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-                                                                        Lorem ipsum.
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="col-lg-6">
-                                                                <div id="chartContainerone" style={{ height: "370px", width: "100%" }}></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="item">
-                                                    <div className="trending-banner-content">
-                                                        <h2>How long will the government shutdown last?</h2>
-                                                        <div className="row">
-                                                            <div className="col-lg-6">
-                                                                <div className="market-content-parent">
-                                                                    <ul>
-                                                                        <li>Market</li>
-                                                                        <li>Pays out</li>
-                                                                        <li>Odds</li>
-                                                                    </ul>
-                                                                    <ul>
-                                                                        <li>
-                                                                            <a href="#">Yes</a>
-                                                                        </li>
-                                                                        <li>1.93%</li>
-                                                                        <li>
-                                                                            <span>50%</span>
-                                                                        </li>
-                                                                    </ul>
-                                                                    <ul>
-                                                                        <li>
-                                                                            <a href="#" className="nobtn">
-                                                                                No
-                                                                            </a>
-                                                                        </li>
-                                                                        <li>0.93%</li>
-                                                                        <li>
-                                                                            <span>30%</span>
-                                                                        </li>
-                                                                    </ul>
-                                                                </div>
-                                                                <div className="market-bottom-content">
-                                                                    <p>$645,765 vol</p>
-                                                                    <p>11 markets</p>
-                                                                </div>
-                                                                <div className="markets-bottom-text">
-                                                                    <p>
-                                                                        <strong>News:</strong> dolor sit amet, consetetur sadipscing elitr, sed diam
-                                                                        nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed
-                                                                        diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
-                                                                        clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-                                                                        Lorem ipsum.
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="col-lg-6">
-                                                                <div id="chartContainertwo" style={{ height: "370px", width: "100%" }}></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+
+                                    {/* Chart — only active question */}
+                                    {activeItem && graphData[activeItem.id] ? (
+                                        <CanvasChart questionId={activeItem.id} chartData={graphData[activeItem.id]} />
+                                    ) : (
+                                        <div
+                                            style={{
+                                                height: 260,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                color: "#aaa",
+                                                fontSize: 13,
+                                                background: "#f9f9f9",
+                                                borderRadius: 8,
+                                            }}
+                                        >
+                                            {marketData.length === 0 ? "No questions available" : "Loading chart..."}
                                         </div>
-                                        <div className="tab-pane fade fade" id="home01" role="tabpanel" aria-labelledby="home-tab01">
-                                            <div className="owl_1 owl-carousel owl-theme"></div>
-                                        </div>
+                                    )}
+
+                                    {/* Dot indicators */}
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            gap: 6,
+                                            marginTop: 12,
+                                        }}
+                                    >
+                                        {marketData.map((_, i) => (
+                                            <div
+                                                key={i}
+                                                onClick={() => setActiveIndex(i)}
+                                                style={{
+                                                    width: i === activeIndex ? 20 : 8,
+                                                    height: 8,
+                                                    borderRadius: 4,
+                                                    background: i === activeIndex ? "#6366f1" : "#ddd",
+                                                    cursor: "pointer",
+                                                    transition: "all 0.3s ease",
+                                                }}
+                                            />
+                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -410,6 +408,8 @@ export default function Home() {
                                                             onClick={(e) => {
                                                                 if (e.target.closest(".option-row-parent")) return;
 
+                                                                // navigate(`/home-detail/${item.id}`);
+                                                                getGraphData(item.id);
                                                                 navigate(`/home-detail/${item.id}`);
                                                             }}
                                                             style={{ cursor: "pointer" }}

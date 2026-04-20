@@ -17,7 +17,6 @@ export default function Dashboard() {
 
             const response = await services.get( "/admin/dashboard", {},  true,  );
 
-            console.log("DASHBOARD RESPONSE:", response);
 
             if (response?.status) {
                 const { totalUsers, totalMatches, totalQuestions, activeMatches } = response?.data || {};

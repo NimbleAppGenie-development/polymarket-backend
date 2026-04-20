@@ -1,16 +1,15 @@
-// import privacypolicycss from "../assets/css/static-pages/privacy-policy.module.css";
 import { useContext, useEffect, useState } from "react";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import { errorToastr, successToastr } from "../utils/toastr.js";
-import { HttpClient } from "../utils/request.js";
 import { Link, useParams } from "react-router";
 import AuthContext from "../utils/auth/AuthContext.jsx";
 import Swal from "sweetalert2";
 import Service from "../services/Http.js";
 import { useNavigate } from "react-router-dom";
+import CanvasChart from "../components/CanvasChart.jsx";
 
-export default function Home() {
+export default function HomeDetail() {
     const { user } = useContext(AuthContext);
     const [marketData, setMarketData] = useState([]);
     const [predictionData, setPredictionData] = useState([]);
@@ -18,23 +17,19 @@ export default function Home() {
     const [loading, setLoading] = useState(false);
     const { detailId } = useParams();
     const [showPopup, setShowPopup] = useState(false);
-    const [selectedData, setSelectedData] = useState(null);
     const [amount, setAmount] = useState("");
-    const [hovered, setHovered] = useState({
-        id: null,
-        option: null,
-    });
     const [tradeData, setTradeData] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
     const [open, setOpen] = useState(true);
+    const [graphData, setGraphData] = useState({});
     const navigate = useNavigate();
 
     const getMarketData = async () => {
         try {
             setLoading(true);
-
             const services = new Service();
             const response = await services.get(`/user/get-market-detail/${detailId}`, {}, false);
+            
             if (response?.status) {
                 setMarketData(response.data || []);
                 setTotal(response.total || 0);
@@ -51,13 +46,10 @@ export default function Home() {
 
     const getPredictionData = async () => {
         if (!user?.id) return;
-
         try {
             setLoading(true);
-
             const services = new Service();
             const response = await services.get(`/user/get-user-prdication-data/${user.id}`, {}, true);
-
             if (response?.status) {
                 setPredictionData(response.data || []);
             } else {
@@ -70,15 +62,47 @@ export default function Home() {
         }
     };
 
+    // fetch graph data for this question
+    const getGraphData = async (questionId) => {
+        try {
+            const services = new Service();
+            const response = await services.get(`/user/get-graph-data/${questionId}`, {}, false);
+
+            if (response?.status && response.data?.length) {
+                const optionMap = {};
+
+                response.data.forEach((item) => {
+                    const name = item.option.trim();
+                    if (name === "None of the Above") return;
+
+                    if (!optionMap[name]) optionMap[name] = [];
+
+                    const dateObj = new Date(item.time.replace(" ", "T"));
+                    optionMap[name].push({
+                        x: isNaN(dateObj) ? new Date() : dateObj,
+                        y: Number(item.percentage),
+                    });
+                });
+
+                setGraphData((prev) => ({
+                    ...prev,
+                    [questionId]: optionMap,
+                }));
+            }
+        } catch (error) {
+            console.error("GRAPH ERROR:", error);
+        }
+    };
+
     const hasPredicted = (questionId) => {
         return predictionData?.find((item) => item.questionId === questionId);
     };
+
     const prediction = predictionData?.find((p) => String(p.questionId) === String(marketData?.id));
 
     const firstOption = async (userId, categoryId, questionId, selectedOption, amount) => {
         try {
             const services = new Service();
-
             const data = await services.post("/user/user-prdication", {
                 userId,
                 categoryId,
@@ -86,10 +110,10 @@ export default function Home() {
                 selectedOption,
                 amount,
             });
-
             if (data?.status) {
                 getMarketData();
                 getPredictionData();
+                getGraphData(questionId);
             }
         } catch (error) {
             console.log("Error in select option", error);
@@ -98,11 +122,17 @@ export default function Home() {
 
     useEffect(() => {
         getMarketData();
-
         if (user?.id) {
             getPredictionData();
         }
-    }, [user?.id, marketData?.id]);
+    }, [user?.id]);
+
+    //fetch graph once marketData loaded and has an id
+    useEffect(() => {
+        if (marketData?.id) {
+            getGraphData(marketData.id);
+        }
+    }, [marketData?.id]);
 
     const filterOptions = (options = []) => options.filter((opt) => opt.option !== "None of the Above");
 
@@ -124,10 +154,12 @@ export default function Home() {
                                 aria-controls="home"
                                 aria-selected="true"
                             >
-                                Sport
+                                {marketData?.category?.name || "Loading..."}
+                                {/* {response.data?.category?.name} */}
                             </button>
                         </li>
                     </ul>
+
                     <div className="tabing-content-wrapper">
                         <div className="row">
                             <div className="col-lg-8">
@@ -142,7 +174,7 @@ export default function Home() {
                                         <h3>{marketData?.question}</h3>
                                         <h4>{marketData?.description}</h4>
                                     </div>
-                                    <div className="details-user-right-parent">
+                                    {/* <div className="details-user-right-parent">
                                         <ul>
                                             <li>
                                                 <a href="#">
@@ -160,116 +192,78 @@ export default function Home() {
                                                 </a>
                                             </li>
                                         </ul>
-                                    </div>
+                                    </div> */}
                                 </div>
-                                <div className="forecast-main-box">
+
+                                {/* <div className="forecast-main-box">
                                     <p>56.7 forecast</p>
                                     <span>
                                         <img src="/img/arrow-top.svg" alt="icon" /> 38.3
                                     </span>
-                                </div>
+                                </div> */}
+
+                                {/* Graph Section */}
                                 <div className="details-page-chart-parent">
-                                    <div id="chartContainer" style={{ height: "370px", width: "100%" }}></div>
+                                    {marketData?.id && graphData[marketData.id] ? (
+                                        <CanvasChart questionId={marketData.id} chartData={graphData[marketData.id]} />
+                                    ) : (
+                                        <div
+                                            style={{
+                                                height: 280,
+                                                display: "flex",
+                                                alignItems: "left",
+                                                justifyContent: "left",
+                                                color: "#aaa",
+                                                fontSize: 13,
+                                                background: "#f9f9f9",
+                                                borderRadius: 8,
+                                            }}
+                                        >
+                                            {loading ? "Loading chart..." : "No graph data yet"}
+                                        </div>
+                                    )}
                                 </div>
+
                                 <div className="details-page-tabing-wraper">
                                     <div className="details-page-header-parent">
-                                        <p>$3,778,567 vol</p>
-                                        <ul className="nav nav-tabs" id="myTab" role="tablist">
+                                        <p>${marketData.totalEntryAmountOnQuestion?.toLocaleString() || "0"} vol</p>
+                                        {/* <ul className="nav nav-tabs" id="myTab" role="tablist">
                                             <li className="nav-item" role="presentation">
-                                                <button
-                                                    className="nav-link active"
-                                                    id="home-tab001"
-                                                    data-bs-toggle="tab"
-                                                    data-bs-target="#home001"
-                                                    type="button"
-                                                    role="tab"
-                                                    aria-controls="home001"
-                                                    aria-selected="true"
-                                                >
-                                                    6H
-                                                </button>
+                                                <button className="nav-link active" id="home-tab001" data-bs-toggle="tab" data-bs-target="#home001" type="button" role="tab">6H</button>
                                             </li>
                                             <li className="nav-item" role="presentation">
-                                                <button
-                                                    className="nav-link"
-                                                    id="profile-tab002"
-                                                    data-bs-toggle="tab"
-                                                    data-bs-target="#profile002"
-                                                    type="button"
-                                                    role="tab"
-                                                    aria-controls="profile002"
-                                                    aria-selected="false"
-                                                >
-                                                    1D
-                                                </button>
+                                                <button className="nav-link" id="profile-tab002" data-bs-toggle="tab" data-bs-target="#profile002" type="button" role="tab">1D</button>
                                             </li>
                                             <li className="nav-item" role="presentation">
-                                                <button
-                                                    className="nav-link"
-                                                    id="contact-tab003"
-                                                    data-bs-toggle="tab"
-                                                    data-bs-target="#contact003"
-                                                    type="button"
-                                                    role="tab"
-                                                    aria-controls="contact003"
-                                                    aria-selected="false"
-                                                >
-                                                    1W
-                                                </button>
+                                                <button className="nav-link" id="contact-tab003" data-bs-toggle="tab" data-bs-target="#contact003" type="button" role="tab">1W</button>
                                             </li>
                                             <li className="nav-item" role="presentation">
-                                                <button
-                                                    className="nav-link"
-                                                    id="contact-tab004"
-                                                    data-bs-toggle="tab"
-                                                    data-bs-target="#contact004"
-                                                    type="button"
-                                                    role="tab"
-                                                    aria-controls="contact005"
-                                                    aria-selected="false"
-                                                >
-                                                    1M
-                                                </button>
+                                                <button className="nav-link" id="contact-tab004" data-bs-toggle="tab" data-bs-target="#contact004" type="button" role="tab">1M</button>
                                             </li>
                                             <li className="nav-item" role="presentation">
-                                                <button
-                                                    className="nav-link"
-                                                    id="contact-tab005"
-                                                    data-bs-toggle="tab"
-                                                    data-bs-target="#contact005"
-                                                    type="button"
-                                                    role="tab"
-                                                    aria-controls="contact005"
-                                                    aria-selected="false"
-                                                >
-                                                    ALL
-                                                </button>
+                                                <button className="nav-link" id="contact-tab005" data-bs-toggle="tab" data-bs-target="#contact005" type="button" role="tab">ALL</button>
                                             </li>
-                                        </ul>
+                                        </ul> */}
                                     </div>
+
                                     <div className="details-page-tbaing-content-parent">
                                         <div className="tab-content" id="myTabContent">
-                                            <div className="tab-pane fade show active" id="home001" role="tabpanel" aria-labelledby="home-tab001">
+                                            <div className="tab-pane fade show active" id="home001" role="tabpanel">
                                                 <div className="details-page-tbaing-content">
                                                     <div className="center-box">
                                                         <p>Chance</p>
                                                     </div>
                                                     <div className="main-box-inner-details-box">
-                                                        {filterOptions(marketData?.options).map((opt) => {
-                                                            return (
-                                                                <div key={opt.id}>
-                                                                    <span>{opt.option}</span>
-
-                                                                    <span>{opt.multiplier}x</span>
-
-                                                                    <div className="counter-box-btn">
-                                                                        <span>{opt.percentage}%</span>
-                                                                    </div>
+                                                        {filterOptions(marketData?.options).map((opt) => (
+                                                            <div key={opt.id}>
+                                                                <span>{opt.option}</span>
+                                                                <span>{opt.multiplier}x</span>
+                                                                <div className="counter-box-btn">
+                                                                    <span>{opt.percentage}%</span>
                                                                 </div>
-                                                            );
-                                                        })}
+                                                            </div>
+                                                        ))}
                                                     </div>
-
                                                     <div className="details-page-tbaing-content-box">
                                                         <div className="show-less-content">Show Less Market</div>
                                                     </div>
@@ -285,7 +279,6 @@ export default function Home() {
                                                                         Market Rules
                                                                     </button>
                                                                 </h2>
-
                                                                 <div className={`accordion-collapse collapse ${open ? "show" : ""}`}>
                                                                     <div className="accordion-body">
                                                                         <p>{marketData?.marketRules}</p>
@@ -300,6 +293,7 @@ export default function Home() {
                                     </div>
                                 </div>
                             </div>
+
                             <div className="col-lg-4">
                                 <div className="details-price-box-parent">
                                     <div className="politics-header-box">
@@ -311,23 +305,20 @@ export default function Home() {
                                         </figure>
                                         <h5>{marketData?.category?.name}</h5>
                                     </div>
-                                    <h3>{marketData?.question}</h3>
+                                    <h4>{marketData?.question}</h4>
 
                                     <div className="details-page-tbaing-right">
                                         <ul>
                                             {user ? (
-                                                /* ✅ LOGGED IN USER */
                                                 <div className="politics-btn-box d-flex flex-column">
                                                     {filterOptions(marketData?.options).map((opt) => {
                                                         const alreadySelected = String(prediction?.selectedOptionId) === String(opt.id);
-
                                                         return (
                                                             <div
                                                                 key={opt.id}
                                                                 className={`option-row-parent ${alreadySelected ? "active" : ""}`}
                                                                 onClick={() => {
                                                                     const alreadyPredicted = hasPredicted(marketData.id);
-
                                                                     if (alreadyPredicted) {
                                                                         Swal.fire({
                                                                             icon: "warning",
@@ -336,7 +327,6 @@ export default function Home() {
                                                                         });
                                                                         return;
                                                                     }
-
                                                                     setTradeData({
                                                                         userId: user.id,
                                                                         categoryId: marketData.category?.id,
@@ -344,12 +334,10 @@ export default function Home() {
                                                                         question: marketData.question,
                                                                         options: filterOptions(marketData.options),
                                                                     });
-
                                                                     setSelectedOption(opt.id);
                                                                     setShowPopup(true);
                                                                 }}
                                                             >
-                                                                {/* IMAGE */}
                                                                 <div className="option-row">
                                                                     <img
                                                                         src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
@@ -357,21 +345,14 @@ export default function Home() {
                                                                         className="option-img"
                                                                     />
                                                                 </div>
-
-                                                                {/* OPTION NAME */}
                                                                 <span className="option-text">{opt.option}</span>
-
-                                                                {/* MULTIPLIER */}
                                                                 <span className="option-multiplier">{opt.multiplier || "1x"}x</span>
-
-                                                                {/* PERCENTAGE */}
                                                                 <span className="option-percentage">{opt.percentage || 0}%</span>
                                                             </div>
                                                         );
                                                     })}
                                                 </div>
                                             ) : (
-                                                /* NOT LOGGED IN USER */
                                                 <div className="politics-btn-box d-flex flex-column">
                                                     {filterOptions(marketData?.options).map((opt) => (
                                                         <div
@@ -379,7 +360,7 @@ export default function Home() {
                                                             className="option-row-parent"
                                                             data-bs-toggle="modal"
                                                             data-bs-target="#exampleModal"
-                                                            onClick={(e) => e.stopPropagation()} // ⭐ IMPORTANT
+                                                            onClick={(e) => e.stopPropagation()}
                                                         >
                                                             <div className="option-row flex-parent">
                                                                 <img
@@ -387,12 +368,9 @@ export default function Home() {
                                                                     alt={opt.option}
                                                                     className="option-img"
                                                                 />
-
                                                                 <span className="option-text">{opt.option}</span>
                                                             </div>
-
                                                             <span className="option-multiplier">{opt.multiplier || "1x"}x</span>
-
                                                             <span className="option-percentage">{opt.percentage || 0}%</span>
                                                         </div>
                                                     ))}
@@ -400,35 +378,22 @@ export default function Home() {
                                             )}
                                         </ul>
                                     </div>
-                                    {/* <div className="amount-main-box">
-                                        <div className="amount-label-box">
-                                            <span>Amount</span>
-                                            <p>Earn 3.25% Interest</p>
-                                        </div>
-                                        <div className="amount-label-box">
-                                            <strong>$0</strong>
-                                        </div>
-                                    </div> */}
-                                    {/* <div className="price-box-btn">
-                                        <button>Sign up to trade</button>
-                                    </div> */}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
+
             {showPopup && tradeData && (
                 <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
                     <div className="modal-dialog modal-dialog-centered modal-md">
                         <div className="modal-content p-3">
-                            {/* HEADER */}
                             <div className="modal-header border-0">
                                 <div>
                                     <h5 className="modal-title">{tradeData.options?.map((opt) => opt.option).join(" / ")}</h5>
                                     <small className="text-muted">Select an option to trade</small>
                                 </div>
-
                                 <button
                                     className="btn-close"
                                     onClick={() => {
@@ -439,8 +404,6 @@ export default function Home() {
                                     }}
                                 />
                             </div>
-
-                            {/* OPTIONS */}
                             <div className="d-flex flex-column gap-2 mb-3">
                                 {filterOptions(tradeData.options).map((opt) => (
                                     <div
@@ -459,8 +422,6 @@ export default function Home() {
                                     </div>
                                 ))}
                             </div>
-
-                            {/* AMOUNT */}
                             <input
                                 type="number"
                                 className="form-control mb-3"
@@ -469,17 +430,13 @@ export default function Home() {
                                 min={1}
                                 onChange={(e) => setAmount(e.target.value)}
                             />
-
-                            {/* CONFIRM */}
                             <button
                                 className="btn btn-success w-100"
                                 disabled={!selectedOption}
                                 onClick={() => {
                                     if (!amount) return errorToastr("Enter amount");
                                     if (!selectedOption) return errorToastr("Select option");
-
                                     firstOption(tradeData.userId, tradeData.categoryId, tradeData.questionId, selectedOption, amount);
-
                                     setShowPopup(false);
                                     setAmount("");
                                     setTradeData(null);
@@ -492,6 +449,7 @@ export default function Home() {
                     </div>
                 </div>
             )}
+
             <Footer />
         </div>
     );

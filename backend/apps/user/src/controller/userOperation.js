@@ -257,7 +257,7 @@ module.exports = {
     getUserPrdicationData: async (req, res, next) => {
         try {
             const { userId } = req.params;
-            console.log("Fetching market detail for ID:", userId);
+            
             const userPredictions = await UserPredictedQuestion.findAll({
                 where: { userId },
             });

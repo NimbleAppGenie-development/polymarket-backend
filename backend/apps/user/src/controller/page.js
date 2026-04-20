@@ -88,72 +88,6 @@ module.exports = {
         }
     },
 
-    /* getMarketDetail: async (req, res, next) => {
-        try {
-            const { id } = req.params;
-            if (!id) {
-                return res.status(statusCodes.BAD_REQUEST).json({
-                    status: false,
-                    message: "ID is required",
-                });
-            }
-
-            let query = { id: id.toLowerCase() };
-
-            const data = await Question.findOne({
-                where: query,
-                include: [
-                    {
-                        model: Category,
-                        as: "category",
-                        attributes: ["id", "name", "image"],
-                    },
-                    {
-                        model: QuestionOptions,
-                        as: "options",
-                        attributes: ["id", "questionId", "option", "multiplier", "resultStatus","image"],
-                    },
-                ],
-            });
-
-            let result = {};
-            if (data) {
-                result = {
-                    id: data.id,
-                    question: data.question,
-                    description: data.description,
-                    marketRules: data.marketRules,
-                    status: data.status,
-
-                    category: data.category
-                        ? {
-                              id: data.category.id,
-                              name: data.category.name,
-                              image: data.category.image,
-                          }
-                        : null,
-
-                    options: data.options
-                        ? data.options.map((opt) => ({
-                              id: opt.id,
-                              option: opt.option,
-                              multiplier: opt.multiplier,
-                              resultStatus: opt.resultStatus,
-                              image: opt.image
-                          }))
-                        : [],
-
-                    createdAt: moment(data.createdAt).format("MM/DD/YYYY HH:mm:A"),
-                };
-            }
-
-            return res.status(statusCodes.OK).json(successResponse(result, "Market fetched successfully"));
-        } catch (error) {
-            console.log(error);
-            next(error);
-        }
-    }, */
-
     getMarketDetail: async (req, res, next) => {
         try {
             const { id } = req.params;
@@ -185,7 +119,7 @@ module.exports = {
                 return res.status(statusCodes.OK).json(successResponse({}, "No data found"));
             }
 
-            // ✅ prediction count
+            //prediction count
             const predictions = await UserPredictedQuestion.findAll({
                 attributes: ["selectedOptionId", [Sequelize.fn("COUNT", Sequelize.col("selectedOptionId")), "count"]],
                 group: ["selectedOptionId"],
@@ -197,12 +131,15 @@ module.exports = {
                 countMap[p.selectedOptionId] = parseInt(p.count);
             });
 
-            // ✅ total votes
+            // total votes
             const totalVotes = data.options.reduce((sum, opt) => {
                 return sum + (countMap[opt.id] || 0);
             }, 0);
-
-            // ✅ options with %
+            const totalEntryAmountOnQuestion = await UserPredictedQuestion.sum("entryAmount", {
+                where: { questionId: id },
+            });
+            
+            //options with %
             const optionsWithPercentage = data.options.map((opt) => {
                 const count = countMap[opt.id] || 0;
 
@@ -225,6 +162,7 @@ module.exports = {
                 status: data.status,
                 category: data.category,
                 options: optionsWithPercentage,
+                totalEntryAmountOnQuestion,
                 createdAt: moment(data.createdAt).format("MM/DD/YYYY HH:mm:A"),
             };
 
@@ -234,7 +172,7 @@ module.exports = {
             next(error);
         }
     },
-    
+
     getTrendingList: async (req, res, next) => {
         try {
             const trendingList = await Question.findAll({
@@ -260,6 +198,85 @@ module.exports = {
             return res.status(statusCodes.OK).json(successResponse(formatted, "Page content fetched"));
         } catch (error) {
             console.error("getPage error:", error);
+            next(error);
+        }
+    },
+
+    getGraphData: async (req, res, next) => {
+        try {
+            const { questionId } = req.params;
+
+            if (!questionId) {
+                return res.status(statusCodes.BAD_REQUEST).json(errorResponse([], "Question ID required"));
+            }
+
+            const predictions = await UserPredictedQuestion.findAll({
+                where: { questionId },
+                attributes: ["selectedOptionId", "createdAt"],
+                order: [["createdAt", "ASC"]],
+                raw: true,
+            });
+
+            if (!predictions.length) {
+                return res.status(statusCodes.OK).json(successResponse([], "No graph data found"));
+            }
+
+            const options = await QuestionOptions.findAll({
+                where: { questionId },
+                attributes: ["id", "option"],
+                raw: true,
+            });
+
+            const cumulativeVotes = {};
+            options.forEach((opt) => {
+                cumulativeVotes[opt.id] = 0;
+            });
+
+            // Group predictions by minute bucket
+            const timeBuckets = {};
+            predictions.forEach((pred) => {
+                const timeKey = moment(pred.createdAt).format("YYYY-MM-DD HH:mm");
+                if (!timeBuckets[timeKey]) {
+                    timeBuckets[timeKey] = [];
+                }
+                timeBuckets[timeKey].push(pred.selectedOptionId);
+            });
+
+            const graphData = [];
+
+            // For each time bucket, ADD to cumulative then calculate %
+            Object.keys(timeBuckets)
+                .sort()
+                .forEach(async (time) => {
+                    const votes = timeBuckets[time];
+
+                    // Add this bucket's votes to cumulative
+                    votes.forEach((optId) => {
+                        if (cumulativeVotes[optId] !== undefined) {
+                            cumulativeVotes[optId]++;
+                        }
+                    });
+
+                    // Total votes so far (cumulative)
+                    const totalVotes = Object.values(cumulativeVotes).reduce((a, b) => a + b, 0);
+
+                    // Calculate percentage for each option based on ALL votes so far
+                    options.forEach((opt) => {
+                        const count = cumulativeVotes[opt.id] || 0;
+                        const percentage = totalVotes ? Number(((count / totalVotes) * 100).toFixed(1)) : 0;
+
+                        graphData.push({
+                            time,
+                            optionId: opt.id,
+                            option: opt.option.trim(),
+                            percentage,
+                        });
+                    });
+                });
+
+            return res.status(statusCodes.OK).json(successResponse(graphData, "Graph data fetched"));
+        } catch (error) {
+            console.error("getGraphData error:", error);
             next(error);
         }
     },
