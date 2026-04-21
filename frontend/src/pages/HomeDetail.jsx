@@ -125,21 +125,26 @@ export default function HomeDetail() {
 
     const firstOption = async (userId, categoryId, questionId, selectedOption, amount) => {
         try {
+            setLoading(true);
             const services = new Service();
-            const data = await services.post("/user/user-prdication", {
+            const response = await services.post("/user/user-prdication", {
                 userId,
                 categoryId,
                 questionId,
                 selectedOption,
                 amount,
             });
-            if (data?.status) {
+            if (response?.status) {
+                successToastr(response?.message || "Prediction submitted successfully");
                 getMarketData();
                 getPredictionData();
                 getGraphData(questionId);
+            } else {
+                errorToastr(response?.message || "Something went wrong");
             }
         } catch (error) {
-            console.log("Error in select option", error);
+            console.error("Error in select option", error);
+            errorToastr(error?.message || error?.response?.message || "Something went wrong");
         }
     };
 
@@ -191,11 +196,11 @@ export default function HomeDetail() {
                                         <figure>
                                             <img
                                                 src={`${import.meta.env.VITE_IMAGE_URL}/public/category/${marketData?.category?.image}`}
-                                                alt="image"
+                                                // alt="image"
                                             />
                                         </figure>
                                         <h3>{marketData?.question}</h3>
-                                        <h4>{marketData?.description}</h4>
+                                        {/* <h4>{marketData?.description}</h4> */}
                                     </div>
                                     {/* <div className="details-user-right-parent">
                                         <ul>
@@ -276,17 +281,6 @@ export default function HomeDetail() {
                                                     <div className="center-box">
                                                         <p>Chance</p>
                                                     </div>
-                                                    {/* <div className="main-box-inner-details-box">
-                                                        {filterOptions(marketData?.options).map((opt) => (
-                                                            <div key={opt.id}>
-                                                                <span>{opt.option}</span>
-                                                                <span>{opt.multiplier}x</span>
-                                                                <div className="counter-box-btn">
-                                                                    <span>{opt.percentage}%</span>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div> */}
                                                     <div className="main-box-inner-details-box">
                                                         {visibleOptions.map((opt) => (
                                                             <div key={opt.id}>
@@ -342,7 +336,7 @@ export default function HomeDetail() {
                                         <figure>
                                             <img
                                                 src={`${import.meta.env.VITE_IMAGE_URL}/public/category/${marketData?.category?.image}`}
-                                                alt="image"
+                                                // alt="image"
                                             />
                                         </figure>
                                         <h5>{marketData?.category?.name}</h5>
@@ -464,12 +458,18 @@ export default function HomeDetail() {
                                     </div>
                                 ))}
                             </div>
+                
                             <input
                                 type="number"
                                 className="form-control mb-3"
                                 placeholder="Enter amount"
                                 value={amount}
                                 min={1}
+                                onKeyDown={(e) => {
+                                    if (["e", "E", "+", "-", "."].includes(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 onChange={(e) => setAmount(e.target.value)}
                             />
                             <button

@@ -1,5 +1,5 @@
 import moment from "moment";
-const staticBaseUrl = import.meta.env.VITE_STATIC_URL;
+const staticBaseUrl = import.meta.env.VITE_IMAGE_URL;
 
 const dateFormats = {
     // ISO formats

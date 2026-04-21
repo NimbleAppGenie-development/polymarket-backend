@@ -29,7 +29,7 @@ class Admin extends Model {
                 tokenVersion: this.tokenVersion,
             },
             JWT_SECRET_KEY,
-            { expiresIn: "11d" },
+            { expiresIn: "30m" },
         );
 
         const refreshToken = jwt.sign(
@@ -39,7 +39,7 @@ class Admin extends Model {
                 tokenVersion: this.tokenVersion,
             },
             JWT_REFRESH_SECRET_KEY,
-            { expiresIn: "31d" },
+            { expiresIn: "7d" },
         );
 
         this.accessToken = accessToken;

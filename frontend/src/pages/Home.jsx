@@ -30,7 +30,8 @@ export default function Home() {
     const [graphData, setGraphData] = useState({});
     const [activeChartId, setActiveChartId] = useState(null);
     const [activeIndex, setActiveIndex] = useState(0);
-    const activeItem = showSlider[activeIndex];
+    const sliderData = showSlider.filter((item) => item.showInSlider === true);
+    const activeItem = sliderData[activeIndex];
 
     const getMarketList = async () => {
         try {
@@ -173,7 +174,6 @@ export default function Home() {
                 const services = new Service();
 
                 const response = await services.get("/user/get-show-slider", {}, false);
-                
                 if (response?.status) {
                     setShowSlider(response?.data || []);
                 } else {
@@ -243,7 +243,6 @@ export default function Home() {
             }
         });
     }, [marketData]);
-
 
     useEffect(() => {
         if (!marketData.length) return;
@@ -318,7 +317,7 @@ export default function Home() {
                                         {/* Question Title + Counter */}
                                         <div style={{ textAlign: "center", flex: 1, padding: "0 12px" }}>
                                             <div style={{ fontSize: 13, color: "#aaa", marginBottom: 2 }}>
-                                                {activeIndex + 1} of {marketData.length}
+                                                {activeIndex + 1} of {sliderData.length}
                                             </div>
                                             <div
                                                 style={{
@@ -337,16 +336,16 @@ export default function Home() {
 
                                         {/* Next Button */}
                                         <button
-                                            onClick={() => setActiveIndex((prev) => Math.min(prev + 1, marketData.length - 1))}
-                                            disabled={activeIndex === marketData.length - 1}
+                                            onClick={() => setActiveIndex((prev) => Math.min(prev + 1, sliderData.length - 1))}
+                                            disabled={activeIndex === sliderData.length - 1}
                                             style={{
-                                                background: activeIndex === marketData.length - 1 ? "#eee" : "#6366f1",
-                                                color: activeIndex === marketData.length - 1 ? "#aaa" : "#fff",
+                                                background: activeIndex === sliderData.length - 1 ? "#eee" : "#6366f1",
+                                                color: activeIndex === sliderData.length - 1 ? "#aaa" : "#fff",
                                                 border: "none",
                                                 borderRadius: "50%",
                                                 width: 36,
                                                 height: 36,
-                                                cursor: activeIndex === marketData.length - 1 ? "not-allowed" : "pointer",
+                                                cursor: activeIndex === sliderData.length - 1 ? "not-allowed" : "pointer",
                                                 fontSize: 18,
                                                 display: "flex",
                                                 alignItems: "center",
@@ -377,7 +376,6 @@ export default function Home() {
                                         </div>
                                     )}
 
-                                    {/* Dot indicators */}
                                     <div
                                         style={{
                                             display: "flex",
@@ -386,7 +384,7 @@ export default function Home() {
                                             marginTop: 12,
                                         }}
                                     >
-                                        {marketData.map((_, i) => (
+                                        {sliderData.map((_, i) => (
                                             <div
                                                 key={i}
                                                 onClick={() => setActiveIndex(i)}
@@ -603,12 +601,18 @@ export default function Home() {
                                                     </div>
 
                                                     {/* Amount */}
+                                                    
                                                     <input
                                                         type="number"
                                                         className="form-control mb-3"
                                                         placeholder="Enter amount"
                                                         value={amount}
                                                         min={1}
+                                                        onKeyDown={(e) => {
+                                                            if (["e", "E", "+", "-", "."].includes(e.key)) {
+                                                                e.preventDefault();
+                                                            }
+                                                        }}
                                                         onChange={(e) => setAmount(e.target.value)}
                                                     />
 

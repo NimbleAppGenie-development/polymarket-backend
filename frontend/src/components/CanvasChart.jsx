@@ -31,7 +31,7 @@ export default function CanvasChart({ questionId, chartData }) {
 
             const lastY = points.length > 0 ? points[points.length - 1].y : 0;
 
-            // ✅ Only mark the last point with a dot — no inline label
+            // Only mark the last point with a dot — no inline label
             if (points.length > 0) {
                 points[points.length - 1] = {
                     ...points[points.length - 1],
@@ -46,7 +46,7 @@ export default function CanvasChart({ questionId, chartData }) {
                 type: "stepLine",
                 name: opt,
                 showInLegend: true,
-                legendText: `${opt}: ${lastY}%`,  // ✅ show current % in legend
+                legendText: `${opt}: ${lastY}%`,  //show current % in legend
                 legendMarkerType: "circle",
                 color: COLORS[i % COLORS.length],
                 lineThickness: 2,

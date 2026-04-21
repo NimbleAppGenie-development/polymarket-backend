@@ -173,9 +173,9 @@ export default function Header() {
                                 <input type="text" name="" placeholder="Search your TARGET…" />
                             </div>
                             <div className="header-works">
-                                <a href="#">
+                                <Link to="/how-it-works">
                                     <img src="/img/setting.svg" alt="setting-icon" /> How it works?
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -183,9 +183,9 @@ export default function Header() {
                         <div className="header-right-content">
                             <ul>
                                 <li>
-                                    <a href="#" className="btn live-btn">
+                                    <Link to="/live" className="btn live-btn">
                                         <img src="/img/live.svg" alt="live-icon" /> LIVE
-                                    </a>
+                                    </Link>
                                 </li>
 
                                 {user ? (

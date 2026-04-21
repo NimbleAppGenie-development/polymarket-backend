@@ -209,6 +209,13 @@ module.exports = {
                 where: {
                     showInSlider: "true",
                 },
+                include: [
+                    {
+                        model: Category,
+                        as: "category",
+                        attributes: ["id", "name"],
+                    },
+                ],
             });
 
             const total = showSlider.length;
@@ -222,6 +229,7 @@ module.exports = {
                 description: item.description,
                 status: item.status,
                 showInSlider: item.showInSlider,
+                category: item.category,
                 createdAt: moment(item.createdAt).format("MM/DD/YYYY HH:mm:A"),
             }));
             return res.status(statusCodes.OK).json(successResponse(formatted, "Page content fetched"));
@@ -309,4 +317,30 @@ module.exports = {
             next(error);
         }
     },
+    
+    getLiveData: async (req, res, next) => {
+        try {
+            const liveData = await Question.findAll({
+                where: {status: "true"},
+                attributes:["id", "question", "description", "status"],
+                include: [
+                    {
+                        model: Category,
+                        as: "category",
+                        attributes: ["id", "name","image"],
+                    },
+                    {
+                        model: QuestionOptions,
+                        as: "options",
+                        attributes: ["id", "questionId", "option", "multiplier", "resultStatus", "image"],
+                    }
+                ]
+            })
+            console.log("============liveData", liveData)
+            return res.status(statusCodes.OK).json(successResponse(liveData, "Live data fetched"));
+        } catch (error) {
+            console.error("getLiveData error:", error);
+            next(error);
+        }
+    }
 };

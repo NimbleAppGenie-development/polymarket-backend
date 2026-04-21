@@ -49,20 +49,14 @@ const Account = () => {
                 {
                     userId: user.id,
                     amount,
-                    // method,
-                    // txnId,
                 },
                 true,
             );
-            
+
             if (response?.status) {
-                // alert("Money added successfully");
                 success("Money added successfully");
                 setAmount(response.data || []);
-                // setMethod("");
-                // setTxnId("");
-
-                getAccountDetails(); 
+                getAccountDetails();
             }
         } catch (error) {
             console.error(error);
@@ -123,18 +117,19 @@ const Account = () => {
                                     <form className="account-form" onSubmit={handleAddMoney}>
                                         <label>Enter Amount *</label>
 
-                                        <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} min="1" required max="99999999"/>
-
-                                        {/* <label>Payment Method *</label>
-                                        <select required>
-                                            <option value="">Select Method</option>
-                                            <option value="upi">UPI</option>
-                                            <option value="card">Card</option>
-                                            <option value="netbanking">Net Banking</option>
-                                        </select>
-
-                                        <label>Transaction ID</label>
-                                        <input type="text" value={txnId} onChange={(e) => setTxnId(e.target.value)} /> */}
+                                        <input
+                                            type="number"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            min="1"
+                                            onKeyDown={(e) => {
+                                                if (["e", "E", "+", "-", "."].includes(e.key)) {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            required
+                                            max="99999999"
+                                        />
 
                                         <button type="submit" className="btn btn-primaryx mt-3">
                                             Add Money
