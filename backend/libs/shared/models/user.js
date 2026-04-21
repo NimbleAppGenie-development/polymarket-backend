@@ -14,11 +14,11 @@ class User extends Model {
 
         this.tokenVersion = crypto.randomBytes(16).toString("hex");
         const accessToken = jwt.sign({ id: this.id, tokenVersion: this.tokenVersion }, JWT_SECRET_KEY, {
-            expiresIn: "30m",
+            expiresIn: "7d",
         });
 
         const refreshToken = jwt.sign({ id: this.id, tokenVersion: this.tokenVersion }, JWT_REFRESH_SECRET_KEY, {
-            expiresIn: "7d",
+            expiresIn: "31d",
         });
 
         this.accessToken = accessToken;

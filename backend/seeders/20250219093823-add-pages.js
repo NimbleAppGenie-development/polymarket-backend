@@ -22,6 +22,15 @@ module.exports = {
                 createdAt: new Date(),
                 updatedAt: new Date(),
             },
+            {
+                id: uuidv4(),
+                title: "How It Works",
+                slug: "how-it-works",
+                description: `Lorem ipsum dolor sit amet consectetur. Vitae adipiscing nulla enim risus phasellus magna viverra sollicitudin sapien. Consectetur mauris egestas imperdiet lobortis magna in nec in. Quam lorem egestas tellus sit id duis egestas fermentum sed. Quis velit vitae massa lectus ut vitae fringilla. Sagittis aliquam mattis faucibus eu suscipit suspendisse.`,
+                image: "",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            },
         ]);
     },
 

@@ -11,6 +11,11 @@ const UserPredictedQuestion = require("@models/userpredictedquestions");
 const { Sequelize } = require("sequelize");
 
 module.exports = {
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     getMarketList: async (req, res, next) => {
         try {
             const marketList = await Question.findAll({
@@ -88,6 +93,11 @@ module.exports = {
         }
     },
 
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     getMarketDetail: async (req, res, next) => {
         try {
             const { id } = req.params;
@@ -173,6 +183,11 @@ module.exports = {
         }
     },
 
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     getTrendingList: async (req, res, next) => {
         try {
             const trendingList = await Question.findAll({
@@ -202,6 +217,11 @@ module.exports = {
         }
     },
 
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     getShowInSlider: async (req, res, next) => {
         try {
             const showSlider = await Question.findAll({
@@ -239,6 +259,11 @@ module.exports = {
         }
     },
 
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     getGraphData: async (req, res, next) => {
         try {
             const { questionId } = req.params;
@@ -318,6 +343,11 @@ module.exports = {
         }
     },
     
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     getLiveData: async (req, res, next) => {
         try {
             const liveData = await Question.findAll({
@@ -336,10 +366,36 @@ module.exports = {
                     }
                 ]
             })
-            console.log("============liveData", liveData)
+            
             return res.status(statusCodes.OK).json(successResponse(liveData, "Live data fetched"));
         } catch (error) {
             console.error("getLiveData error:", error);
+            next(error);
+        }
+    },
+
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
+    getHowItWorks: async (req, res, next) => {
+        try {
+            const howItWorksPage = await Page.findAll({
+                order: [['createdAt', 'ASC']],
+                where: { slug: "how-it-works" },
+            })
+            const formatted = howItWorksPage.map(item => ({
+                id: item.id,
+                title: item.title,
+                description: item.description,
+                createdAt: moment(item.createdAt).format('DD-MM-YYYY HH:mm')
+            }));
+            return res.status(statusCodes.OK).json(
+                successResponse(formatted, "How it works content fetched successfully")
+            )
+        } catch (error) {
+            console.error("getHowItWorks error:", error);
             next(error);
         }
     }

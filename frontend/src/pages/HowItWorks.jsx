@@ -1,8 +1,30 @@
-import { Fragment } from "react";
+import { useContext, useEffect, useState, Fragment } from "react";
+import { errorToastr, successToastr } from "../utils/toastr.js";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Service from "../services/Http.js";
 
 export default function HowItWorks() {
+    const [howItWorksContent, SetHowItWorksContent] = useState([]);
+
+    const getHowItWorksData = async () => {
+        try {
+            const services = new Service();
+            const response = await services.get("/user/get-how-it-works", {}, false);
+            if (response?.status) {
+                
+                SetHowItWorksContent(response.data);
+            } else {
+                SetHowItWorksContent({});
+            }
+        } catch (error) {
+            errorToastr(error?.message || "Failed to fetch How it works data");
+        }
+    };
+    useEffect(() => {
+        getHowItWorksData();
+    }, []);
+
     return (
         <Fragment>
             <Header />
@@ -11,55 +33,25 @@ export default function HowItWorks() {
                 <div className="container">
                     <div className="row justify-content-center">
                         <div className="col-lg-10">
-
                             <h1 className="mb-4 text-center">How It Works</h1>
 
                             <div className="static-content">
-
-                                <div className="mb-4">
-                                    <h4>1. Explore Markets</h4>
-                                    <p>
-                                        Browse through different categories and discover trending questions.
-                                        Each market represents a real-world event where you can make predictions.
-                                    </p>
-                                </div>
-
-                                <div className="mb-4">
-                                    <h4>2. Analyze Data</h4>
-                                    <p>
-                                        View live charts and insights to understand how others are predicting.
-                                        Use this data to make informed decisions before placing your prediction.
-                                    </p>
-                                </div>
-
-                                <div className="mb-4">
-                                    <h4>3. Make a Prediction</h4>
-                                    <p>
-                                        Choose an option and enter the amount you want to invest.
-                                        Your prediction is recorded instantly.
-                                    </p>
-                                </div>
-
-                                <div className="mb-4">
-                                    <h4>4. Track Performance</h4>
-                                    <p>
-                                        Monitor your predictions and see how they perform over time
-                                        from your dashboard.
-                                    </p>
-                                </div>
-
-                                <div className="mb-4">
-                                    <h4>5. Earn Rewards</h4>
-                                    <p>
-                                        If your prediction is correct, you earn rewards based on
-                                        the multiplier shown at the time of prediction.
-                                    </p>
-                                </div>
+                                {howItWorksContent.length > 0 ? (
+                                    howItWorksContent.map((item, index) => (
+                                        <div className="mb-4" key={item.id || index}>
+                                            <h4>
+                                                {index + 1}. {item.title}
+                                            </h4>
+                                            <p>{item.description}</p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-center">No content available</p>
+                                )}
 
                                 <div className="mt-5 text-center">
                                     <h5>Start predicting smarter 🚀</h5>
                                 </div>
-
                             </div>
                         </div>
                     </div>
