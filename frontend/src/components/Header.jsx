@@ -140,11 +140,21 @@ export default function Header() {
             registerModal.hide();
         }
 
-        setTimeout(() => {
+        // Wait for the hide transition to fully complete before showing login
+        registerModalEl.addEventListener(
+            "hidden.bs.modal",
+            () => {
+                const loginModal = Modal.getOrCreateInstance(loginModalEl);
+                loginModal.show();
+            },
+            { once: true }, // fires only once, auto-removes listener
+        );
+
+        /* setTimeout(() => {
             loginModal.show();
-            registerModalEl.show();
+            // registerModalEl.show();
             document.querySelectorAll(".modal-backdrop").forEach((el) => el.remove());
-        }, 300);
+        }, 300); */
     };
 
     return (
@@ -263,7 +273,7 @@ export default function Header() {
                                             </button>
                                         </div>
                                         <div className="form-bottom-btn">
-                                            <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal01">
+                                            <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal01" data-bs-dismiss="modal">
                                                 No account? Create one
                                             </a>
                                         </div>

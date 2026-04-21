@@ -8,6 +8,7 @@ import { useNavigate } from "react-router";
 export default function AddCategory() {
     const navigate = useNavigate();
     const [formErrors, setFormErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Validation logic
     const validateForm = (formData) => {
@@ -28,41 +29,38 @@ export default function AddCategory() {
         return errors;
     };
 
-    // Handle form submit
     const handleSubmitting = async (event) => {
         event.preventDefault();
 
-        const form = new FormData(event.target);
+        if (isSubmitting) return;
 
+        setIsSubmitting(true);
+
+        const form = new FormData(event.target);
         const errors = validateForm(form);
 
-        // ❌ Stop if validation errors exist
         if (Object.keys(errors).length > 0) {
-            const firstError = Object.values(errors)[0];
-
-            errorToastr(firstError);
-
+            errorToastr(Object.values(errors)[0]);
+            setIsSubmitting(false);
             return;
         }
 
         try {
             const services = new Service();
 
-            const response = await services.post( "/admin/category/addCategory", form,  true, );
+            const response = await services.post("/admin/category/addCategory", form, true);
 
             if (response?.status) {
                 successToastr(response.message || "Category created successfully!");
-
-                navigate("/category", {
-                    replace: true,
-                });
+                navigate("/category", { replace: true });
             } else {
                 errorToastr(response?.message || "Failed to create category");
             }
         } catch (error) {
             console.error("ADD CATEGORY ERROR:", error);
-
             errorToastr(error?.message || "Something went wrong.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -91,8 +89,8 @@ export default function AddCategory() {
                                 </div>
                             </div>
                             <div className="card-footer text-center">
-                                <button type="submit" className="btn btn-primary w-100">
-                                    Submit
+                                <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>
+                                    {isSubmitting ? "Submitting..." : "Submit"}
                                 </button>
                             </div>
                         </form>

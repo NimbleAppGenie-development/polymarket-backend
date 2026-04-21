@@ -23,13 +23,17 @@ export default function HomeDetail() {
     const [open, setOpen] = useState(true);
     const [graphData, setGraphData] = useState({});
     const navigate = useNavigate();
+    const [showAll, setShowAll] = useState(false);
+    const filterOptions = (options = []) => options.filter((opt) => opt.option !== "None of the Above");
+    const options = filterOptions(marketData?.options || []);
+    const visibleOptions = showAll ? options : options.slice(0, 3);
 
     const getMarketData = async () => {
         try {
             setLoading(true);
             const services = new Service();
             const response = await services.get(`/user/get-market-detail/${detailId}`, {}, false);
-            
+
             if (response?.status) {
                 setMarketData(response.data || []);
                 setTotal(response.total || 0);
@@ -68,27 +72,46 @@ export default function HomeDetail() {
             const services = new Service();
             const response = await services.get(`/user/get-graph-data/${questionId}`, {}, false);
 
-            if (response?.status && response.data?.length) {
-                const optionMap = {};
+            const optionMap = {};
 
+            const question = marketData;
+
+            if (response?.status && response.data?.length) {
                 response.data.forEach((item) => {
                     const name = item.option.trim();
+
                     if (name === "None of the Above") return;
 
                     if (!optionMap[name]) optionMap[name] = [];
 
                     const dateObj = new Date(item.time.replace(" ", "T"));
+
                     optionMap[name].push({
                         x: isNaN(dateObj) ? new Date() : dateObj,
-                        y: Number(item.percentage),
+                        y: Number(item.percentage) || 0,
                     });
                 });
-
-                setGraphData((prev) => ({
-                    ...prev,
-                    [questionId]: optionMap,
-                }));
             }
+
+            if (question?.options?.length) {
+                question.options
+                    .filter((opt) => opt.option !== "None of the Above")
+                    .forEach((opt) => {
+                        if (!optionMap[opt.option]) {
+                            optionMap[opt.option] = [
+                                {
+                                    x: new Date(),
+                                    y: 0,
+                                },
+                            ];
+                        }
+                    });
+            }
+
+            setGraphData((prev) => ({
+                ...prev,
+                [questionId]: optionMap,
+            }));
         } catch (error) {
             console.error("GRAPH ERROR:", error);
         }
@@ -134,7 +157,7 @@ export default function HomeDetail() {
         }
     }, [marketData?.id]);
 
-    const filterOptions = (options = []) => options.filter((opt) => opt.option !== "None of the Above");
+    // const filterOptions = (options = []) => options.filter((opt) => opt.option !== "None of the Above");
 
     return (
         <div className="home-page">
@@ -253,7 +276,7 @@ export default function HomeDetail() {
                                                     <div className="center-box">
                                                         <p>Chance</p>
                                                     </div>
-                                                    <div className="main-box-inner-details-box">
+                                                    {/* <div className="main-box-inner-details-box">
                                                         {filterOptions(marketData?.options).map((opt) => (
                                                             <div key={opt.id}>
                                                                 <span>{opt.option}</span>
@@ -263,10 +286,29 @@ export default function HomeDetail() {
                                                                 </div>
                                                             </div>
                                                         ))}
+                                                    </div> */}
+                                                    <div className="main-box-inner-details-box">
+                                                        {visibleOptions.map((opt) => (
+                                                            <div key={opt.id}>
+                                                                <span>{opt.option}</span>
+                                                                <span>{opt.multiplier}x</span>
+                                                                <div className="counter-box-btn">
+                                                                    <span>{opt.percentage}%</span>
+                                                                </div>
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                    <div className="details-page-tbaing-content-box">
+                                                    {/* Show More / Less Button */}
+                                                    {options.length > 3 && (
+                                                        <div className="show-toggle">
+                                                            <span style={{ cursor: "pointer", color: "black" }} onClick={() => setShowAll(!showAll)}>
+                                                                {showAll ? "Show Less" : `${options.length - 3} more`}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    {/* <div className="details-page-tbaing-content-box">
                                                         <div className="show-less-content">Show Less Market</div>
-                                                    </div>
+                                                    </div> */}
                                                     <div className="details-page-bottom-accordion">
                                                         <div className="accordion" id="accordionExample">
                                                             <div className="accordion-item">

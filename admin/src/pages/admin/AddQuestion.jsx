@@ -12,6 +12,7 @@ export default function CreateQuestion() {
     const [formErrors, setFormErrors] = useState({});
     const [filteredCategory, setFilteredCategory] = useState([]); // shown in dropdown
     const [firstCategoryId, setFirstCategoryId] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [options, setOptions] = useState([
         { option: "", multiplier: "", image: null },
         { option: "", multiplier: "", image: null },
@@ -118,14 +119,17 @@ export default function CreateQuestion() {
 
     const handleSubmitting = async (event) => {
         event.preventDefault();
-
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         const form = new FormData(event.target);
 
         const errors = validateForm(form, options);
 
         if (Object.keys(errors).length > 0) {
-            errorToastr("Please fix the errors in the form");
+            const firstError = Object.values(errors)[0]; 
+            errorToastr(firstError);
 
+            setIsSubmitting(false);
             return;
         }
 
@@ -301,8 +305,8 @@ export default function CreateQuestion() {
 
                             <div className="card-footer">
                                 <div className="d-grid gap-2">
-                                    <button className="btn btn-primary" type="submit">
-                                        Submit
+                                    <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
+                                        {isSubmitting ? "Submitting..." : "Submit"}
                                     </button>
                                 </div>
                             </div>

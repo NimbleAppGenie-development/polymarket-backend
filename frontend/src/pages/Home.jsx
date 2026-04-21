@@ -17,6 +17,7 @@ export default function Home() {
     const [marketData, setMarketData] = useState([]);
     const [predictionData, setPredictionData] = useState([]);
     const [trendingData, setTrendingData] = useState([]);
+    const [showSlider, setShowSlider] = useState([]);
     const [showPopup, setShowPopup] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
     const [amount, setAmount] = useState("");
@@ -29,7 +30,7 @@ export default function Home() {
     const [graphData, setGraphData] = useState({});
     const [activeChartId, setActiveChartId] = useState(null);
     const [activeIndex, setActiveIndex] = useState(0);
-    const activeItem = marketData[activeIndex];
+    const activeItem = showSlider[activeIndex];
 
     const getMarketList = async () => {
         try {
@@ -164,15 +165,43 @@ export default function Home() {
         getTrendingList();
     }, []);
 
+    useEffect(() => {
+        const showSlider = async () => {
+            try {
+                setLoading(true);
+
+                const services = new Service();
+
+                const response = await services.get("/user/get-show-slider", {}, false);
+                
+                if (response?.status) {
+                    setShowSlider(response?.data || []);
+                } else {
+                    setShowSlider([]);
+                }
+            } catch (error) {
+                console.error("GET SHOW SLIDER ERROR:", error);
+
+                errorToastr(error?.message || "Failed to fetch show slider");
+                setShowSlider([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        showSlider();
+    }, []);
+
     const getGraphData = async (questionId) => {
         try {
             const services = new Service();
 
             const response = await services.get(`/user/get-graph-data/${questionId}`, {}, false);
 
-            if (response?.status) {
-                const optionMap = {};
+            const optionMap = {};
 
+            const question = marketData.find((q) => String(q.id) === String(questionId));
+
+            if (response?.status && response.data.length > 0) {
                 response.data.forEach((item) => {
                     const name = item.option.trim();
 
@@ -181,16 +210,25 @@ export default function Home() {
                     }
 
                     optionMap[name].push({
-                        x: new Date(item.time.replace(" ", "T")), // ensure seconds
+                        x: new Date(item.time.replace(" ", "T")),
                         y: Number(item.percentage),
                     });
                 });
-
-                setGraphData((prev) => ({
-                    ...prev,
-                    [questionId]: optionMap,
-                }));
+            } else if (question?.options) {
+                question.options.forEach((opt) => {
+                    optionMap[opt.option] = [
+                        {
+                            x: new Date(),
+                            y: 0,
+                        },
+                    ];
+                });
             }
+
+            setGraphData((prev) => ({
+                ...prev,
+                [questionId]: optionMap,
+            }));
         } catch (error) {
             console.error("GRAPH ERROR:", error);
         }
@@ -206,7 +244,7 @@ export default function Home() {
         });
     }, [marketData]);
 
-    // Already exists — but make sure it runs for ALL marketData items
+
     useEffect(() => {
         if (!marketData.length) return;
         marketData.forEach((item) => {

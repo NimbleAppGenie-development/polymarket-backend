@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import { useContext, useEffect, useState } from "react";
 import AuthContext from "../utils/auth/AuthContext.jsx";
 import Service from "../services/Http.js";
+import { success } from "toastr";
 
 const Account = () => {
     const { user } = useContext(AuthContext);
@@ -56,7 +57,7 @@ const Account = () => {
             
             if (response?.status) {
                 // alert("Money added successfully");
-
+                success("Money added successfully");
                 setAmount(response.data || []);
                 // setMethod("");
                 // setTxnId("");
@@ -105,7 +106,7 @@ const Account = () => {
                                     </div>
 
                                     <div className="wallet-box">
-                                        <h3>₹ {wallet}</h3>
+                                        <h3>$ {wallet}</h3>
                                         <p>Available Balance</p>
                                     </div>
                                 </div>

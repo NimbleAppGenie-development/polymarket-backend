@@ -72,7 +72,7 @@ const AdminWallet = () => {
                         <div className="card-body text-center">
                             <h5>Total Wallet Balance</h5>
                             <h2 className="text-success">
-                                ₹ {walletBalance}
+                                $ {walletBalance}
                             </h2>
                         </div>
                     </div>

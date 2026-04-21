@@ -53,7 +53,7 @@ export default function Login() {
         >
             <div className="card text-bg-dark shadow-lg px-5">
                 <img
-                    src="/img/logos.svg"
+                    src="/img/logo.svg"
                     className="card-img-top mt-5"
                     alt="Admin Logo"
                     style={{

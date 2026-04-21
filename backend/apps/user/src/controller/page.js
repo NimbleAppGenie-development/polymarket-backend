@@ -202,6 +202,35 @@ module.exports = {
         }
     },
 
+    getShowInSlider: async (req, res, next) => {
+        try {
+            const showSlider = await Question.findAll({
+                order: [["createdAt", "DESC"]],
+                where: {
+                    showInSlider: "true",
+                },
+            });
+
+            const total = showSlider.length;
+
+            if (!showSlider || showSlider.length === 0)
+                return res.status(statusCodes.OK).json(successResponse([], "No showSlider found"));
+
+            const formatted = showSlider.map((item) => ({
+                id: item.id,
+                question: item.question,
+                description: item.description,
+                status: item.status,
+                showInSlider: item.showInSlider,
+                createdAt: moment(item.createdAt).format("MM/DD/YYYY HH:mm:A"),
+            }));
+            return res.status(statusCodes.OK).json(successResponse(formatted, "Page content fetched"));
+        } catch (error) {
+            console.error("getPage error:", error);
+            next(error);
+        }
+    },
+
     getGraphData: async (req, res, next) => {
         try {
             const { questionId } = req.params;

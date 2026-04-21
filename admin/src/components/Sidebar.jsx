@@ -103,7 +103,7 @@ export default function Sidebar() {
                             alt="navbar brand"
                             style={{marginTop: "30px"}}
                             className="navbar-brand"
-                            height="60"
+                            height="40"
                         />
                     </Link>
 
