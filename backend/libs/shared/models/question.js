@@ -42,6 +42,14 @@ Question.init(
             defaultValue: false,
             allowNull: false,
         },
+        eventStartDate: {
+            type: DataTypes.DATE,
+            allowNull: false,  
+        },
+        eventEndDate: {
+            type: DataTypes.DATE,
+            allowNull: false,  
+        },
     },
     {
         sequelize,

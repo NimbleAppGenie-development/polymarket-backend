@@ -30,8 +30,29 @@ export default function Home() {
     const [graphData, setGraphData] = useState({});
     const [activeChartId, setActiveChartId] = useState(null);
     const [activeIndex, setActiveIndex] = useState(0);
-    const sliderData = showSlider.filter((item) => item.showInSlider === true);
+    // const sliderData = showSlider.filter((item) => item.showInSlider === true);
+    const currentTime = new Date();
+    const isActiveEvent = (date) => {
+        if (!date) return false;
+        return new Date(date).getTime() > Date.now();
+    };
+    const sliderData = showSlider.filter((item) => item.showInSlider === true).filter((item) => isActiveEvent(item.eventEndDate));
     const activeItem = sliderData[activeIndex];
+
+    const filteredMarketData = marketData.filter((item) => isActiveEvent(item.eventEndDate));
+    const filteredTrendingData = trendingData.filter((item) => isActiveEvent(item.eventEndDate));
+
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "-";
+
+        return new Intl.DateTimeFormat("en-GB", {
+            day: "2-digit",
+            month: "long",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+        }).format(new Date(dateString));
+    };
 
     const getMarketList = async () => {
         try {
@@ -92,7 +113,7 @@ export default function Home() {
         }
     }, [user]);
 
-    const groupedData = marketData?.reduce((acc, item) => {
+    const groupedData = filteredMarketData?.reduce((acc, item) => {
         const categoryName = item.category?.name || "Other";
 
         if (!acc[categoryName]) {
@@ -236,17 +257,7 @@ export default function Home() {
 
     useEffect(() => {
         if (!marketData.length) return;
-
-        marketData.forEach((item) => {
-            if (!graphData[item.id]) {
-                getGraphData(item.id);
-            }
-        });
-    }, [marketData]);
-
-    useEffect(() => {
-        if (!marketData.length) return;
-        marketData.forEach((item) => {
+        filteredMarketData.forEach((item) => {
             if (!graphData[item.id]) {
                 getGraphData(item.id);
             }
@@ -315,7 +326,14 @@ export default function Home() {
                                         </button>
 
                                         {/* Question Title + Counter */}
-                                        <div style={{ textAlign: "center", flex: 1, padding: "0 12px" }}>
+                                        <div
+                                            style={{ textAlign: "center", flex: 1, padding: "0 12px" }}
+                                            onClick={() => {
+                                                if (activeItem?.id) {
+                                                    navigate(`/home-detail/${activeItem.id}`);
+                                                }
+                                            }}
+                                        >
                                             <div style={{ fontSize: 13, color: "#aaa", marginBottom: 2 }}>
                                                 {activeIndex + 1} of {sliderData.length}
                                             </div>
@@ -409,12 +427,12 @@ export default function Home() {
                                     </h2>
 
                                     <div className="trading-content-right-box">
-                                        {trendingData?.map((item, index) => (
+                                        {filteredTrendingData?.map((item, index) => (
                                             <div className="trading-content-right-box-inner" key={item.id || index}>
                                                 <div className="trading-question-left">
                                                     <span>{index + 1}.</span>
-                                                    <h3>
-                                                        <a href={item.link || "#"}>{item.question}</a>
+                                                    <h3 onClick={() => navigate(`/home-detail/${item.id}`)} style={{ cursor: "pointer" }}>
+                                                        {item.question}
                                                     </h3>
                                                     {/* <p className="date-text">{item.createdAt}</p> */}
                                                 </div>
@@ -462,7 +480,7 @@ export default function Home() {
                                                                 </div>
 
                                                                 <h3>{item.question}</h3>
-                                                                {/* <p>{item.createdAt}</p> */}
+                                                                <p>{formatDateTime(item.eventStartDate)}</p>
 
                                                                 {user ? (
                                                                     <div className="politics-btn-box d-flex flex-column">
@@ -601,7 +619,7 @@ export default function Home() {
                                                     </div>
 
                                                     {/* Amount */}
-                                                    
+
                                                     <input
                                                         type="number"
                                                         className="form-control mb-3"

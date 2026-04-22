@@ -16,6 +16,8 @@ export default function QuestionEdit() {
         question: "",
         description: "",
         marketRules: "",
+        eventStartDate: "",
+        eventEndDate: "",
     });
     const [options, setOptions] = useState([
         { option: "", multiplier: "", image: "" },
@@ -49,6 +51,14 @@ export default function QuestionEdit() {
 
         if (!options || options.length < 2) {
             errors.options = "Minimum 2 options required";
+        }
+
+        if (!QuestionData.eventStartDate) {
+            errors.eventStartDate = "Event start date is required";
+        }
+
+        if (!QuestionData.eventEndDate) {
+            errors.eventEndDate = "Event end date is required";
         }
 
         options.forEach((opt, i) => {
@@ -140,6 +150,8 @@ export default function QuestionEdit() {
                 question: question.question,
                 description: question.description,
                 marketRules: question.marketRules,
+                eventStartDate: question.eventStartDate ? question.eventStartDate.slice(0, 16) : "",
+                eventEndDate: question.eventEndDate ? question.eventEndDate.slice(0, 16) : "",
             });
 
             const matchesToUse = Array.isArray(categoryParam) ? categoryParam : allCategory;
@@ -199,6 +211,8 @@ export default function QuestionEdit() {
         formData.append("question", QuestionData.question);
         formData.append("description", QuestionData.description);
         formData.append("marketRules", QuestionData.marketRules);
+        formData.append("eventStartDate", QuestionData.eventStartDate);
+        formData.append("eventEndDate", QuestionData.eventEndDate);
 
         formData.append("options", JSON.stringify(options));
 
@@ -330,80 +344,107 @@ export default function QuestionEdit() {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label className="form-label">Options</label>
-
-                                    {options.map((opt, index) => (
-                                        <div key={index} className="mb-3">
-                                            <div className="d-flex gap-2 align-items-center">
-                                                <input
-                                                    type="file"
-                                                    className="form-control"
-                                                    accept=".jpg,.jpeg,.png,.webp"
-                                                    onChange={(e) => handleFileChange(index, e.target.files[0])}
-                                                />
-
-                                                {/* SHOW EXISTING IMAGE */}
-                                                {typeof opt.image === "string" && opt.image && (
-                                                    <img
-                                                        src={`${import.meta.env.VITE_STATIC_URL}/public/question/${opt.image}`}
-                                                        width="40"
-                                                        height="40"
-                                                        style={{ objectFit: "cover", borderRadius: "6px" }}
-                                                    />
-                                                )}
-
-                                                {/* SHOW NEW SELECTED IMAGE PREVIEW */}
-                                                {opt.image instanceof File && (
-                                                    <img
-                                                        src={URL.createObjectURL(opt.image)}
-                                                        width="40"
-                                                        height="40"
-                                                        style={{ objectFit: "cover", borderRadius: "6px" }}
-                                                    />
-                                                )}
-
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Option"
-                                                    value={opt.option}
-                                                    onChange={(e) => handleOptionChange(index, "option", e.target.value)}
-                                                />
-
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    className="form-control"
-                                                    placeholder="Multiplier"
-                                                    value={opt.multiplier}
-                                                    onChange={(e) => handleOptionChange(index, "multiplier", e.target.value)}
-                                                />
-
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-danger"
-                                                    onClick={() => removeOption(index)}
-                                                    disabled={options.length <= 2}
-                                                >
-                                                    ❌
-                                                </button>
-                                            </div>
-                                            <div className="mt-1">
-                                                {formErrors[`option_${index}`] && <div className="text-danger">{formErrors[`option_${index}`]}</div>}
-
-                                                {formErrors[`multiplier_${index}`] && (
-                                                    <div className="text-danger">{formErrors[`multiplier_${index}`]}</div>
-                                                )}
-
-                                                {formErrors[`image_${index}`] && <div className="text-danger">{formErrors[`image_${index}`]}</div>}
-                                            </div>
-                                        </div>
-                                    ))}
-
-                                    <button type="button" className="btn btn-success mt-2" onClick={addOption}>
-                                        + Add Option
-                                    </button>
+                                    <label htmlFor="eventStartDate" className="form-label">
+                                        Event Start Date
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        className="form-control"
+                                        name="eventStartDate"
+                                        id="eventStartDate"
+                                        onChange={(e) => setQuestionData((prev) => ({ ...prev, eventStartDate: e.target.value }))}
+                                        value={QuestionData?.eventStartDate || ""}
+                                    />
                                 </div>
+                                <div className="mb-3">
+                                    <label htmlFor="eventEndDate" className="form-label">
+                                        Event End Date
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        className="form-control"
+                                        name="eventEndDate"
+                                        id="eventEndDate"
+                                        onChange={(e) => setQuestionData((prev) => ({ ...prev, eventEndDate: e.target.value }))}
+                                        value={QuestionData?.eventEndDate || ""}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mb-3">
+                                <label className="form-label">Options</label>
+
+                                {options.map((opt, index) => (
+                                    <div key={index} className="mb-3">
+                                        <div className="d-flex gap-2 align-items-center">
+                                            <input
+                                                type="file"
+                                                className="form-control"
+                                                accept=".jpg,.jpeg,.png,.webp"
+                                                onChange={(e) => handleFileChange(index, e.target.files[0])}
+                                            />
+
+                                            {/* SHOW EXISTING IMAGE */}
+                                            {typeof opt.image === "string" && opt.image && (
+                                                <img
+                                                    src={`${import.meta.env.VITE_STATIC_URL}/public/question/${opt.image}`}
+                                                    width="40"
+                                                    height="40"
+                                                    style={{ objectFit: "cover", borderRadius: "6px" }}
+                                                />
+                                            )}
+
+                                            {/* SHOW NEW SELECTED IMAGE PREVIEW */}
+                                            {opt.image instanceof File && (
+                                                <img
+                                                    src={URL.createObjectURL(opt.image)}
+                                                    width="40"
+                                                    height="40"
+                                                    style={{ objectFit: "cover", borderRadius: "6px" }}
+                                                />
+                                            )}
+
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Option"
+                                                value={opt.option}
+                                                onChange={(e) => handleOptionChange(index, "option", e.target.value)}
+                                            />
+
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                className="form-control"
+                                                placeholder="Multiplier"
+                                                value={opt.multiplier}
+                                                onChange={(e) => handleOptionChange(index, "multiplier", e.target.value)}
+                                            />
+
+                                            <button
+                                                type="button"
+                                                className="btn btn-danger"
+                                                onClick={() => removeOption(index)}
+                                                disabled={options.length <= 2}
+                                            >
+                                                ❌
+                                            </button>
+                                        </div>
+                                        <div className="mt-1">
+                                            {formErrors[`option_${index}`] && <div className="text-danger">{formErrors[`option_${index}`]}</div>}
+
+                                            {formErrors[`multiplier_${index}`] && (
+                                                <div className="text-danger">{formErrors[`multiplier_${index}`]}</div>
+                                            )}
+
+                                            {formErrors[`image_${index}`] && <div className="text-danger">{formErrors[`image_${index}`]}</div>}
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <button type="button" className="btn btn-success mt-2" onClick={addOption}>
+                                    + Add Option
+                                </button>
                             </div>
 
                             <div className="card-footer">

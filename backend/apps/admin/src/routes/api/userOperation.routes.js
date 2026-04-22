@@ -70,14 +70,7 @@ router.route("/question/winner/:id").get(isAuthenticated, getQuestionForWinner).
 router.route("/question/announce-winner").post(isAuthenticated, announceWinner).all(methodNotAllowed);
 
 // router.route("/question/edit").post(isAuthenticated, editQuestion).all(methodNotAllowed);
-router
-  .route("/question/edit")
-  .post(
-    isAuthenticated,
-    upload("question").array("optionImages"),
-    editQuestion
-  )
-  .all(methodNotAllowed);
+router .route("/question/edit") .post( isAuthenticated, upload("question").array("optionImages"), editQuestion).all(methodNotAllowed);
 
 router.route("/question/delete").post(isAuthenticated, deleteQuestion).all(methodNotAllowed);
 

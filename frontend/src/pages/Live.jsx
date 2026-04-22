@@ -12,6 +12,37 @@ export default function Live() {
     const [liveData, setLiveData] = useState([]);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const isLive = (start, end) => {
+        const now = new Date();
+        return now >= new Date(start) && now <= new Date(end);
+    };
+
+    const formatDateTime = (dateString) => {
+        const date = new Date(dateString);
+
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12;
+
+        return `${day}-${month}-${year} ${hours}:${minutes} ${ampm}`;
+    };
+
+    const getLiveRecords = (data) => {
+        const now = new Date();
+
+        return data.filter((item) => {
+            const start = new Date(item.eventStartDate);
+            const end = new Date(item.eventEndDate);
+
+            return now >= start && now <= end;
+        });
+    };
 
     const getLiveData = async () => {
         try {
@@ -20,7 +51,7 @@ export default function Live() {
             const services = new Service();
 
             const response = await services.get("/user/get-live-data", {}, false);
-
+            console.log("============Radhe============", response.data);
             if (response?.status) {
                 setLiveData(response?.data || []);
             } else {
@@ -38,6 +69,8 @@ export default function Live() {
     useEffect(() => {
         getLiveData();
     }, []);
+    
+    const filteredLive = getLiveRecords(liveData);
 
     return (
         <div className="home-page">
@@ -54,10 +87,10 @@ export default function Live() {
                         <div className="row">
                             {loading ? (
                                 <div className="text-center py-5">Loading...</div>
-                            ) : liveData.length === 0 ? (
+                            ) : filteredLive.length === 0 ? (
                                 <div className="text-center py-5 text-muted">No live markets available</div>
                             ) : (
-                                liveData.map((item, index) => (
+                                filteredLive.map((item, index) => (
                                     <div className="col-lg-4" key={item.id || index}>
                                         <div className="politics-main-box">
                                             {/* HEADER  */}
@@ -73,7 +106,11 @@ export default function Live() {
 
                                             {/* QUESTION */}
                                             <h3>
-                                                <span style={{ color: "red" }}>● LIVE</span> {item.question}
+                                                <div>{item.question}</div>
+
+                                                {isLive(item.eventStartDate, item.eventEndDate) && (
+                                                    <span style={{ color: "red", fontSize: "14px", fontWeight: "bold" }}>● LIVE</span>
+                                                )}
                                             </h3>
 
                                             {/* OPTIONS */}
@@ -101,12 +138,11 @@ export default function Live() {
                                                     ))}
                                             </div>
                                             <div>
-                                            <button className="btn btn-primaryx w-100 mt-3" onClick={() => navigate(`/home-detail/${item.id}`)}>
-                                                View Details
-                                            </button>
+                                                <button className="btn btn-primaryx w-100 mt-3" onClick={() => navigate(`/home-detail/${item.id}`)}>
+                                                    View Details
+                                                </button>
+                                            </div>
                                         </div>
-                                        </div>
-                                        
                                     </div>
                                 ))
                             )}

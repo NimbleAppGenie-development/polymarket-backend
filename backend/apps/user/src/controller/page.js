@@ -79,6 +79,8 @@ module.exports = {
                     question: plainItem.question,
                     description: plainItem.description,
                     status: plainItem.status,
+                    eventStartDate: plainItem.eventStartDate,
+                    eventEndDate: plainItem.eventEndDate,
                     category: plainItem.category,
                     options: optionsWithPercentage,
                     image: plainItem.image,
@@ -208,6 +210,8 @@ module.exports = {
                 description: item.description,
                 status: item.status,
                 trending: item.isTrending,
+                eventStartDate: item.eventStartDate,
+                eventEndDate: item.eventEndDate,
                 createdAt: moment(item.createdAt).format("MM/DD/YYYY HH:mm:A"),
             }));
             return res.status(statusCodes.OK).json(successResponse(formatted, "Page content fetched"));
@@ -249,6 +253,8 @@ module.exports = {
                 description: item.description,
                 status: item.status,
                 showInSlider: item.showInSlider,
+                eventStartDate: item.eventStartDate,
+                eventEndDate: item.eventEndDate,
                 category: item.category,
                 createdAt: moment(item.createdAt).format("MM/DD/YYYY HH:mm:A"),
             }));
@@ -352,7 +358,7 @@ module.exports = {
         try {
             const liveData = await Question.findAll({
                 where: {status: "true"},
-                attributes:["id", "question", "description", "status"],
+                attributes:["id", "question", "description", "status","eventStartDate","eventEndDate"],
                 include: [
                     {
                         model: Category,

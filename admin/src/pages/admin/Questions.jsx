@@ -111,6 +111,23 @@ export default function Questions() {
         }
     };
 
+    const formatDateTime = (dateString) => {
+        const date = new Date(dateString);
+
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12; // convert to 12-hour format
+        hours = String(hours).padStart(2, "0");
+
+        return `${day}-${month}-${year} ${hours}:${minutes} ${ampm}`;
+    };
+
     const handlePageChange = (updatedPage) => {
         setPage(updatedPage);
     };
@@ -262,6 +279,8 @@ export default function Questions() {
                                             <th>Options</th>
                                             <th>Description</th>
                                             <th>Status</th>
+                                            <th>Event Start Date</th>
+                                            <th>Event End Date</th>
                                             <td>Trending</td>
                                             <td>Show In Slider</td>
                                             <th>Action</th>
@@ -313,10 +332,12 @@ export default function Questions() {
                                                         </span>
                                                     )}
                                                 </td>
+                                                <td>{formatDateTime(item.eventStartDate)}</td>
+                                                <td>{formatDateTime(item.eventEndDate)}</td>
                                                 <td>
                                                     <input
                                                         type="checkbox"
-                                                        checked={item.isTrending === true || item.isTrending === "true"} 
+                                                        checked={item.isTrending === true || item.isTrending === "true"}
                                                         onChange={() => updateTrending(item.questionId)}
                                                         style={{ cursor: "pointer", width: "20px", height: "20px" }}
                                                     />
@@ -324,7 +345,7 @@ export default function Questions() {
                                                 <td>
                                                     <input
                                                         type="checkbox"
-                                                        checked={item.showInSlider === true || item.showInSlider === "true"} 
+                                                        checked={item.showInSlider === true || item.showInSlider === "true"}
                                                         onChange={() => updateShowInSlider(item.questionId)}
                                                         style={{ cursor: "pointer", width: "20px", height: "20px" }}
                                                     />
@@ -364,6 +385,8 @@ export default function Questions() {
                                     <th>Category</th>
                                     <th>Description</th>
                                     <th>Status</th>
+                                    <th>Event Start Date</th>
+                                    <th>Event End Date</th>
                                     <th>Trending</th>
                                     <th>Show In Slider</th>
                                     <th>Result status</th>
@@ -407,6 +430,8 @@ export default function Questions() {
                                                     </span>
                                                 )}
                                             </td>
+                                            <td>{formatDateTime(item.eventStartDate)}</td>
+                                            <td>{formatDateTime(item.eventEndDate)}</td>
                                             <td>
                                                 <input
                                                     type="checkbox"

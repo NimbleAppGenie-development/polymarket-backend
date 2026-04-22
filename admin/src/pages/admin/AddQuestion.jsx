@@ -117,6 +117,11 @@ export default function CreateQuestion() {
         }
     };
 
+    const getCurrentDateTime = () => {
+        const now = new Date();
+        return now.toISOString().slice(0, 16);
+    };
+
     const handleSubmitting = async (event) => {
         event.preventDefault();
         if (isSubmitting) return;
@@ -126,7 +131,7 @@ export default function CreateQuestion() {
         const errors = validateForm(form, options);
 
         if (Object.keys(errors).length > 0) {
-            const firstError = Object.values(errors)[0]; 
+            const firstError = Object.values(errors)[0];
             errorToastr(firstError);
 
             setIsSubmitting(false);
@@ -153,7 +158,8 @@ export default function CreateQuestion() {
                 formData.append("optionImages", opt.image);
             }
         });
-
+        formData.append("eventStartDate", form.get("eventStartDate"));
+        formData.append("eventEndDate", form.get("eventEndDate"));
         try {
             const services = new Service();
 
@@ -242,6 +248,19 @@ export default function CreateQuestion() {
                                         placeholder="Enter market rules"
                                         required
                                     ></textarea>
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="eventStartDate" className="form-label">
+                                        Event Start Date & Time
+                                    </label>
+                                    <input type="datetime-local" className="form-control" name="eventStartDate" min={getCurrentDateTime()} required />
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="eventEndDate" className="form-label">
+                                        Event End Date & Time
+                                    </label>
+                                    <input type="datetime-local" className="form-control" name="eventEndDate" min={getCurrentDateTime()} required />
                                 </div>
 
                                 <div className="mb-3">

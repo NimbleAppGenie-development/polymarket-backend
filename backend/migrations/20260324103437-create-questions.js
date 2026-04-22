@@ -32,7 +32,15 @@ module.exports = {
                 defaultValue: false,
                 allowNull: false
             },
-            
+            eventStartDate: {
+                type: Sequelize.DATE,
+                allowNull: false,
+            },
+            eventEndDate: {
+                type: Sequelize.DATE,
+                allowNull: false,
+            },
+
             createdAt: Sequelize.DATE,
             updatedAt: Sequelize.DATE
         });

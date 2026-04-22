@@ -411,6 +411,8 @@ module.exports = {
                 status: q.status,
                 trending: q.isTrending,
                 showInSlider: q.showInSlider,
+                eventStartDate: q.eventStartDate,
+                eventEndDate: q.eventEndDate,
                 createdAt: q.createdAt,
             }));
 
@@ -439,7 +441,7 @@ module.exports = {
             const admin = req.user;
             const files = req.files || [];
             let options = [];
-            let { categoryId, question, description, marketRules } = req.body;
+            let { categoryId, question, description, marketRules, eventStartDate, eventEndDate } = req.body;
 
             const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
 
@@ -449,7 +451,7 @@ module.exports = {
                 }
             });
 
-            if (!categoryId || !question || !description || !marketRules) {
+            if (!categoryId || !question || !description || !marketRules || !eventStartDate || !eventEndDate) {
                 return res.status(statusCode.BAD_REQUEST).json({
                     status: false,
                     message: "Required fields missing",
@@ -482,6 +484,8 @@ module.exports = {
                 status: true,
                 isTrending: true,
                 showInSlider: true,
+                eventStartDate,
+                eventEndDate,
             });
 
             const optionData = options.map((opt, index) => ({
@@ -658,6 +662,8 @@ module.exports = {
                     multiplier: opt.multiplier,
                     image: opt.image,
                 })),
+                eventStartDate: question.eventStartDate,
+                eventEndDate: question.eventEndDate,
             };
 
             return res.status(statusCode.OK).json(successResponse(formattedQuestion, "Question fetched successfully"));
@@ -683,7 +689,7 @@ module.exports = {
                 });
             }
 
-            const { id, categoryId, question, description, options, marketRules } = req.body;
+            const { id, categoryId, question, description, options, marketRules, eventStartDate, eventEndDate } = req.body;
 
             const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
 
@@ -703,6 +709,8 @@ module.exports = {
             questionExists.question = question;
             questionExists.description = description;
             questionExists.marketRules = marketRules;
+            questionExists.eventStartDate = eventStartDate;
+            questionExists.eventEndDate = eventEndDate;
 
             await questionExists.save();
 
