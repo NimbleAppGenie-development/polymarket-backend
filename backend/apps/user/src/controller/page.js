@@ -150,7 +150,7 @@ module.exports = {
             const totalEntryAmountOnQuestion = await UserPredictedQuestion.sum("entryAmount", {
                 where: { questionId: id },
             });
-            
+
             //options with %
             const optionsWithPercentage = data.options.map((opt) => {
                 const count = countMap[opt.id] || 0;
@@ -197,6 +197,13 @@ module.exports = {
                 where: {
                     isTrending: "true",
                 },
+                include: [
+                    {
+                        model: QuestionOptions,
+                        as: "options",
+                        attributes: ["id", "questionId", "option", "multiplier", "resultStatus"],
+                    },
+                ],
             });
 
             const total = trendingList.length;
@@ -213,6 +220,8 @@ module.exports = {
                 eventStartDate: item.eventStartDate,
                 eventEndDate: item.eventEndDate,
                 createdAt: moment(item.createdAt).format("MM/DD/YYYY HH:mm:A"),
+                options:
+                    item.options,
             }));
             return res.status(statusCodes.OK).json(successResponse(formatted, "Page content fetched"));
         } catch (error) {
@@ -239,6 +248,11 @@ module.exports = {
                         as: "category",
                         attributes: ["id", "name"],
                     },
+                    {
+                        model: QuestionOptions,
+                        as: "options",
+                        attributes: ["id", "questionId", "option", "multiplier", "resultStatus"],
+                    }
                 ],
             });
 
@@ -257,6 +271,7 @@ module.exports = {
                 eventEndDate: item.eventEndDate,
                 category: item.category,
                 createdAt: moment(item.createdAt).format("MM/DD/YYYY HH:mm:A"),
+                options: item.options,
             }));
             return res.status(statusCodes.OK).json(successResponse(formatted, "Page content fetched"));
         } catch (error) {
@@ -348,7 +363,7 @@ module.exports = {
             next(error);
         }
     },
-    
+
     /**
      * @param {import('express').Request} req
      * @param {import('express').Response} res
@@ -357,22 +372,22 @@ module.exports = {
     getLiveData: async (req, res, next) => {
         try {
             const liveData = await Question.findAll({
-                where: {status: "true"},
-                attributes:["id", "question", "description", "status","eventStartDate","eventEndDate"],
+                where: { status: "true" },
+                attributes: ["id", "question", "description", "status", "eventStartDate", "eventEndDate"],
                 include: [
                     {
                         model: Category,
                         as: "category",
-                        attributes: ["id", "name","image"],
+                        attributes: ["id", "name", "image"],
                     },
                     {
                         model: QuestionOptions,
                         as: "options",
                         attributes: ["id", "questionId", "option", "multiplier", "resultStatus", "image"],
-                    }
-                ]
-            })
-            
+                    },
+                ],
+            });
+
             return res.status(statusCodes.OK).json(successResponse(liveData, "Live data fetched"));
         } catch (error) {
             console.error("getLiveData error:", error);
@@ -388,21 +403,21 @@ module.exports = {
     getHowItWorks: async (req, res, next) => {
         try {
             const howItWorksPage = await Page.findAll({
-                order: [['createdAt', 'ASC']],
+                order: [["createdAt", "ASC"]],
                 where: { slug: "how-it-works" },
-            })
-            const formatted = howItWorksPage.map(item => ({
+            });
+            const formatted = howItWorksPage.map((item) => ({
                 id: item.id,
                 title: item.title,
                 description: item.description,
-                createdAt: moment(item.createdAt).format('DD-MM-YYYY HH:mm')
+                createdAt: moment(item.createdAt).format("DD-MM-YYYY HH:mm"),
             }));
-            return res.status(statusCodes.OK).json(
-                successResponse(formatted, "How it works content fetched successfully")
-            )
+            return res
+                .status(statusCodes.OK)
+                .json(successResponse(formatted, "How it works content fetched successfully"));
         } catch (error) {
             console.error("getHowItWorks error:", error);
             next(error);
         }
-    }
+    },
 };

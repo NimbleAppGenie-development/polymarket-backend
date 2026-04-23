@@ -33,14 +33,25 @@ export default function Home() {
     // const sliderData = showSlider.filter((item) => item.showInSlider === true);
     const currentTime = new Date();
     const isActiveEvent = (date) => {
-        if (!date) return false;
         return new Date(date).getTime() > Date.now();
     };
-    const sliderData = showSlider.filter((item) => item.showInSlider === true).filter((item) => isActiveEvent(item.eventEndDate));
+    // const sliderData = showSlider.filter((item) => item.showInSlider === true).filter((item) => isActiveEvent(item.eventEndDate));
+    const isValidMarket = (item) => {
+        const now = Date.now();
+        const end = new Date(item.eventEndDate).getTime();
+
+        const isExpired = end < now;
+        const isResultDeclared = item.options?.some((opt) => opt.resultStatus === true);
+
+        return !isExpired && !isResultDeclared;
+    };
+
+    const sliderData = showSlider.filter((item) => item.showInSlider === true).filter(isValidMarket);
+
     const activeItem = sliderData[activeIndex];
 
-    const filteredMarketData = marketData.filter((item) => isActiveEvent(item.eventEndDate));
-    const filteredTrendingData = trendingData.filter((item) => isActiveEvent(item.eventEndDate));
+    const filteredMarketData = marketData.filter(isValidMarket);
+    const filteredTrendingData = trendingData.filter(isValidMarket);
 
     const formatDateTime = (dateString) => {
         if (!dateString) return "-";
@@ -139,7 +150,7 @@ export default function Home() {
                     questionId,
                     selectedOption,
                     amount,
-                    type :"MAIN"
+                    type: "MAIN",
                 },
                 true,
             );
@@ -263,413 +274,439 @@ export default function Home() {
                 getGraphData(item.id);
             }
         });
-    }, [marketData]);
+    }, [filteredMarketData]);
 
     const hasPredicted = (questionId) => {
         return predictionData?.find((item) => String(item.questionId) === String(questionId));
     };
 
+    // const noData = !showSlider.length && !marketData.length && !trendingData.length;
+    const noData = !sliderData.length && !filteredMarketData.length && !filteredTrendingData.length;
     return (
         <div className="home-page">
             <Header />
 
-            <section className="banner-section-content">
-                <div className="container">
-                    <ul className="nav nav-tabs" id="myTab" role="tablist">
-                        <li className="nav-item" role="presentation">
-                            <button
-                                className="nav-link active"
-                                id="home-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#home"
-                                type="button"
-                                role="tab"
-                                aria-controls="home"
-                                aria-selected="true"
-                            >
-                                {activeItem?.category?.name || "Loading..."}
-                            </button>
-                        </li>
-                    </ul>
-                    <div className="tabing-content-wrapper">
-                        <div className="row">
-                            <div className="col-lg-8">
-                                <div className="treding-color-box-parent">
-                                    {/* Slider Header */}
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                            marginBottom: 12,
-                                            padding: "8px 4px",
-                                        }}
+            {noData ? (
+                <div
+                    style={{
+                        height: "60vh",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "18px",
+                        fontWeight: 600,
+                        color: "#888",
+                    }}
+                >
+                    No Data Available
+                </div>
+            ) : (
+                <>
+                    <section className="banner-section-content">
+                        <div className="container">
+                            <ul className="nav nav-tabs" id="myTab" role="tablist">
+                                <li className="nav-item" role="presentation">
+                                    <button
+                                        className="nav-link active"
+                                        id="home-tab"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#home"
+                                        type="button"
+                                        role="tab"
+                                        aria-controls="home"
+                                        aria-selected="true"
                                     >
-                                        {/* Prev Button */}
-                                        <button
-                                            onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
-                                            disabled={activeIndex === 0}
-                                            style={{
-                                                background: activeIndex === 0 ? "#eee" : "#6366f1",
-                                                color: activeIndex === 0 ? "#aaa" : "#fff",
-                                                border: "none",
-                                                borderRadius: "50%",
-                                                width: 36,
-                                                height: 36,
-                                                cursor: activeIndex === 0 ? "not-allowed" : "pointer",
-                                                fontSize: 18,
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                            }}
-                                        >
-                                            ‹
-                                        </button>
-
-                                        {/* Question Title + Counter */}
-                                        <div
-                                            style={{ textAlign: "center", flex: 1, padding: "0 12px" }}
-                                            onClick={() => {
-                                                if (activeItem?.id) {
-                                                    navigate(`/home-detail/${activeItem.id}`);
-                                                }
-                                            }}
-                                        >
-                                            <div style={{ fontSize: 13, color: "#aaa", marginBottom: 2 }}>
-                                                {activeIndex + 1} of {sliderData.length}
-                                            </div>
+                                        {activeItem?.category?.name || ""}
+                                    </button>
+                                </li>
+                            </ul>
+                            <div className="tabing-content-wrapper">
+                                <div className="row">
+                                    <div className="col-lg-8">
+                                        <div className="treding-color-box-parent">
+                                            {/* Slider Header */}
                                             <div
                                                 style={{
-                                                    fontWeight: 600,
-                                                    fontSize: 15,
-                                                    color: "#333",
-                                                    whiteSpace: "nowrap",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "space-between",
+                                                    marginBottom: 12,
+                                                    padding: "8px 4px",
                                                 }}
                                             >
-                                                {activeItem?.question || ""}
-                                            </div>
-                                            {/* <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{activeItem?.category?.name || ""}</div> */}
-                                        </div>
+                                                {/* Prev Button */}
+                                                <button
+                                                    onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
+                                                    disabled={activeIndex === 0}
+                                                    style={{
+                                                        background: activeIndex === 0 ? "#eee" : "#6366f1",
+                                                        color: activeIndex === 0 ? "#aaa" : "#fff",
+                                                        border: "none",
+                                                        borderRadius: "50%",
+                                                        width: 36,
+                                                        height: 36,
+                                                        cursor: activeIndex === 0 ? "not-allowed" : "pointer",
+                                                        fontSize: 18,
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                    }}
+                                                >
+                                                    ‹
+                                                </button>
 
-                                        {/* Next Button */}
-                                        <button
-                                            onClick={() => setActiveIndex((prev) => Math.min(prev + 1, sliderData.length - 1))}
-                                            disabled={activeIndex === sliderData.length - 1}
-                                            style={{
-                                                background: activeIndex === sliderData.length - 1 ? "#eee" : "#6366f1",
-                                                color: activeIndex === sliderData.length - 1 ? "#aaa" : "#fff",
-                                                border: "none",
-                                                borderRadius: "50%",
-                                                width: 36,
-                                                height: 36,
-                                                cursor: activeIndex === sliderData.length - 1 ? "not-allowed" : "pointer",
-                                                fontSize: 18,
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                            }}
-                                        >
-                                            ›
-                                        </button>
-                                    </div>
-
-                                    {/* Chart — only active question */}
-                                    {activeItem && graphData[activeItem.id] ? (
-                                        <CanvasChart questionId={activeItem.id} chartData={graphData[activeItem.id]} />
-                                    ) : (
-                                        <div
-                                            style={{
-                                                height: 260,
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                color: "#aaa",
-                                                fontSize: 13,
-                                                background: "#f9f9f9",
-                                                borderRadius: 8,
-                                            }}
-                                        >
-                                            {marketData.length === 0 ? "No questions available" : "Loading chart..."}
-                                        </div>
-                                    )}
-
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            gap: 6,
-                                            marginTop: 12,
-                                        }}
-                                    >
-                                        {sliderData.map((_, i) => (
-                                            <div
-                                                key={i}
-                                                onClick={() => setActiveIndex(i)}
-                                                style={{
-                                                    width: i === activeIndex ? 20 : 8,
-                                                    height: 8,
-                                                    borderRadius: 4,
-                                                    background: i === activeIndex ? "#6366f1" : "#ddd",
-                                                    cursor: "pointer",
-                                                    transition: "all 0.3s ease",
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="col-lg-4">
-                                <div className="trending-main-parent">
-                                    <h2>
-                                        Trending <img src="img/rightarrow.svg" alt="icon" />
-                                    </h2>
-
-                                    <div className="trading-content-right-box">
-                                        {filteredTrendingData?.map((item, index) => (
-                                            <div className="trading-content-right-box-inner" key={item.id || index}>
-                                                <div className="trading-question-left">
-                                                    <span>{index + 1}.</span>
-                                                    <h3 onClick={() => navigate(`/home-detail/${item.id}`)} style={{ cursor: "pointer" }}>
-                                                        {item.question}
-                                                    </h3>
-                                                    {/* <p className="date-text">{item.createdAt}</p> */}
-                                                </div>
-                                                <div className="trading-question-right"></div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-lg-12">
-                                <div className="trending-main-parent politics-main-content-parent">
-                                    {Object.entries(groupedData || {}).map(([categoryName, items]) => (
-                                        <div key={categoryName}>
-                                            <h2>
-                                                {categoryName}
-                                                <img src="img/rightarrow.svg" alt="icon" />
-                                            </h2>
-
-                                            <div className="row">
-                                                {items.map((item, index) => {
-                                                    const prediction = hasPredicted(item.id);
-
-                                                    return (
-                                                        <div
-                                                            className="col-lg-4"
-                                                            key={index}
-                                                            onClick={(e) => {
-                                                                if (e.target.closest(".option-row-parent")) return;
-
-                                                                // navigate(`/home-detail/${item.id}`);
-                                                                getGraphData(item.id);
-                                                                navigate(`/home-detail/${item.id}`);
-                                                            }}
-                                                            style={{ cursor: "pointer" }}
-                                                        >
-                                                            <div className="politics-main-box">
-                                                                <div className="politics-header-box">
-                                                                    <figure>
-                                                                        <img
-                                                                            src={`${import.meta.env.VITE_IMAGE_URL}/public/category/${item.category.image}`}
-                                                                            alt="image"
-                                                                        />
-                                                                    </figure>
-                                                                    <h4 className="text-uppercase">{item.category.name}</h4>
-                                                                </div>
-
-                                                                <h3>{item.question}</h3>
-                                                                <p>{formatDateTime(item.eventStartDate)}</p>
-
-                                                                {user ? (
-                                                                    <div className="politics-btn-box d-flex flex-column">
-                                                                        {item.options
-                                                                            ?.filter((opt) => opt.option !== "None of the Above")
-                                                                            .map((opt) => {
-                                                                                const alreadySelected =
-                                                                                    String(prediction?.selectedOptionId) === String(opt.id);
-
-                                                                                return (
-                                                                                    <div
-                                                                                        key={opt.id}
-                                                                                        className={`option-row-parent ${alreadySelected ? "active" : ""}`}
-                                                                                        onClick={() => {
-                                                                                            const alreadyPredicted = hasPredicted(item.id);
-
-                                                                                            if (alreadyPredicted) {
-                                                                                                Swal.fire({
-                                                                                                    icon: "warning",
-                                                                                                    title: "Already Selected",
-                                                                                                    text: "You have already predicted on this question",
-                                                                                                });
-                                                                                                return;
-                                                                                            }
-
-                                                                                            setTradeData({
-                                                                                                userId: user.id,
-                                                                                                categoryId: item.category?.id,
-                                                                                                questionId: item.id,
-                                                                                                question: item.question,
-                                                                                                options: item.options?.filter(
-                                                                                                    (opt) => opt.option !== "None of the Above",
-                                                                                                ),
-                                                                                            });
-
-                                                                                            setSelectedOption(opt.id);
-
-                                                                                            setShowPopup(true);
-                                                                                        }}
-                                                                                    >
-                                                                                        <div className="option-row flex-parent">
-                                                                                            <img
-                                                                                                src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
-                                                                                                alt={opt.option}
-                                                                                                className="option-img"
-                                                                                            />
-                                                                                            <span className="option-text">{opt.option}</span>
-                                                                                        </div>
-
-                                                                                        <span className="option-multiplier">
-                                                                                            {opt.multiplier || "1x"}x
-                                                                                        </span>
-
-                                                                                        <span className="option-percentage">
-                                                                                            {opt.percentage || 0}%
-                                                                                        </span>
-                                                                                    </div>
-                                                                                );
-                                                                            })}
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="politics-btn-box d-flex flex-column">
-                                                                        {item.options
-                                                                            ?.filter((opt) => opt.option !== "None of the Above")
-                                                                            .map((opt) => (
-                                                                                <div
-                                                                                    key={opt.id}
-                                                                                    className="option-row-parent"
-                                                                                    data-bs-toggle="modal"
-                                                                                    data-bs-target="#exampleModal"
-                                                                                >
-                                                                                    <div className="option-row flex-parent">
-                                                                                        <img
-                                                                                            src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
-                                                                                            alt={opt.option}
-                                                                                            className="option-img"
-                                                                                        />
-
-                                                                                        <span className="option-text">{opt.option}</span>
-                                                                                    </div>
-
-                                                                                    <span className="option-multiplier">
-                                                                                        {opt.multiplier || "1x"}x
-                                                                                    </span>
-
-                                                                                    <span className="option-percentage">{opt.percentage || 0}%</span>
-                                                                                </div>
-                                                                            ))}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {showPopup && tradeData && (
-                                        <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
-                                            <div className="modal-dialog modal-dialog-centered modal-md">
-                                                <div className="modal-content p-3">
-                                                    {/* Title */}
-                                                    <div className="modal-header border-0">
-                                                        <div>
-                                                            <h5 className="modal-title">{tradeData.options?.map((opt) => opt.option).join(" / ")}</h5>
-                                                            <small className="text-muted">Select an option to trade</small>
-                                                        </div>
-
-                                                        <button
-                                                            className="btn-close"
-                                                            onClick={() => {
-                                                                setShowPopup(false);
-                                                                setTradeData(null);
-                                                                setSelectedOption(null);
-                                                            }}
-                                                        />
+                                                {/* Question Title + Counter */}
+                                                <div
+                                                    style={{ textAlign: "center", flex: 1, padding: "0 12px" }}
+                                                    onClick={() => {
+                                                        if (activeItem?.id) {
+                                                            navigate(`/home-detail/${activeItem.id}`);
+                                                        }
+                                                    }}
+                                                >
+                                                    <div style={{ fontSize: 13, color: "#aaa", marginBottom: 2 }}>
+                                                        {activeIndex + 1} of {sliderData.length}
                                                     </div>
-
-                                                    <div className="d-flex flex-column gap-2 mb-3">
-                                                        {tradeData.options.map((opt) => (
-                                                            <div
-                                                                key={opt.id}
-                                                                onClick={() => setSelectedOption(opt.id)}
-                                                                style={{
-                                                                    padding: "12px",
-                                                                    border: "1px solid #ddd",
-                                                                    borderRadius: "10px",
-                                                                    cursor: "pointer",
-                                                                    background: selectedOption === opt.id ? "#e6fff2" : "#fff",
-                                                                    borderColor: selectedOption === opt.id ? "#00c853" : "#ddd",
-                                                                }}
-                                                            >
-                                                                <strong>{opt.option}</strong>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-
-                                                    {/* Amount */}
-
-                                                    <input
-                                                        type="number"
-                                                        className="form-control mb-3"
-                                                        placeholder="Enter amount"
-                                                        value={amount}
-                                                        min={1}
-                                                        onKeyDown={(e) => {
-                                                            if (["e", "E", "+", "-", "."].includes(e.key)) {
-                                                                e.preventDefault();
-                                                            }
-                                                        }}
-                                                        onChange={(e) => setAmount(e.target.value)}
-                                                    />
-
-                                                    <button
-                                                        className="btn btn-success w-100"
-                                                        disabled={!selectedOption}
-                                                        onClick={() => {
-                                                            if (!amount) return errorToastr("Enter amount");
-                                                            if (!selectedOption) return errorToastr("Select option");
-
-                                                            firstOption(
-                                                                tradeData.userId,
-                                                                tradeData.categoryId,
-                                                                tradeData.questionId,
-                                                                selectedOption,
-                                                                amount,
-                                                            );
-
-                                                            setShowPopup(false);
-                                                            setAmount("");
-                                                            setTradeData(null);
-                                                            setSelectedOption(null);
+                                                    <div
+                                                        style={{
+                                                            fontWeight: 600,
+                                                            fontSize: 15,
+                                                            color: "#333",
+                                                            whiteSpace: "nowrap",
+                                                            overflow: "hidden",
+                                                            textOverflow: "ellipsis",
                                                         }}
                                                     >
-                                                        Confirm
-                                                    </button>
+                                                        {activeItem?.question || ""}
+                                                    </div>
+                                                    {/* <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{activeItem?.category?.name || ""}</div> */}
                                                 </div>
+
+                                                {/* Next Button */}
+                                                <button
+                                                    onClick={() => setActiveIndex((prev) => Math.min(prev + 1, sliderData.length - 1))}
+                                                    disabled={activeIndex === sliderData.length - 1}
+                                                    style={{
+                                                        background: activeIndex === sliderData.length - 1 ? "#eee" : "#6366f1",
+                                                        color: activeIndex === sliderData.length - 1 ? "#aaa" : "#fff",
+                                                        border: "none",
+                                                        borderRadius: "50%",
+                                                        width: 36,
+                                                        height: 36,
+                                                        cursor: activeIndex === sliderData.length - 1 ? "not-allowed" : "pointer",
+                                                        fontSize: 18,
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                    }}
+                                                >
+                                                    ›
+                                                </button>
+                                            </div>
+
+                                            {/* Chart — only active question */}
+                                            {activeItem && graphData[activeItem.id] ? (
+                                                <CanvasChart questionId={activeItem.id} chartData={graphData[activeItem.id]} />
+                                            ) : (
+                                                <div
+                                                    style={{
+                                                        height: 260,
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        color: "#aaa",
+                                                        fontSize: 13,
+                                                        background: "#f9f9f9",
+                                                        borderRadius: 8,
+                                                    }}
+                                                >
+                                                    {marketData.length === 0 ? "No questions available" : "Loading chart..."}
+                                                </div>
+                                            )}
+
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    gap: 6,
+                                                    marginTop: 12,
+                                                }}
+                                            >
+                                                {sliderData.map((_, i) => (
+                                                    <div
+                                                        key={i}
+                                                        onClick={() => setActiveIndex(i)}
+                                                        style={{
+                                                            width: i === activeIndex ? 20 : 8,
+                                                            height: 8,
+                                                            borderRadius: 4,
+                                                            background: i === activeIndex ? "#6366f1" : "#ddd",
+                                                            cursor: "pointer",
+                                                            transition: "all 0.3s ease",
+                                                        }}
+                                                    />
+                                                ))}
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
+
+                                    <div className="col-lg-4">
+                                        <div className="trending-main-parent">
+                                            <h2>
+                                                Trending <img src="img/rightarrow.svg" alt="icon" />
+                                            </h2>
+
+                                            <div className="trading-content-right-box">
+                                                {filteredTrendingData?.map((item, index) => (
+                                                    <div className="trading-content-right-box-inner" key={item.id || index}>
+                                                        <div className="trading-question-left">
+                                                            <span>{index + 1}.</span>
+                                                            <h3 onClick={() => navigate(`/home-detail/${item.id}`)} style={{ cursor: "pointer" }}>
+                                                                {item.question}
+                                                            </h3>
+                                                            {/* <p className="date-text">{item.createdAt}</p> */}
+                                                        </div>
+                                                        <div className="trading-question-right"></div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-12">
+                                        <div className="trending-main-parent politics-main-content-parent">
+                                            {Object.entries(groupedData || {}).map(([categoryName, items]) => (
+                                                <div key={categoryName}>
+                                                    <h2>
+                                                        {categoryName}
+                                                        <img src="img/rightarrow.svg" alt="icon" />
+                                                    </h2>
+
+                                                    <div className="row">
+                                                        {items.map((item, index) => {
+                                                            const prediction = hasPredicted(item.id);
+
+                                                            return (
+                                                                <div
+                                                                    className="col-lg-4"
+                                                                    key={index}
+                                                                    onClick={(e) => {
+                                                                        if (e.target.closest(".option-row-parent")) return;
+
+                                                                        // navigate(`/home-detail/${item.id}`);
+                                                                        getGraphData(item.id);
+                                                                        navigate(`/home-detail/${item.id}`);
+                                                                    }}
+                                                                    style={{ cursor: "pointer" }}
+                                                                >
+                                                                    <div className="politics-main-box">
+                                                                        <div className="politics-header-box">
+                                                                            <figure>
+                                                                                <img
+                                                                                    src={`${import.meta.env.VITE_IMAGE_URL}/public/category/${item.category.image}`}
+                                                                                    alt="image"
+                                                                                />
+                                                                            </figure>
+                                                                            <h4 className="text-uppercase">{item.category.name}</h4>
+                                                                        </div>
+
+                                                                        <h3>{item.question}</h3>
+                                                                        <p>{formatDateTime(item.eventStartDate)}</p>
+
+                                                                        {user ? (
+                                                                            <div className="politics-btn-box d-flex flex-column">
+                                                                                {item.options
+                                                                                    ?.filter((opt) => opt.option !== "None of the Above")
+                                                                                    .map((opt) => {
+                                                                                        const alreadySelected =
+                                                                                            String(prediction?.selectedOptionId) === String(opt.id);
+
+                                                                                        return (
+                                                                                            <div
+                                                                                                key={opt.id}
+                                                                                                className={`option-row-parent ${alreadySelected ? "active" : ""}`}
+                                                                                                onClick={() => {
+                                                                                                    const alreadyPredicted = hasPredicted(item.id);
+
+                                                                                                    if (alreadyPredicted) {
+                                                                                                        Swal.fire({
+                                                                                                            icon: "warning",
+                                                                                                            title: "Already Selected",
+                                                                                                            text: "You have already predicted on this question",
+                                                                                                        });
+                                                                                                        return;
+                                                                                                    }
+
+                                                                                                    setTradeData({
+                                                                                                        userId: user.id,
+                                                                                                        categoryId: item.category?.id,
+                                                                                                        questionId: item.id,
+                                                                                                        question: item.question,
+                                                                                                        options: item.options?.filter(
+                                                                                                            (opt) =>
+                                                                                                                opt.option !== "None of the Above",
+                                                                                                        ),
+                                                                                                    });
+
+                                                                                                    setSelectedOption(opt.id);
+
+                                                                                                    setShowPopup(true);
+                                                                                                }}
+                                                                                            >
+                                                                                                <div className="option-row flex-parent">
+                                                                                                    {opt.image && (
+                                                                                                        <img
+                                                                                                            src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
+                                                                                                            alt={opt.option}
+                                                                                                            className="option-img"
+                                                                                                        />
+                                                                                                    )}
+                                                                                                    <span className="option-text">{opt.option}</span>
+                                                                                                </div>
+
+                                                                                                <span className="option-multiplier">
+                                                                                                    {opt.multiplier || "1x"}x
+                                                                                                </span>
+
+                                                                                                <span className="option-percentage">
+                                                                                                    {opt.percentage || 0}%
+                                                                                                </span>
+                                                                                            </div>
+                                                                                        );
+                                                                                    })}
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="politics-btn-box d-flex flex-column">
+                                                                                {item.options
+                                                                                    ?.filter((opt) => opt.option !== "None of the Above")
+                                                                                    .map((opt) => (
+                                                                                        <div
+                                                                                            key={opt.id}
+                                                                                            className="option-row-parent"
+                                                                                            data-bs-toggle="modal"
+                                                                                            data-bs-target="#exampleModal"
+                                                                                        >
+                                                                                            <div className="option-row flex-parent">
+                                                                                                {opt.image && (
+                                                                                                    <img
+                                                                                                        src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
+                                                                                                        alt={opt.option}
+                                                                                                        className="option-img"
+                                                                                                    />
+                                                                                                )}
+                                                                                                <span className="option-text">{opt.option}</span>
+                                                                                            </div>
+
+                                                                                            <span className="option-multiplier">
+                                                                                                {opt.multiplier || "1x"}x
+                                                                                            </span>
+
+                                                                                            <span className="option-percentage">
+                                                                                                {opt.percentage || 0}%
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    ))}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {showPopup && tradeData && (
+                                                <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
+                                                    <div className="modal-dialog modal-dialog-centered modal-md">
+                                                        <div className="modal-content p-3">
+                                                            {/* Title */}
+                                                            <div className="modal-header border-0">
+                                                                <div>
+                                                                    <h5 className="modal-title">{tradeData.question}</h5>
+                                                                    <small className="text-muted">Select an option to trade</small>
+                                                                </div>
+
+                                                                <button
+                                                                    className="btn-close"
+                                                                    onClick={() => {
+                                                                        setShowPopup(false);
+                                                                        setTradeData(null);
+                                                                        setSelectedOption(null);
+                                                                    }}
+                                                                />
+                                                            </div>
+
+                                                            <div className="d-flex flex-column gap-2 mb-3">
+                                                                {tradeData.options.map((opt) => (
+                                                                    <div
+                                                                        key={opt.id}
+                                                                        onClick={() => setSelectedOption(opt.id)}
+                                                                        style={{
+                                                                            padding: "12px",
+                                                                            border: "1px solid #ddd",
+                                                                            borderRadius: "10px",
+                                                                            cursor: "pointer",
+                                                                            background: selectedOption === opt.id ? "#e6fff2" : "#fff",
+                                                                            borderColor: selectedOption === opt.id ? "#00c853" : "#ddd",
+                                                                        }}
+                                                                    >
+                                                                        <strong>{opt.option}</strong>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+
+                                                            {/* Amount */}
+
+                                                            <input
+                                                                type="number"
+                                                                className="form-control mb-3"
+                                                                placeholder="Enter amount"
+                                                                value={amount}
+                                                                min={1}
+                                                                onKeyDown={(e) => {
+                                                                    if (["e", "E", "+", "-", "."].includes(e.key)) {
+                                                                        e.preventDefault();
+                                                                    }
+                                                                }}
+                                                                onChange={(e) => setAmount(e.target.value)}
+                                                            />
+
+                                                            <button
+                                                                className="btn btn-success w-100"
+                                                                disabled={!selectedOption}
+                                                                onClick={() => {
+                                                                    if (!amount) return errorToastr("Enter amount");
+                                                                    if (!selectedOption) return errorToastr("Select option");
+
+                                                                    firstOption(
+                                                                        tradeData.userId,
+                                                                        tradeData.categoryId,
+                                                                        tradeData.questionId,
+                                                                        selectedOption,
+                                                                        amount,
+                                                                    );
+
+                                                                    setShowPopup(false);
+                                                                    setAmount("");
+                                                                    setTradeData(null);
+                                                                    setSelectedOption(null);
+                                                                }}
+                                                            >
+                                                                Confirm
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
+                    </section>
 
-            <Footer />
+                    <Footer />
+                </>
+            )}
         </div>
     );
 }

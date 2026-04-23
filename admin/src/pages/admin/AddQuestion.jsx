@@ -79,9 +79,9 @@ export default function CreateQuestion() {
                 errors[`multiplier_${i}`] = "Valid multiplier required";
             }
 
-            if (!opt.image) {
+           /*  if (!opt.image) {
                 errors[`image_${i}`] = "Image is required";
-            }
+            } */
         });
 
         setFormErrors(errors);
@@ -310,7 +310,7 @@ export default function CreateQuestion() {
                                                 <div className="text-danger">{formErrors[`multiplier_${index}`]}</div>
                                             )}
 
-                                            {formErrors[`image_${index}`] && <div className="text-danger">{formErrors[`image_${index}`]}</div>}
+                                            {/* {formErrors[`image_${index}`] && <div className="text-danger">{formErrors[`image_${index}`]}</div>} */}
                                         </div>
                                     ))}
 

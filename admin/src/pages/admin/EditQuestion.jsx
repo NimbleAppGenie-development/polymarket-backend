@@ -70,11 +70,11 @@ export default function QuestionEdit() {
                 errors[`multiplier_${i}`] = "Valid multiplier required";
             }
 
-            const hasImage = (typeof opt.image === "string" && opt.image.trim() !== "") || opt.image instanceof File;
+            /* const hasImage = (typeof opt.image === "string" && opt.image.trim() !== "") || opt.image instanceof File;
 
             if (!hasImage) {
                 errors[`image_${i}`] = "Image is required";
-            }
+            } */
         });
 
         return errors;

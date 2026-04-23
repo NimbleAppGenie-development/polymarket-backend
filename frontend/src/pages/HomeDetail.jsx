@@ -375,11 +375,13 @@ export default function HomeDetail() {
                                                                 }}
                                                             >
                                                                 <div className="option-row">
-                                                                    <img
-                                                                        src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
-                                                                        alt={opt.option}
-                                                                        className="option-img"
-                                                                    />
+                                                                    {opt.image && (
+                                                                        <img
+                                                                            src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
+                                                                            alt={opt.option}
+                                                                            className="option-img"
+                                                                        />
+                                                                    )}
                                                                 </div>
                                                                 <span className="option-text">{opt.option}</span>
                                                                 <span className="option-multiplier">{opt.multiplier || "1x"}x</span>
@@ -399,11 +401,13 @@ export default function HomeDetail() {
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
                                                             <div className="option-row flex-parent">
-                                                                <img
-                                                                    src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
-                                                                    alt={opt.option}
-                                                                    className="option-img"
-                                                                />
+                                                                {opt.image && (
+                                                                    <img
+                                                                        src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
+                                                                        alt={opt.option}
+                                                                        className="option-img"
+                                                                    />
+                                                                )}
                                                                 <span className="option-text">{opt.option}</span>
                                                             </div>
                                                             <span className="option-multiplier">{opt.multiplier || "1x"}x</span>
@@ -458,7 +462,7 @@ export default function HomeDetail() {
                                     </div>
                                 ))}
                             </div>
-                
+
                             <input
                                 type="number"
                                 className="form-control mb-3"
