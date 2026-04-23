@@ -181,6 +181,7 @@ export default function Questions() {
             errorToastr(error?.message || "Failed to update trending");
         }
     };
+
     const updateShowInSlider = async (id) => {
         try {
             const services = new Service();
@@ -552,6 +553,7 @@ export default function Questions() {
                                                 {
                                                     questionId: winnerData.id,
                                                     optionId: selectedOptionId,
+                                                    type: "WINNING"
                                                 },
                                                 true,
                                             );

@@ -125,7 +125,7 @@ export default function Home() {
         return acc;
     }, {});
 
-    const firstOption = async (userId, categoryId, questionId, selectedOption, amount) => {
+    const firstOption = async (userId, categoryId, questionId, selectedOption, amount, type) => {
         try {
             setLoading(true);
 
@@ -139,6 +139,7 @@ export default function Home() {
                     questionId,
                     selectedOption,
                     amount,
+                    type :"MAIN"
                 },
                 true,
             );

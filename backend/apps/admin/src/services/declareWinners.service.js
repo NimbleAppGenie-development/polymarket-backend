@@ -4,8 +4,10 @@ const User = require("@models/user");
 const Admin = require("@models/adminModel");
 const UserPredictedQuestion = require("@models/userpredictedquestions");
 const Transaction = require("@models/transaction");
+const UserWallet = require("@models/userWallet");
 
-async function declareWinners({ questionId, answerId }) {
+
+async function declareWinners({ questionId, answerId, type }) {
     const t = await sequelize.transaction();
 
     try {
@@ -55,19 +57,47 @@ async function declareWinners({ questionId, answerId }) {
 
             await bet.update({ winningCredited: winningAmount }, { transaction: t });
 
-            await User.increment("walletBalance", {
+            /* await User.increment("walletBalance", {
                 by: winningAmount,
                 where: { id: bet.userId },
                 transaction: t,
-            });
+            }); */
+
+            if (type === "WINNING") {
+                const wallet = await UserWallet.findOne({
+                    where: {
+                        userId: bet.userId,
+                        type: "WINNING",
+                    },
+                    transaction: t,
+                    lock: t.LOCK.UPDATE, 
+                });
+
+                if (!wallet) {
+                    await UserWallet.create(
+                        {
+                            userId: bet.userId,
+                            type: "WINNING",
+                            balance: winningAmount,
+                        },
+                        { transaction: t },
+                    );
+                } else {
+                    await wallet.update(
+                        {
+                            balance: Number(wallet.balance || 0) + winningAmount,
+                        },
+                        { transaction: t },
+                    );
+                }
+            }
 
             await Transaction.create({
-                userId : bet.userId,
+                userId: bet.userId,
                 amount: winningAmount,
                 type: "WINNING",
                 status: "SUCCESS",
                 response: JSON.stringify({ userId: bet.userId }),
-
             });
         }
 

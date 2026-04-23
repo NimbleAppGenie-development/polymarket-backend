@@ -304,3 +304,10 @@
 }
 
 .trending-main-parent h2{margin: 0 0 20px;}
+
+.wallet-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+

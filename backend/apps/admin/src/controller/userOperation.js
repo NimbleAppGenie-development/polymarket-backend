@@ -830,7 +830,7 @@ module.exports = {
      */
     announceWinner: async (req, res, next) => {
         try {
-            const { questionId, optionId } = req.body;
+            const { questionId, optionId, type } = req.body;
 
             await QuestionOption.update({ resultStatus: false }, { where: { questionId } });
 
@@ -846,7 +846,7 @@ module.exports = {
                 );
             }
 
-            declareWinners({ questionId, answerId: optionId }).then(console.log);
+            declareWinners({ questionId, answerId: optionId, type }).then(console.log);
 
             return res.status(statusCode.OK).json({
                 status: true,

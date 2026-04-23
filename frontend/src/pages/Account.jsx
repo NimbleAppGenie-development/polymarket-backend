@@ -8,7 +8,8 @@ import { success } from "toastr";
 
 const Account = () => {
     const { user } = useContext(AuthContext);
-    const [wallet, setWallet] = useState(0);
+    const [availableWallet, setAvailableWallet] = useState(0);
+    const [winningWallet, setWinningWallet] = useState(0);
     const [loading, setLoading] = useState(false);
     const [amount, setAmount] = useState("");
     const [method, setMethod] = useState("");
@@ -23,7 +24,8 @@ const Account = () => {
             const response = await services.get(`/user/user-account-details/${user.id}`, {}, true);
 
             if (response?.status) {
-                setWallet(response?.data?.walletBalance || 0);
+                setAvailableWallet(response?.data?.availableBalance || 0);
+                setWinningWallet(response?.data?.winningBalance || 0);
             }
         } catch (error) {
             console.error("ACCOUNT ERROR:", error);
@@ -49,6 +51,7 @@ const Account = () => {
                 {
                     userId: user.id,
                     amount,
+                    type: "MAIN",
                 },
                 true,
             );
@@ -99,9 +102,16 @@ const Account = () => {
                                         <h4>WALLET</h4>
                                     </div>
 
-                                    <div className="wallet-box">
-                                        <h3>$ {wallet}</h3>
-                                        <p>Available Balance</p>
+                                    <div className="wallet-row">
+                                        <div className="wallet-box">
+                                            <p>Available Balance</p>
+                                            <h3>$ {availableWallet}</h3>
+                                        </div>
+
+                                        <div className="wallet-box">
+                                            <p>Winning Balance</p>
+                                            <h3>$ {winningWallet}</h3>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

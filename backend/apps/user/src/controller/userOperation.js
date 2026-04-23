@@ -12,6 +12,7 @@ const Question = require("@models/question");
 const QuestionOption = require("@models/questionOption");
 const Admin = require("@models/adminModel");
 const Transaction = require("@models/transaction");
+const UserWallet = require("@models/userWallet");
 
 module.exports = {
     userLogin: async (req, res, next) => {
@@ -144,6 +145,14 @@ module.exports = {
 
             const user = await User.findOne({
                 where: { id },
+                attributes: { exclude: ["password", "accessToken", "refreshToken"] },
+                include: [
+                    {
+                        model: UserWallet,
+                        as: "wallet",
+                        attributes: ["userId", "type", "balance"],
+                    },
+                ],
             });
 
             if (!user) {
@@ -153,13 +162,20 @@ module.exports = {
                 });
             }
 
+            const wallet = await UserWallet.findOne({
+                where: {
+                    userId: id,
+                    type: "MAIN",
+                },
+            });
             return res.json({
                 status: true,
                 data: {
                     id: user.id,
                     name: user.name,
                     email: user.email,
-                    walletBalance: user.walletBalance,
+                    availableBalance: user.wallet ? user.wallet.find((w) => w.type === "MAIN")?.balance || 0 : 0,
+                    winningBalance: user.wallet ? user.wallet.find((w) => w.type === "WINNING")?.balance || 0 : 0,
                 },
             });
         } catch (error) {
@@ -174,9 +190,9 @@ module.exports = {
 
     addMoney: async (req, res, next) => {
         try {
-            const { userId, amount } = req.body;
+            const { userId, amount, type } = req.body;
 
-            if (!userId || !amount) {
+            if (!userId || !amount || !type) {
                 return res.status(statusCodes.BAD_REQUEST).json({
                     status: false,
                     message: "All fields are required",
@@ -194,6 +210,14 @@ module.exports = {
 
             const user = await User.findOne({
                 where: { id: userId },
+                attributes: { exclude: ["password", "accessToken", "refreshToken"] },
+                include: [
+                    {
+                        model: UserWallet,
+                        as: "wallet",
+                        attributes: ["userId", "type", "balance"],
+                    },
+                ],
             });
 
             if (!user) {
@@ -205,7 +229,28 @@ module.exports = {
 
             const newBalance = Number(user.walletBalance || 0) + addAmount;
 
-            await User.update({ walletBalance: newBalance }, { where: { id: userId } });
+            if (type === "MAIN") {
+                const wallet = await UserWallet.findOne({
+                    where: {
+                        userId,
+                        type: "MAIN",
+                    },
+                });
+
+                if (!wallet) {
+                    // create new wallet
+                    await UserWallet.create({
+                        userId,
+                        type: "MAIN",
+                        balance: addAmount,
+                    });
+                } else {
+                    // update existing wallet
+                    await wallet.update({
+                        balance: Number(wallet.balance || 0) + addAmount,
+                    });
+                }
+            }
             await Transaction.create({
                 userId,
                 amount,
@@ -257,7 +302,7 @@ module.exports = {
     getUserPrdicationData: async (req, res, next) => {
         try {
             const { userId } = req.params;
-            
+
             const userPredictions = await UserPredictedQuestion.findAll({
                 where: { userId },
             });
@@ -270,9 +315,9 @@ module.exports = {
 
     userPrdication: async (req, res, next) => {
         try {
-            const { userId, categoryId, questionId, selectedOption, amount } = req.body;
+            const { userId, categoryId, questionId, selectedOption, amount, type } = req.body;
 
-            if (!userId || !categoryId || !questionId || !selectedOption || !amount) {
+            if (!userId || !categoryId || !questionId || !selectedOption || !amount || !type) {
                 return res.json(errorResponse([], "All fields are required."));
             }
 
@@ -285,7 +330,17 @@ module.exports = {
                 });
             }
 
-            const user = await User.findOne({ where: { id: userId } });
+            const user = await User.findOne({
+                where: { id: userId },
+                attributes: { exclude: ["password", "accessToken", "refreshToken"] },
+                include: [
+                    {
+                        model: UserWallet,
+                        as: "wallet",
+                        attributes: ["userId", "type", "balance"],
+                    },
+                ],
+            });
 
             if (!user) {
                 return res.status(statusCodes.BAD_REQUEST).json({
@@ -294,7 +349,14 @@ module.exports = {
                 });
             }
 
-            if (Number(user.walletBalance || 0) < betAmount) {
+            const wallet = await UserWallet.findOne({
+                where: {
+                    userId,
+                    type: "MAIN",
+                },
+            });
+
+            if (!wallet || Number(wallet.balance) < betAmount) {
                 return res.status(statusCodes.BAD_REQUEST).json({
                     status: false,
                     message: "Insufficient wallet balance",
@@ -338,12 +400,15 @@ module.exports = {
 
             const optionPlain = optionData.get({ plain: true });
 
-            await User.update(
+            await UserWallet.update(
                 {
-                    walletBalance: Number(user.walletBalance) - betAmount,
+                    balance: Number(wallet.balance) - betAmount,
                 },
                 {
-                    where: { id: userId },
+                    where: {
+                        userId: userId,
+                        type: "MAIN",
+                    },
                 },
             );
 

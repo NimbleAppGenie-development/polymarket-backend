@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const dotenv = require("dotenv");
 dotenv.config();
 const sequelize = require(".");
-
+const UserWallet = require("./userWallet");
 class User extends Model {
 
     async generateToken() {
@@ -72,5 +72,6 @@ User.init(
         },
     }
 );
+User.hasMany(UserWallet, { foreignKey: "userId", as: "wallet" });
 
 module.exports = User;
