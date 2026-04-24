@@ -30,12 +30,10 @@ export default function Home() {
     const [graphData, setGraphData] = useState({});
     const [activeChartId, setActiveChartId] = useState(null);
     const [activeIndex, setActiveIndex] = useState(0);
-    // const sliderData = showSlider.filter((item) => item.showInSlider === true);
     const currentTime = new Date();
     const isActiveEvent = (date) => {
         return new Date(date).getTime() > Date.now();
     };
-    // const sliderData = showSlider.filter((item) => item.showInSlider === true).filter((item) => isActiveEvent(item.eventEndDate));
     const isValidMarket = (item) => {
         const now = Date.now();
         const end = new Date(item.eventEndDate).getTime();
@@ -47,7 +45,8 @@ export default function Home() {
     };
 
     const sliderData = showSlider.filter((item) => item.showInSlider === true).filter(isValidMarket);
-
+    const hasSliderData = showSlider?.some((item) => item.showInSlider === true);
+    const hasTrendingData = trendingData?.some((item) => item.trending === true);
     const activeItem = sliderData[activeIndex];
 
     const filteredMarketData = marketData.filter(isValidMarket);
@@ -64,7 +63,7 @@ export default function Home() {
             hour12: true,
         }).format(new Date(dateString));
     };
-
+    
     const getMarketList = async () => {
         try {
             setLoading(true);
@@ -72,7 +71,7 @@ export default function Home() {
             const services = new Service();
 
             const response = await services.get("/user/get-market-list", {}, false);
-
+            
             if (response?.status) {
                 setMarketData(response?.data || []);
             } else {
@@ -323,154 +322,158 @@ export default function Home() {
                             <div className="tabing-content-wrapper">
                                 <div className="row">
                                     <div className="col-lg-8">
-                                        <div className="treding-color-box-parent">
-                                            {/* Slider Header */}
-                                            <div
-                                                style={{
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "space-between",
-                                                    marginBottom: 12,
-                                                    padding: "8px 4px",
-                                                }}
-                                            >
-                                                {/* Prev Button */}
-                                                <button
-                                                    onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
-                                                    disabled={activeIndex === 0}
+                                        {hasSliderData && sliderData.length > 0 && (
+                                            <div className="treding-color-box-parent">
+                                                {/* Slider Header */}
+                                                <div
                                                     style={{
-                                                        background: activeIndex === 0 ? "#eee" : "#6366f1",
-                                                        color: activeIndex === 0 ? "#aaa" : "#fff",
-                                                        border: "none",
-                                                        borderRadius: "50%",
-                                                        width: 36,
-                                                        height: 36,
-                                                        cursor: activeIndex === 0 ? "not-allowed" : "pointer",
-                                                        fontSize: 18,
                                                         display: "flex",
                                                         alignItems: "center",
-                                                        justifyContent: "center",
+                                                        justifyContent: "space-between",
+                                                        marginBottom: 12,
+                                                        padding: "8px 4px",
                                                     }}
                                                 >
-                                                    ‹
-                                                </button>
-
-                                                {/* Question Title + Counter */}
-                                                <div
-                                                    style={{ textAlign: "center", flex: 1, padding: "0 12px" }}
-                                                    onClick={() => {
-                                                        if (activeItem?.id) {
-                                                            navigate(`/home-detail/${activeItem.id}`);
-                                                        }
-                                                    }}
-                                                >
-                                                    <div style={{ fontSize: 13, color: "#aaa", marginBottom: 2 }}>
-                                                        {activeIndex + 1} of {sliderData.length}
-                                                    </div>
-                                                    <div
+                                                    {/* Prev Button */}
+                                                    <button
+                                                        onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
+                                                        disabled={activeIndex === 0}
                                                         style={{
-                                                            fontWeight: 600,
-                                                            fontSize: 15,
-                                                            color: "#333",
-                                                            whiteSpace: "nowrap",
-                                                            overflow: "hidden",
-                                                            textOverflow: "ellipsis",
+                                                            background: activeIndex === 0 ? "#eee" : "#6366f1",
+                                                            color: activeIndex === 0 ? "#aaa" : "#fff",
+                                                            border: "none",
+                                                            borderRadius: "50%",
+                                                            width: 36,
+                                                            height: 36,
+                                                            cursor: activeIndex === 0 ? "not-allowed" : "pointer",
+                                                            fontSize: 18,
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            justifyContent: "center",
                                                         }}
                                                     >
-                                                        {activeItem?.question || ""}
+                                                        ‹
+                                                    </button>
+
+                                                    {/* Question Title + Counter */}
+                                                    <div
+                                                        style={{ textAlign: "center", flex: 1, padding: "0 12px" }}
+                                                        onClick={() => {
+                                                            if (activeItem?.id) {
+                                                                navigate(`/home-detail/${activeItem.id}`);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <div style={{ fontSize: 13, color: "#aaa", marginBottom: 2 }}>
+                                                            {activeIndex + 1} of {sliderData.length}
+                                                        </div>
+                                                        <div
+                                                            style={{
+                                                                fontWeight: 600,
+                                                                fontSize: 15,
+                                                                color: "#333",
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {activeItem?.question || ""}
+                                                        </div>
+                                                        {/* <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{activeItem?.category?.name || ""}</div> */}
                                                     </div>
-                                                    {/* <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{activeItem?.category?.name || ""}</div> */}
+
+                                                    {/* Next Button */}
+                                                    <button
+                                                        onClick={() => setActiveIndex((prev) => Math.min(prev + 1, sliderData.length - 1))}
+                                                        disabled={activeIndex === sliderData.length - 1}
+                                                        style={{
+                                                            background: activeIndex === sliderData.length - 1 ? "#eee" : "#6366f1",
+                                                            color: activeIndex === sliderData.length - 1 ? "#aaa" : "#fff",
+                                                            border: "none",
+                                                            borderRadius: "50%",
+                                                            width: 36,
+                                                            height: 36,
+                                                            cursor: activeIndex === sliderData.length - 1 ? "not-allowed" : "pointer",
+                                                            fontSize: 18,
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            justifyContent: "center",
+                                                        }}
+                                                    >
+                                                        ›
+                                                    </button>
                                                 </div>
 
-                                                {/* Next Button */}
-                                                <button
-                                                    onClick={() => setActiveIndex((prev) => Math.min(prev + 1, sliderData.length - 1))}
-                                                    disabled={activeIndex === sliderData.length - 1}
-                                                    style={{
-                                                        background: activeIndex === sliderData.length - 1 ? "#eee" : "#6366f1",
-                                                        color: activeIndex === sliderData.length - 1 ? "#aaa" : "#fff",
-                                                        border: "none",
-                                                        borderRadius: "50%",
-                                                        width: 36,
-                                                        height: 36,
-                                                        cursor: activeIndex === sliderData.length - 1 ? "not-allowed" : "pointer",
-                                                        fontSize: 18,
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        justifyContent: "center",
-                                                    }}
-                                                >
-                                                    ›
-                                                </button>
-                                            </div>
+                                                {/* Chart — only active question */}
+                                                {activeItem && graphData[activeItem.id] ? (
+                                                    <CanvasChart questionId={activeItem.id} chartData={graphData[activeItem.id]} />
+                                                ) : (
+                                                    <div
+                                                        style={{
+                                                            height: 260,
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            justifyContent: "center",
+                                                            color: "#aaa",
+                                                            fontSize: 13,
+                                                            background: "#f9f9f9",
+                                                            borderRadius: 8,
+                                                        }}
+                                                    >
+                                                        {marketData.length === 0 ? "No questions available" : "Loading chart..."}
+                                                    </div>
+                                                )}
 
-                                            {/* Chart — only active question */}
-                                            {activeItem && graphData[activeItem.id] ? (
-                                                <CanvasChart questionId={activeItem.id} chartData={graphData[activeItem.id]} />
-                                            ) : (
                                                 <div
                                                     style={{
-                                                        height: 260,
                                                         display: "flex",
-                                                        alignItems: "center",
                                                         justifyContent: "center",
-                                                        color: "#aaa",
-                                                        fontSize: 13,
-                                                        background: "#f9f9f9",
-                                                        borderRadius: 8,
+                                                        gap: 6,
+                                                        marginTop: 12,
                                                     }}
                                                 >
-                                                    {marketData.length === 0 ? "No questions available" : "Loading chart..."}
+                                                    {sliderData.map((_, i) => (
+                                                        <div
+                                                            key={i}
+                                                            onClick={() => setActiveIndex(i)}
+                                                            style={{
+                                                                width: i === activeIndex ? 20 : 8,
+                                                                height: 8,
+                                                                borderRadius: 4,
+                                                                background: i === activeIndex ? "#6366f1" : "#ddd",
+                                                                cursor: "pointer",
+                                                                transition: "all 0.3s ease",
+                                                            }}
+                                                        />
+                                                    ))}
                                                 </div>
-                                            )}
-
-                                            <div
-                                                style={{
-                                                    display: "flex",
-                                                    justifyContent: "center",
-                                                    gap: 6,
-                                                    marginTop: 12,
-                                                }}
-                                            >
-                                                {sliderData.map((_, i) => (
-                                                    <div
-                                                        key={i}
-                                                        onClick={() => setActiveIndex(i)}
-                                                        style={{
-                                                            width: i === activeIndex ? 20 : 8,
-                                                            height: 8,
-                                                            borderRadius: 4,
-                                                            background: i === activeIndex ? "#6366f1" : "#ddd",
-                                                            cursor: "pointer",
-                                                            transition: "all 0.3s ease",
-                                                        }}
-                                                    />
-                                                ))}
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
 
                                     <div className="col-lg-4">
-                                        <div className="trending-main-parent">
-                                            <h2>
-                                                Trending <img src="img/rightarrow.svg" alt="icon" />
-                                            </h2>
+                                        {hasTrendingData && filteredTrendingData.length > 0 && (
+                                            <div className="trending-main-parent">
+                                                <h2>
+                                                    Trending <img src="img/rightarrow.svg" alt="icon" />
+                                                </h2>
 
-                                            <div className="trading-content-right-box">
-                                                {filteredTrendingData?.map((item, index) => (
-                                                    <div className="trading-content-right-box-inner" key={item.id || index}>
-                                                        <div className="trading-question-left">
-                                                            <span>{index + 1}.</span>
-                                                            <h3 onClick={() => navigate(`/home-detail/${item.id}`)} style={{ cursor: "pointer" }}>
-                                                                {item.question}
-                                                            </h3>
-                                                            {/* <p className="date-text">{item.createdAt}</p> */}
+                                                <div className="trading-content-right-box">
+                                                    {filteredTrendingData?.map((item, index) => (
+                                                        <div className="trading-content-right-box-inner" key={item.id || index}>
+                                                            <div className="trading-question-left">
+                                                                <span>{index + 1}.</span>
+                                                                <h3 onClick={() => navigate(`/home-detail/${item.id}`)} style={{ cursor: "pointer" }}>
+                                                                    {item.question}
+                                                                </h3>
+                                                                {/* <p className="date-text">{item.createdAt}</p> */}
+                                                            </div>
+                                                            <div className="trading-question-right"></div>
                                                         </div>
-                                                        <div className="trading-question-right"></div>
-                                                    </div>
-                                                ))}
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
                                     <div className="col-lg-12">
                                         <div className="trending-main-parent politics-main-content-parent">
@@ -484,7 +487,9 @@ export default function Home() {
                                                     <div className="row">
                                                         {items.map((item, index) => {
                                                             const prediction = hasPredicted(item.id);
+                                                            const validOptions = item.options?.filter((opt) => opt.option !== "None of the Above");
 
+                                                            const limitedOptions = validOptions.slice(0, 2);
                                                             return (
                                                                 <div
                                                                     className="col-lg-4"
@@ -514,9 +519,7 @@ export default function Home() {
 
                                                                         {user ? (
                                                                             <div className="politics-btn-box d-flex flex-column">
-                                                                                {item.options
-                                                                                    ?.filter((opt) => opt.option !== "None of the Above")
-                                                                                    .map((opt) => {
+                                                                                {limitedOptions.map((opt) => {
                                                                                         const alreadySelected =
                                                                                             String(prediction?.selectedOptionId) === String(opt.id);
 
@@ -541,10 +544,7 @@ export default function Home() {
                                                                                                         categoryId: item.category?.id,
                                                                                                         questionId: item.id,
                                                                                                         question: item.question,
-                                                                                                        options: item.options?.filter(
-                                                                                                            (opt) =>
-                                                                                                                opt.option !== "None of the Above",
-                                                                                                        ),
+                                                                                                        options: limitedOptions,
                                                                                                     });
 
                                                                                                     setSelectedOption(opt.id);
@@ -607,6 +607,18 @@ export default function Home() {
                                                                                     ))}
                                                                             </div>
                                                                         )}
+                                                                        <div className="politics-footer-box d-flex justify-content-between">
+                                                                            <span>
+                                                                                {item.totalEntryAmountOnQuestion?.toLocaleString() || "0"}{" "}
+                                                                                Vol
+                                                                            </span>
+                                                                            <span>
+                                                                                {item.options?.filter((opt) => opt.option !== "None of the Above")
+                                                                                    .length || 0}{" "}
+                                                                                Markets
+                                                                            </span>
+                                                                        </div>
+                                                                        
                                                                     </div>
                                                                 </div>
                                                             );

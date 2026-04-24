@@ -169,7 +169,7 @@ module.exports = {
             const category = await Category.findAll();
 
             const categoryExist = category?.map((opt) => opt.name);
-            
+
             if (categoryExist.includes(name)) {
                 return res.status(statusCode.BAD_REQUEST).json({
                     status: false,
@@ -637,6 +637,7 @@ module.exports = {
                     {
                         model: QuestionOption,
                         as: "options",
+                        required: false,
                         attributes: ["id", "option", "multiplier", "image"],
                         where: {
                             option: {
@@ -649,7 +650,14 @@ module.exports = {
             if (!question) {
                 throw new NotFound(simpleResponse(false, "Question not found"));
             }
+            const formatDate = (date) => {
+                if (!date) return null;
 
+                const d = new Date(date);
+                if (isNaN(d.getTime())) return null;
+
+                return d.toISOString();
+            };
             const formattedQuestion = {
                 id: question.id,
                 categoryId: question.categoryId,
@@ -662,8 +670,8 @@ module.exports = {
                     multiplier: opt.multiplier,
                     image: opt.image,
                 })),
-                eventStartDate: question.eventStartDate,
-                eventEndDate: question.eventEndDate,
+                eventStartDate: formatDate(question.eventStartDate),
+                eventEndDate: formatDate(question.eventEndDate),
             };
 
             return res.status(statusCode.OK).json(successResponse(formattedQuestion, "Question fetched successfully"));
@@ -689,7 +697,8 @@ module.exports = {
                 });
             }
 
-            const { id, categoryId, question, description, options, marketRules, eventStartDate, eventEndDate } = req.body;
+            const { id, categoryId, question, description, options, marketRules, eventStartDate, eventEndDate } =
+                req.body;
 
             const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
 

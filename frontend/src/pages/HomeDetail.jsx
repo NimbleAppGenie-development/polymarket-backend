@@ -254,7 +254,7 @@ export default function HomeDetail() {
 
                                 <div className="details-page-tabing-wraper">
                                     <div className="details-page-header-parent">
-                                        <p>${marketData.totalEntryAmountOnQuestion?.toLocaleString() || "0"} vol</p>
+                                        <p>${marketData.totalEntryAmountOnQuestion?.toLocaleString() || "0"} Vol</p>
                                         {/* <ul className="nav nav-tabs" id="myTab" role="tablist">
                                             <li className="nav-item" role="presentation">
                                                 <button className="nav-link active" id="home-tab001" data-bs-toggle="tab" data-bs-target="#home001" type="button" role="tab">6H</button>

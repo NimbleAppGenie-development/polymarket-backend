@@ -59,6 +59,17 @@ module.exports = {
                 return !closedQuestionIds.includes(item.id);
             });
 
+            const totals = await UserPredictedQuestion.findAll({
+                attributes: ["questionId", [Sequelize.fn("SUM", Sequelize.col("entryAmount")), "total"]],
+                group: ["questionId"],
+                raw: true,
+            });
+            const totalMap = {};
+
+            totals.forEach((t) => {
+                totalMap[t.questionId] = parseFloat(t.total);
+            });
+
             const formatted = filteredMarketList.map((item) => {
                 const plainItem = item.get({ plain: true });
                 const totalVotes = plainItem.options.reduce((sum, opt) => {
@@ -85,6 +96,7 @@ module.exports = {
                     options: optionsWithPercentage,
                     image: plainItem.image,
                     createdAt: moment(plainItem.createdAt).format("MM/DD/YYYY hh:mm A"),
+                    totalEntryAmountOnQuestion: totalMap[plainItem.id] || 0,
                 };
             });
 
@@ -220,8 +232,7 @@ module.exports = {
                 eventStartDate: item.eventStartDate,
                 eventEndDate: item.eventEndDate,
                 createdAt: moment(item.createdAt).format("MM/DD/YYYY HH:mm:A"),
-                options:
-                    item.options,
+                options: item.options,
             }));
             return res.status(statusCodes.OK).json(successResponse(formatted, "Page content fetched"));
         } catch (error) {
@@ -252,7 +263,7 @@ module.exports = {
                         model: QuestionOptions,
                         as: "options",
                         attributes: ["id", "questionId", "option", "multiplier", "resultStatus"],
-                    }
+                    },
                 ],
             });
 

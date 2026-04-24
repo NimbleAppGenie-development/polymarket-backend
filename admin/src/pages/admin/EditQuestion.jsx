@@ -30,6 +30,26 @@ export default function QuestionEdit() {
     };
     const [formErrors, setFormErrors] = useState({});
 
+    const formatToLocalInput = (utcDate) => {
+        if (!utcDate) return "";
+
+        const date = new Date(utcDate);
+
+        const pad = (n) => String(n).padStart(2, "0");
+
+        return (
+            date.getFullYear() +
+            "-" +
+            pad(date.getMonth() + 1) +
+            "-" +
+            pad(date.getDate()) +
+            "T" +
+            pad(date.getHours()) +
+            ":" +
+            pad(date.getMinutes())
+        );
+    };
+
     const validateForm = () => {
         const errors = {};
 
@@ -150,8 +170,8 @@ export default function QuestionEdit() {
                 question: question.question,
                 description: question.description,
                 marketRules: question.marketRules,
-                eventStartDate: question.eventStartDate ? question.eventStartDate.slice(0, 16) : "",
-                eventEndDate: question.eventEndDate ? question.eventEndDate.slice(0, 16) : "",
+                eventStartDate: formatToLocalInput(question.eventStartDate),
+                eventEndDate: formatToLocalInput(question.eventEndDate),
             });
 
             const matchesToUse = Array.isArray(categoryParam) ? categoryParam : allCategory;
