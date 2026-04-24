@@ -610,7 +610,7 @@ export default function Home() {
                                                                         <div className="politics-footer-box d-flex justify-content-between">
                                                                             <span>
                                                                                 {item.totalEntryAmountOnQuestion?.toLocaleString() || "0"}{" "}
-                                                                                Vol
+                                                                                vol
                                                                             </span>
                                                                             <span>
                                                                                 {item.options?.filter((opt) => opt.option !== "None of the Above")
