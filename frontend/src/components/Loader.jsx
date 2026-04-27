@@ -12,7 +12,7 @@ export default function Loader({ color }) {
         height: "100vh",
         backgroundColor: "rgba(48, 48, 48, 0.8)",
         
-        zIndex: 99999, // 👈 higher than modals, tables, etc.
+        zIndex: 99999, // higher than modals, tables, etc.
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

@@ -5,7 +5,6 @@ import toastr from "toastr";
 import { HttpClient } from "../utils/request";
 import useTitle from "../utils/title";
 import "../assets/css/admin/bootstrap.min.css";
-// import styles from "../assets/css/newsletter/custom.module.css";
 import "../assets/css/newsletter/media.css";
 import { useNavigate } from "react-router";
 
@@ -15,11 +14,6 @@ export default function NewsLetter() {
     const naviagate = useNavigate();
 
     useEffect(() => {
-        /* Promise.all([
-            import("../assets/css/newsletter/custom.module.css"),
-            import("../assets/css/newsletter/media.module.css"),
-            import("../assets/css/admin/bootstrap.min.css"),
-        ]).then(() => {}); */
         setStylesLoaded(true);
         naviagate("/", {
             replace: true,

@@ -13,6 +13,7 @@ const QuestionOption = require("@models/questionOption");
 const Admin = require("@models/adminModel");
 const Transaction = require("@models/transaction");
 const UserWallet = require("@models/userWallet");
+const Category = require("@models/Category");
 
 module.exports = {
     userLogin: async (req, res, next) => {
@@ -132,12 +133,19 @@ module.exports = {
         }
     },
 
-    userAccountDetails: async (req, res, next) => {
+    userAccountDetails: async (req, res) => {
         try {
             const { id } = req.params;
 
+            let { page = 1, limit = 10 } = req.query;
+
+            page = parseInt(page);
+            limit = parseInt(limit);
+
+            const offset = (page - 1) * limit;
+
             if (!id) {
-                return res.status(statusCodes.BAD_REQUEST).json({
+                return res.status(400).json({
                     status: false,
                     message: "ID not found",
                 });
@@ -145,7 +153,9 @@ module.exports = {
 
             const user = await User.findOne({
                 where: { id },
-                attributes: { exclude: ["password", "accessToken", "refreshToken"] },
+                attributes: {
+                    exclude: ["password", "accessToken", "refreshToken"],
+                },
                 include: [
                     {
                         model: UserWallet,
@@ -156,7 +166,7 @@ module.exports = {
             });
 
             if (!user) {
-                return res.status(statusCodes.NOT_FOUND).json({
+                return res.status(404).json({
                     status: false,
                     message: "User not found",
                 });
@@ -168,14 +178,30 @@ module.exports = {
                     type: "MAIN",
                 },
             });
+
+            const { count, rows } = await Transaction.findAndCountAll({
+                where: { userId: id },
+                order: [["createdAt", "DESC"]],
+                limit,
+                offset,
+            });
+
             return res.json({
                 status: true,
                 data: {
                     id: user.id,
                     name: user.name,
                     email: user.email,
-                    availableBalance: user.wallet ? user.wallet.find((w) => w.type === "MAIN")?.balance || 0 : 0,
-                    winningBalance: user.wallet ? user.wallet.find((w) => w.type === "WINNING")?.balance || 0 : 0,
+                    availableBalance: user.wallet?.find((w) => w.type === "MAIN")?.balance || 0,
+                    winningBalance: user.wallet?.find((w) => w.type === "WINNING")?.balance || 0,
+
+                    transactions: rows,
+
+                    total: count,
+                    page,
+                    limit,
+                    firstItem: count === 0 ? 0 : offset + 1,
+                    lastItem: Math.min(offset + limit, count),
                 },
             });
         } catch (error) {
@@ -443,6 +469,113 @@ module.exports = {
             console.error("userPrdication ERROR:", error);
 
             return res.json(errorResponse([], error.message));
+        }
+    },
+
+    userPortfolio: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            let { page = 1, limit = 10 } = req.query;
+
+            page = parseInt(page);
+            limit = parseInt(limit);
+
+            const offset = (page - 1) * limit;
+
+            if (!id) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "ID not found",
+                });
+            }
+
+            const user = await User.findOne({
+                where: { id },
+                attributes: {
+                    exclude: ["password", "accessToken", "refreshToken"],
+                },
+                include: [
+                    {
+                        model: UserPredictedQuestion,
+                        as: "predictedQuestions",
+                        include: [
+                            {
+                                model: Question,
+                                as: "question",
+                                include: [
+                                    {
+                                        model: Category,
+                                        as: "category",
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            if (!user) {
+                return res.status(statusCodes.NOT_FOUND).json({
+                    status: false,
+                    message: "User not found",
+                });
+            }
+
+            const predictions = user.predictedQuestions || [];
+
+            const openAll = predictions.filter((p) => p.winningStatus === "PENDING");
+
+            const historyAll = predictions.filter((p) => ["WIN", "LOSS"].includes(p.winningStatus));
+
+            const paginate = (arr) => {
+                const total = arr.length;
+
+                const data = arr.slice(offset, offset + limit);
+
+                return {
+                    data,
+                    total,
+                    firstItem: total === 0 ? 0 : offset + 1,
+                    lastItem: Math.min(offset + limit, total),
+                };
+            };
+
+            const formatData = (arr) =>
+                arr.map((p) => ({
+                    id: p.id,
+                    entryAmount: p.entryAmount,
+                    multiplier: p.multiplier,
+                    winningStatus: p.winningStatus,
+                    selectedOption: p.selectedOptionName,
+                    question: p.question?.question,
+                    category: p.question?.category?.name,
+                    createdAt: p.createdAt,
+                }));
+
+            const openPaginated = paginate(openAll);
+            const historyPaginated = paginate(historyAll);
+
+            return res.status(statusCodes.OK).json({
+                status: true,
+                data: {
+                    open: formatData(openPaginated.data),
+                    history: formatData(historyPaginated.data),
+
+                    totalOpen: openPaginated.total,
+                    totalHistory: historyPaginated.total,
+
+                    firstItem: openPaginated.firstItem,
+                    lastItem: openPaginated.lastItem,
+                },
+            });
+        } catch (error) {
+            console.error("userPortfolio ERROR:", error);
+
+            return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({
+                status: false,
+                message: "Internal server error",
+            });
         }
     },
 };

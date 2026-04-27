@@ -311,3 +311,96 @@
     gap: 10px;
 }
 
+.custom-tabs {
+    display: flex;
+    gap: 10px;
+    background: #f5f7fb;
+    padding: 6px;
+    border-radius: 12px;
+    width: fit-content;
+}
+
+.tab-btn {
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    background: transparent;
+    color: #555;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.tab-btn:hover {
+    background: #e6ecff;
+    color: #333;
+}
+
+.tab-btn.active {
+    background: #6366f1;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-btn {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: #f1f3f7;
+    color: #555;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.filter-btn:hover {
+    background: #e6ecff;
+}
+
+.filter-btn.active {
+    background: #6366f1;
+    color: #fff;
+}
+
+.filter-btn.win.active {
+    background: #00c853;
+    color: #fff;
+}
+
+.filter-btn.loss.active {
+    background: #ff4d4f;
+    color: #fff;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.pending {
+    background: rgba(255, 193, 7, 0.15);
+    color: #b78103;
+    border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+.status-badge.win {
+    background: rgba(0, 200, 83, 0.12);
+    color: #00a854;
+    border: 1px solid rgba(0, 200, 83, 0.4);
+}
+
+.status-badge.loss {
+    background: rgba(255, 82, 82, 0.12);
+    color: #ff4d4f;
+    border: 1px solid rgba(255, 82, 82, 0.4);
+}

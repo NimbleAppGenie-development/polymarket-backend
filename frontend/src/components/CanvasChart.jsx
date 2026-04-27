@@ -31,7 +31,6 @@ export default function CanvasChart({ questionId, chartData }) {
 
             const lastY = points.length > 0 ? points[points.length - 1].y : 0;
 
-            // Only mark the last point with a dot — no inline label
             if (points.length > 0) {
                 points[points.length - 1] = {
                     ...points[points.length - 1],

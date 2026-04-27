@@ -13,6 +13,7 @@ const Account = () => {
     const [loading, setLoading] = useState(false);
     const [amount, setAmount] = useState("");
     const [method, setMethod] = useState("");
+    const [data, setData] = useState("");
     const [txnId, setTxnId] = useState("");
 
     const getAccountDetails = async () => {
@@ -22,8 +23,8 @@ const Account = () => {
             const services = new Service();
 
             const response = await services.get(`/user/user-account-details/${user.id}`, {}, true);
-
             if (response?.status) {
+                setData(response?.data || {});
                 setAvailableWallet(response?.data?.availableBalance || 0);
                 setWinningWallet(response?.data?.winningBalance || 0);
             }
@@ -147,6 +148,45 @@ const Account = () => {
                                     </form>
                                 </div>
                             </div>
+                        </div>
+
+                        <div>
+                            <div className="mt-5 justify-content-between align-items-center">
+                                <h3>Transaction History</h3>
+                            </div>
+                            <div className="d-flex justify-content-end">
+                                <a href={`/transaction-history/${user?.id}`}>View All</a>
+                            </div>
+                        </div>
+
+                        <div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {/* Sample transaction data */}
+                                    {data?.transactions?.length > 0 ? (
+                                        data.transactions.slice(0, 5).map((item, index) => (
+                                            <tr key={index}>
+                                                <td>{new Date(item.createdAt).toLocaleDateString("en-GB")}</td>
+                                                <td>$ {item.amount}</td>
+                                                <td>{item.type}</td>
+                                                <td>{item.status}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4">No transactions found</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

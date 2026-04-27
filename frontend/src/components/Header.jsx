@@ -12,8 +12,6 @@ export default function Header() {
     const [formErrors, setFormErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-    // --- Search State ---
     const [searchQuery, setSearchQuery] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
     const [marketData, setMarketData] = useState([]);
@@ -54,7 +52,7 @@ export default function Header() {
                     const validTrending = (response.data || [])
                         .filter((item) => item.trending === true)
                         .filter(isValidMarket)
-                        .slice(0, 5); // sirf pehle 5
+                        .slice(0, 5);
                     setTrendingData(validTrending);
                 }
             } catch (error) {
@@ -64,13 +62,10 @@ export default function Header() {
         fetchTrendingData();
     }, []);
 
-    // Jab kuch type karo to market se filter, warna trending dikhao
     const isSearching = searchQuery.trim() !== "";
 
     const searchResults = isSearching
-        ? marketData
-              .filter((item) => item.question?.toLowerCase().includes(searchQuery.toLowerCase()))
-              .slice(0, 10)
+        ? marketData.filter((item) => item.question?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 10)
         : [];
 
     // Close dropdown on outside click
@@ -115,7 +110,6 @@ export default function Header() {
             ),
         );
     };
-    // --- End Search ---
 
     const validateForm = (formData) => {
         const errors = {};
@@ -228,11 +222,9 @@ export default function Header() {
         const registerModal = Modal.getInstance(registerModalEl);
         document.querySelectorAll(".modal-backdrop").forEach((el) => el.remove());
         if (registerModal) registerModal.hide();
-        registerModalEl.addEventListener(
-            "hidden.bs.modal",
-            () => Modal.getOrCreateInstance(document.getElementById("exampleModal")).show(),
-            { once: true },
-        );
+        registerModalEl.addEventListener("hidden.bs.modal", () => Modal.getOrCreateInstance(document.getElementById("exampleModal")).show(), {
+            once: true,
+        });
     };
 
     // Dropdown item renderer
@@ -253,11 +245,7 @@ export default function Header() {
             onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f3ff")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
         >
-            {showIndex && (
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "#6366f1", minWidth: 18 }}>
-                    {index + 1}.
-                </span>
-            )}
+            {showIndex && <span style={{ fontSize: "12px", fontWeight: 700, color: "#6366f1", minWidth: 18 }}>{index + 1}.</span>}
             <div style={{ flex: 1, overflow: "hidden" }}>
                 <div
                     style={{
@@ -271,15 +259,17 @@ export default function Header() {
                 >
                     {highlightMatch(item.question || "", searchQuery)}
                 </div>
-                {item.category?.name && (
-                    <div style={{ fontSize: "11px", color: "#6b7280", marginTop: "2px" }}>
-                        {item.category.name}
-                    </div>
-                )}
+                {item.category?.name && <div style={{ fontSize: "11px", color: "#6b7280", marginTop: "2px" }}>{item.category.name}</div>}
             </div>
             <svg
-                width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#6366f1"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 style={{ flexShrink: 0 }}
             >
                 <path d="M5 12h14M12 5l7 7-7 7" />
@@ -333,18 +323,21 @@ export default function Header() {
                                             overflowY: "auto",
                                         }}
                                     >
-                                        {/* === SEARCH MODE: kuch type kiya === */}
                                         {isSearching ? (
                                             searchResults.length > 0 ? (
                                                 <>
-                                                    <div style={{
-                                                        padding: "8px 14px",
-                                                        fontSize: "11px", fontWeight: 600,
-                                                        color: "#9ca3af", textTransform: "uppercase",
-                                                        letterSpacing: "0.05em",
-                                                        borderBottom: "1px solid #f3f4f6",
-                                                        background: "#fafafa",
-                                                    }}>
+                                                    <div
+                                                        style={{
+                                                            padding: "8px 14px",
+                                                            fontSize: "11px",
+                                                            fontWeight: 600,
+                                                            color: "#9ca3af",
+                                                            textTransform: "uppercase",
+                                                            letterSpacing: "0.05em",
+                                                            borderBottom: "1px solid #f3f4f6",
+                                                            background: "#fafafa",
+                                                        }}
+                                                    >
                                                         Results for &quot;{searchQuery}&quot;
                                                     </div>
                                                     {searchResults.map((item, i) => (
@@ -356,35 +349,35 @@ export default function Header() {
                                                     No questions found for &quot;{searchQuery}&quot;
                                                 </div>
                                             )
-                                        ) : (
-                                            /* === DEFAULT MODE: sirf focus kiya, kuch type nahi === */
-                                            trendingData.length > 0 ? (
-                                                <>
-                                                    <div style={{
+                                        ) : trendingData.length > 0 ? (
+                                            <>
+                                                <div
+                                                    style={{
                                                         padding: "8px 14px",
-                                                        fontSize: "11px", fontWeight: 600,
-                                                        color: "#9ca3af", textTransform: "uppercase",
+                                                        fontSize: "11px",
+                                                        fontWeight: 600,
+                                                        color: "#9ca3af",
+                                                        textTransform: "uppercase",
                                                         letterSpacing: "0.05em",
                                                         borderBottom: "1px solid #f3f4f6",
                                                         background: "#fafafa",
-                                                        display: "flex", alignItems: "center", gap: 6,
-                                                    }}>
-                                                        
-                                                    </div>
-                                                    {trendingData.map((item, i) => (
-                                                        <DropdownItem key={item.id} item={item} index={i} showIndex={true} />
-                                                    ))}
-                                                </>
-                                            ) : (
-                                                <div style={{ padding: "16px 14px", textAlign: "center", color: "#9ca3af", fontSize: "13px" }}>
-                                                    Loading...
-                                                </div>
-                                            )
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: 6,
+                                                    }}
+                                                ></div>
+                                                {trendingData.map((item, i) => (
+                                                    <DropdownItem key={item.id} item={item} index={i} showIndex={true} />
+                                                ))}
+                                            </>
+                                        ) : (
+                                            <div style={{ padding: "16px 14px", textAlign: "center", color: "#9ca3af", fontSize: "13px" }}>
+                                                Loading...
+                                            </div>
                                         )}
                                     </div>
                                 )}
                             </div>
-                            {/* ===== END SEARCH BOX ===== */}
 
                             <div className="header-works">
                                 <Link to="/how-it-works">
@@ -404,10 +397,19 @@ export default function Header() {
                                 {user ? (
                                     <>
                                         <li>
-                                            <Link to="/account" className="btn login-btn">Account</Link>
+                                            <Link to="/portfolio" className="btn login-btn">
+                                                Portfolio
+                                            </Link>
                                         </li>
                                         <li>
-                                            <button onClick={logout} className="btn login-btn">Logout</button>
+                                            <Link to="/account" className="btn login-btn">
+                                                Account
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <button onClick={logout} className="btn login-btn">
+                                                Logout
+                                            </button>
                                         </li>
                                     </>
                                 ) : (
@@ -418,7 +420,12 @@ export default function Header() {
                                             </button>
                                         </li>
                                         <li>
-                                            <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal01" className="btn register-btn">
+                                            <button
+                                                type="button"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#exampleModal01"
+                                                className="btn register-btn"
+                                            >
                                                 Sign up
                                             </button>
                                         </li>
@@ -440,7 +447,9 @@ export default function Header() {
                             </div>
                             <div className="modal-body">
                                 <div className="login-modal-content">
-                                    <figure><img src="/img/logo.svg" alt="logo" /></figure>
+                                    <figure>
+                                        <img src="/img/logo.svg" alt="logo" />
+                                    </figure>
                                     <h2>Welcome Back!</h2>
                                     <p>Lorem ipsum dolor sit amet, consetetur.</p>
                                     <div className="login-form-parent">
@@ -453,17 +462,27 @@ export default function Header() {
                                             <div className="password-fields" style={{ position: "relative" }}>
                                                 <input
                                                     type={showPassword ? "text" : "password"}
-                                                    className="form-control" name="passwordL" placeholder="Enter password"
+                                                    className="form-control"
+                                                    name="passwordL"
+                                                    placeholder="Enter password"
                                                 />
                                                 <span
                                                     onClick={togglePasswordVisibility}
                                                     className={`fa fa-fw ${showPassword ? "fa-eye" : "fa-eye-slash"} field-icon`}
-                                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer" }}
+                                                    style={{
+                                                        position: "absolute",
+                                                        right: "10px",
+                                                        top: "50%",
+                                                        transform: "translateY(-50%)",
+                                                        cursor: "pointer",
+                                                    }}
                                                 ></span>
                                             </div>
                                         </div>
                                         <div className="form-group">
-                                            <button className="btn btn-primaryx" type="submit">Log In</button>
+                                            <button className="btn btn-primaryx" type="submit">
+                                                Log In
+                                            </button>
                                         </div>
                                         <div className="form-bottom-btn">
                                             <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal01" data-bs-dismiss="modal">
@@ -488,7 +507,9 @@ export default function Header() {
                             </div>
                             <div className="modal-body">
                                 <div className="login-modal-content">
-                                    <figure><img src="/img/logo.svg" alt="logo" /></figure>
+                                    <figure>
+                                        <img src="/img/logo.svg" alt="logo" />
+                                    </figure>
                                     <h2>Welcome Back!</h2>
                                     <p>Lorem ipsum dolor sit amet, consetetur.</p>
                                     <div className="login-form-parent">
@@ -507,12 +528,20 @@ export default function Header() {
                                             <div className="password-fields" style={{ position: "relative" }}>
                                                 <input
                                                     type={showPassword ? "text" : "password"}
-                                                    className="form-control" name="password" placeholder="Enter Password"
+                                                    className="form-control"
+                                                    name="password"
+                                                    placeholder="Enter Password"
                                                 />
                                                 <span
                                                     onClick={() => setShowPassword(!showPassword)}
                                                     className={`fa fa-fw ${showPassword ? "fa-eye" : "fa-eye-slash"} field-icon`}
-                                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer" }}
+                                                    style={{
+                                                        position: "absolute",
+                                                        right: "10px",
+                                                        top: "50%",
+                                                        transform: "translateY(-50%)",
+                                                        cursor: "pointer",
+                                                    }}
                                                 ></span>
                                             </div>
                                             {formErrors.password && <div className="text-danger">{formErrors.password}</div>}
@@ -522,21 +551,33 @@ export default function Header() {
                                             <div className="password-fields">
                                                 <input
                                                     type={showConfirmPassword ? "text" : "password"}
-                                                    className="form-control" name="confirmPassword" placeholder="Enter confirm password"
+                                                    className="form-control"
+                                                    name="confirmPassword"
+                                                    placeholder="Enter confirm password"
                                                 />
                                                 <span
                                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                     className={`fa fa-fw ${showConfirmPassword ? "fa-eye" : "fa-eye-slash"} field-icon`}
-                                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer" }}
+                                                    style={{
+                                                        position: "absolute",
+                                                        right: "10px",
+                                                        top: "50%",
+                                                        transform: "translateY(-50%)",
+                                                        cursor: "pointer",
+                                                    }}
                                                 ></span>
                                             </div>
                                             {formErrors.confirmPassword && <div className="text-danger">{formErrors.confirmPassword}</div>}
                                         </div>
                                         <div className="form-group">
-                                            <button className="btn btn-primaryx" type="submit">Sign Up</button>
+                                            <button className="btn btn-primaryx" type="submit">
+                                                Sign Up
+                                            </button>
                                         </div>
                                         <div className="form-bottom-btn">
-                                            <a href="#" onClick={handleOpenLogin}>Already have an account? Login Here</a>
+                                            <a href="#" onClick={handleOpenLogin}>
+                                                Already have an account? Login Here
+                                            </a>
                                         </div>
                                     </div>
                                 </div>

@@ -69,7 +69,7 @@ export default function Live() {
     useEffect(() => {
         getLiveData();
     }, []);
-    
+
     const filteredLive = getLiveRecords(liveData);
 
     return (
@@ -120,12 +120,13 @@ export default function Live() {
                                                     ?.map((opt) => (
                                                         <div key={opt.id} className="option-row-parent">
                                                             <div className="option-row flex-parent">
-                                                                <img
-                                                                    src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
-                                                                    alt={opt.option}
-                                                                    className="option-img"
-                                                                />
-
+                                                                {opt.image && (
+                                                                    <img
+                                                                        src={`${import.meta.env.VITE_IMAGE_URL}/public/question/${opt.image}`}
+                                                                        alt={opt.option}
+                                                                        className="option-img"
+                                                                    />
+                                                                )}
                                                                 <span className="option-text">{opt.option}</span>
                                                             </div>
 

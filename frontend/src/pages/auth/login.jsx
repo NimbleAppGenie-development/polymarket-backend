@@ -41,7 +41,7 @@ export default function Login() {
             errorToastr(error.message || "Login failed");
         }
 
-        return false; // ✅ prevents form from trying to reload
+        return false; // prevents form from trying to reload
     };
 
 

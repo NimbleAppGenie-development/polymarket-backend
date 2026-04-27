@@ -162,8 +162,6 @@ export default function HomeDetail() {
         }
     }, [marketData?.id]);
 
-    // const filterOptions = (options = []) => options.filter((opt) => opt.option !== "None of the Above");
-
     return (
         <div className="home-page">
             <Header />
@@ -202,33 +200,7 @@ export default function HomeDetail() {
                                         <h3>{marketData?.question}</h3>
                                         {/* <h4>{marketData?.description}</h4> */}
                                     </div>
-                                    {/* <div className="details-user-right-parent">
-                                        <ul>
-                                            <li>
-                                                <a href="#">
-                                                    <img src="/img/comment.svg" alt="icon" />
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="#">
-                                                    <img src="/img/copy.svg" alt="icon" />
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="#">
-                                                    <img src="/img/download.svg" alt="icon" />
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div> */}
                                 </div>
-
-                                {/* <div className="forecast-main-box">
-                                    <p>56.7 forecast</p>
-                                    <span>
-                                        <img src="/img/arrow-top.svg" alt="icon" /> 38.3
-                                    </span>
-                                </div> */}
 
                                 {/* Graph Section */}
                                 <div className="details-page-chart-parent">
@@ -300,9 +272,6 @@ export default function HomeDetail() {
                                                             </span>
                                                         </div>
                                                     )}
-                                                    {/* <div className="details-page-tbaing-content-box">
-                                                        <div className="show-less-content">Show Less Market</div>
-                                                    </div> */}
                                                     <div className="details-page-bottom-accordion">
                                                         <div className="accordion" id="accordionExample">
                                                             <div className="accordion-item">
@@ -336,7 +305,7 @@ export default function HomeDetail() {
                                         <figure>
                                             <img
                                                 src={`${import.meta.env.VITE_IMAGE_URL}/public/category/${marketData?.category?.image}`}
-                                                // alt="image"
+                                                
                                             />
                                         </figure>
                                         <h5>{marketData?.category?.name}</h5>
@@ -431,7 +400,7 @@ export default function HomeDetail() {
                         <div className="modal-content p-3">
                             <div className="modal-header border-0">
                                 <div>
-                                    <h5 className="modal-title">{tradeData.options?.map((opt) => opt.option).join(" / ")}</h5>
+                                    <h5 className="modal-title">{tradeData.question}</h5>
                                     <small className="text-muted">Select an option to trade</small>
                                 </div>
                                 <button

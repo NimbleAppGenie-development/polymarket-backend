@@ -6,6 +6,8 @@ import HomeDetail from "./pages/HomeDetail";
 import Account from "./pages/Account";
 import HowItWorks from "./pages/HowItWorks";
 import Live from "./pages/Live";
+import Portfolio from "./pages/Portfolio";
+import TransactionHistory from "./pages/TransactionHistory";
 import { PrivateRoute } from "./utils/auth/PrivateRoute";
 
 export default function App() {
@@ -17,6 +19,8 @@ export default function App() {
                 <Route path="/how-it-works" element={<HowItWorks />} />
                 <Route path="/live" element={<Live />} />
                 <Route path="/account" element={ <PrivateRoute> <Account /> </PrivateRoute> } />
+                <Route path="/portfolio" element={ <PrivateRoute> <Portfolio /> </PrivateRoute> } />
+                <Route path="/transaction-history/:userId" element={ <PrivateRoute> <TransactionHistory /> </PrivateRoute> } />
 
                 <Route path="*" element={<NotFound />} />
             </Routes>

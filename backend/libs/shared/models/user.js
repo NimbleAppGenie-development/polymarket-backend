@@ -6,6 +6,9 @@ const dotenv = require("dotenv");
 dotenv.config();
 const sequelize = require(".");
 const UserWallet = require("./userWallet");
+const UserPredictedQuestion = require("./userpredictedquestions");
+const Question = require("./question");
+const Category = require("./Category");
 class User extends Model {
 
     async generateToken() {
@@ -73,5 +76,7 @@ User.init(
     }
 );
 User.hasMany(UserWallet, { foreignKey: "userId", as: "wallet" });
-
+User.hasMany(UserPredictedQuestion, { foreignKey: "userId", as: "predictedQuestions" });
+User.hasMany(Question, { foreignKey: "id", as: "question" });
+User.hasMany(Category, { foreignKey: "id", as: "category" });
 module.exports = User;

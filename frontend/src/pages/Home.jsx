@@ -1,10 +1,8 @@
-// import privacypolicycss from "../assets/css/static-pages/privacy-policy.module.css";
 import { Fragment, useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { errorToastr, successToastr } from "../utils/toastr.js";
 import { HttpClient } from "../utils/request";
-// import { Link } from "react-router";
 import { Link } from "react-router-dom";
 import AuthContext from "../utils/auth/AuthContext.jsx";
 import Service from "../services/Http.js";
@@ -279,7 +277,6 @@ export default function Home() {
         return predictionData?.find((item) => String(item.questionId) === String(questionId));
     };
 
-    // const noData = !showSlider.length && !marketData.length && !trendingData.length;
     const noData = !sliderData.length && !filteredMarketData.length && !filteredTrendingData.length;
     return (
         <div className="home-page">
@@ -497,7 +494,6 @@ export default function Home() {
                                                                     onClick={(e) => {
                                                                         if (e.target.closest(".option-row-parent")) return;
 
-                                                                        // navigate(`/home-detail/${item.id}`);
                                                                         getGraphData(item.id);
                                                                         navigate(`/home-detail/${item.id}`);
                                                                     }}
