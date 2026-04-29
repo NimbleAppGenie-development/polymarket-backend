@@ -77,6 +77,7 @@ User.init(
 );
 User.hasMany(UserWallet, { foreignKey: "userId", as: "wallet" });
 User.hasMany(UserPredictedQuestion, { foreignKey: "userId", as: "predictedQuestions" });
+UserPredictedQuestion.belongsTo(User, { foreignKey: "userId", as: "user" });
 User.hasMany(Question, { foreignKey: "id", as: "question" });
 User.hasMany(Category, { foreignKey: "id", as: "category" });
 module.exports = User;

@@ -2,7 +2,6 @@ const { DataTypes, Model } = require("sequelize");
 const sequelize = require("."); // Assuming this is your Sequelize instance
 const Category = require("./Category"); // Assuming you have a User model
 const Question = require("./question");
-const User = require("./user");
 
 class UserPredictedQuestion extends Model {}
 
@@ -62,5 +61,4 @@ UserPredictedQuestion.init(
 
 UserPredictedQuestion.belongsTo(Category, { foreignKey: "categoryId", as: "category" });
 UserPredictedQuestion.belongsTo(Question, { foreignKey: "questionId", as: "question" });
-// UserPredictedQuestion.belongsTo(User, {foreignKey: "userId", as:"user"})
 module.exports = UserPredictedQuestion;

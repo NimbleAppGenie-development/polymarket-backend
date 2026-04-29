@@ -460,17 +460,13 @@ module.exports = {
                 where: { questionId: id },
                 include: [
                     {
-                        model: Category,
-                        as: "category",
-                        attributes: ["name"]
-                    },
-                    // {
-                    //     model: User,
-                    //     as: "user",
-                    //     attributes: {exclude: ["password","accessToken","refreshToken"]}
-                    // }
+                        model: User,
+                        as: "user",
+                        attributes: {exclude: ["password","accessToken","refreshToken"]}
+                    }
                 ]
             });
+            
             if (!predictedQuestion.length) {
                 return res.status(statusCode.NOT_FOUND).json({
                     status: false,
@@ -481,6 +477,7 @@ module.exports = {
             const formattedQuestion = predictedQuestion.map((item) => ({
                 id: item.id,
                 userId: item.userId,
+                userName: item.user?.name, 
                 categoryId: item.categoryId,
                 questionId: item.questionId,
                 selectedOption: item.selectedOptionName,

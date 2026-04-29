@@ -19,7 +19,7 @@ export default function ViewQuestion() {
             const services = new Service();
 
             const response = await services.get(`/admin/question/view/${questionId}`, {}, true);
-            console.log("Radheeeeeeeeeeeee", response);
+            
             if (response?.status) {
                 setQuestion(response.data);
             } else {
@@ -58,7 +58,7 @@ export default function ViewQuestion() {
                         {question?.map((item, key) => (
                             <tr key={item.id || key}>
                                 <td>{key + 1}</td>
-                                <td>{item.userId}</td>
+                                <td>{item.userName}</td>
                                 <td>{item?.selectedOption}</td>
                                 <td>{item?.entryAmount}</td>
                                 <td>{item?.winningStatus}</td>
