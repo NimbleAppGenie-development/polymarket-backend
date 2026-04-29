@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect, useState } from "react";
 import { AuthenticatedLayout } from "../../layout/AuthenticatedLayout";
-import { HttpClient } from "../../utils/request";
 import AuthContext from "../../utils/auth/AuthContext";
 import { fetchURLfromBackend } from "../../utils/helper";
 import { errorToastr, successToastr } from "../../utils/toastr";

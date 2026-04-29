@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { AuthenticatedLayout } from "../../layout/AuthenticatedLayout";
-import { HttpClient } from "../../utils/request";
 import { dateFormatter } from "../../utils/helper";
 import Paginator from "../../components/Paginator";
 import "react-date-range/dist/styles.css";
@@ -51,7 +50,7 @@ export default function UserManagement() {
                     search,
                     dateRange,
                 },
-                true
+                true,
             );
 
             if (response?.status === true) {
@@ -97,15 +96,19 @@ export default function UserManagement() {
 
     const logoutUser = async (user) => {
         try {
-            const request = new HttpClient({
-                auth: true,
-                url: `/user/logoutUser/${user.id}`, // matches your controller route
-            });
+            const services = new Service();
 
-            await request.post();
-            successToastr(`${user.name || "User"} logged out successfully`);
+            const response = await services.post(`/user/logoutUser/${user.id}`, {}, true);
+
+            if (response.status) {
+                successToastr(`${user.name || "User"} logged out successfully`);
+            } else {
+                errorToastr(response?.message || response?.data?.message || "Failed to logout user");
+            }
         } catch (error) {
-            errorToastr(error.message || "Failed to logout user");
+            console.error("Logout user error:", error);
+
+            errorToastr(error?.message || error?.data?.message || "Failed to logout user");
         }
     };
 
@@ -122,26 +125,31 @@ export default function UserManagement() {
         if (passwordData.newPassword !== passwordData.confirmPassword) {
             return errorToastr("Passwords do not match");
         }
+
         if (passwordData.newPassword.length < 8) {
             return errorToastr("Password must be at least 8 characters long");
         }
 
         try {
-            const request = new HttpClient({
-                auth: true,
-                url: `/user/changeUserPassword/${selectedUser.id}`,
-                data: { password: passwordData.newPassword },
-            });
+            const services = new Service();
 
-            await request.post();
-            successToastr("Password updated successfully");
+            const response = await services.post(`/user/changeUserPassword/${selectedUser.id}`, { password: passwordData.newPassword }, true);
 
-            // Close modal safely
-            const modalElement = document.getElementById("changePasswordModal");
-            const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
-            if (modalInstance) modalInstance.hide();
+            if (response.status) {
+                successToastr("Password updated successfully");
+
+                // Close modal safely
+                const modalElement = document.getElementById("changePasswordModal");
+                const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
+
+                if (modalInstance) modalInstance.hide();
+            } else {
+                errorToastr(response?.message || response?.data?.message || "Password update failed");
+            }
         } catch (error) {
-            errorToastr(error.message);
+            console.error("Change password error:", error);
+
+            errorToastr(error?.message || error?.data?.message || "Password update failed");
         }
     };
 
@@ -207,41 +215,32 @@ export default function UserManagement() {
                 }
             }
 
-            // --- Validate inputs ---
             if (!nameRegex.test(editData.fullName)) return errorToastr("Invalid name. Only letters and spaces allowed (3–22 characters).");
-
-            // if (!countryCodeRegex.test(editData.countryCode))
-            //     return errorToastr("Invalid country code. Use format like +91.");
-
-            // if (!phoneNumberRegex.test(editData.phoneNumber))
-            //     return errorToastr("Invalid phone number. Only digits allowed (7–15 digits).");
 
             if (!emailRegex.test(editData.email)) return errorToastr("Invalid email format.");
 
             if (editData.wallet && !walletRegex.test(editData.wallet))
                 return errorToastr("Invalid wallet amount. Only numbers allowed (max 2 decimals).");
 
-            const request = new HttpClient({
-                auth: true,
-                url: `/admin/usersUpdate/${selectedUser.id}`,
-                data: editData,
-            });
+            const services = new Service();
 
-            const res = await request.post();
+            const response = await services.post(`/admin/usersUpdate/${selectedUser.id}`, editData, true);
 
-            if (res.status === 200) {
+            if (response.status) {
                 successToastr("User updated successfully");
 
                 const modalElement = document.getElementById("editModal");
                 const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
+
                 if (modalInstance) modalInstance.hide();
 
                 // Refresh table
                 fetchData({ page, limit, search, dateRange });
             } else {
-                errorToastr(res?.response?.data?.message || "User update failed");
+                errorToastr(response?.message || response?.data?.message || "User update failed");
             }
         } catch (error) {
+            console.error("Update error:", error);
             errorToastr(error.message);
         }
     };
@@ -268,21 +267,19 @@ export default function UserManagement() {
 
     const toggleStatus = async (user) => {
         try {
-            const service = new Service(); 
+            const service = new Service();
 
-            const response = await service.post( `/admin/toggleStatus/${user.id}`, {}, true  );
+            const response = await service.post(`/admin/toggleStatus/${user.id}`, {}, true);
 
             if (response?.status) {
                 successToastr(response?.message || "User status updated successfully");
 
-                fetchData(
-                    { 
-                        page, 
-                        limit, 
-                        search, 
-                        dateRange 
-                    }
-                );
+                fetchData({
+                    page,
+                    limit,
+                    search,
+                    dateRange,
+                });
             } else {
                 errorToastr(response?.message || "Failed to update status");
             }
@@ -388,13 +385,13 @@ export default function UserManagement() {
                                                 <li style={{ cursor: "pointer" }}>
                                                     <span className="dropdown-item" onClick={() => toggleStatus(item)}>
                                                         {item.isActive ? (
-                                                        <>
-                                                            <i className="fa fa-toggle-off me-2 text-danger"></i> Deactivate
-                                                        </>
+                                                            <>
+                                                                <i className="fa fa-toggle-off me-2 text-danger"></i> Deactivate
+                                                            </>
                                                         ) : (
-                                                        <>
-                                                            <i className="fa fa-toggle-on me-2 text-success"></i> Activate
-                                                        </>
+                                                            <>
+                                                                <i className="fa fa-toggle-on me-2 text-success"></i> Activate
+                                                            </>
                                                         )}
                                                     </span>
                                                 </li>

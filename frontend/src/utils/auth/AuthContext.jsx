@@ -1,7 +1,6 @@
 import { createContext, useState, useEffect } from "react";
-import { HttpClient } from "../request";
 import toastr from "../toastr";
-
+import Service from "../../services/Http";
 
 const AuthContext = createContext();
 
@@ -25,26 +24,23 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
+        try {
+            const services = new Service();
 
-        let request = new HttpClient({
-            url: "/user/user-logout",
-            auth: true,
-            data: {},
-            
-        });
-        
-        await request.post();
+            await services.post("/user/user-logout", {}, true);
 
-        localStorage.removeItem("user");
-        setUser(null);
-        toastr.success("User logged out successfully");
+            localStorage.removeItem("user");
+            setUser(null);
+
+            toastr.success("User logged out successfully");
+        } catch (error) {
+            console.error("Logout error:", error);
+
+            toastr.error(error?.message || error?.data?.message || "Logout failed");
+        }
     };
 
-    return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
-            {children}
-        </AuthContext.Provider>
-    );
+    return <AuthContext.Provider value={{ user, login, logout, loading }}>{children}</AuthContext.Provider>;
 };
 
 export default AuthContext;

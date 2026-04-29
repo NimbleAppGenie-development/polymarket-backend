@@ -1,10 +1,8 @@
 import { AuthenticatedLayout } from "../../layout/AuthenticatedLayout.jsx";
 import { useEffect, useState } from "react";
 import { errorToastr, successToastr } from "../../utils/toastr.js";
-import { HttpClient } from "../../utils/request.js";
 import { useNavigate, useParams } from "react-router-dom";
 import Service from "../../services/Http.js";
-
 
 export default function EditCategory() {
     const navigate = useNavigate();
@@ -20,11 +18,7 @@ export default function EditCategory() {
         try {
             const services = new Service();
 
-            const response = await services.get(
-                `/admin/categoryById/${categoryId}`,
-                {}, 
-                true,
-            );
+            const response = await services.get(`/admin/categoryById/${categoryId}`, {}, true);
 
             if (response?.status) {
                 setCategoryData(response?.data || {});
@@ -84,21 +78,6 @@ export default function EditCategory() {
             } else {
                 errorToastr(response?.message || "Failed to update category");
             }
-
-
-            /* const request = new HttpClient({
-                url: "/admin/category/editCategory",
-                auth: true,
-                data: form,
-                headers: { "Content-Type": "multipart/form-data" },
-            }); */
-
-            /* const { data } = await request.post();
-
-            if (data?.status) {
-                successToastr(data.message || "Category created successfully!");
-                navigate("/category", { replace: true });
-            } */
         } catch (error) {
             errorToastr(error.message || "Something went wrong.");
         }
@@ -107,7 +86,7 @@ export default function EditCategory() {
     useEffect(() => {
         fetchCategoryData();
     }, []);
-    
+
     return (
         <AuthenticatedLayout title="Edit Category">
             <div className="row">

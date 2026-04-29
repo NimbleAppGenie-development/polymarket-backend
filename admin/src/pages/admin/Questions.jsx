@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { AuthenticatedLayout } from "../../layout/AuthenticatedLayout";
-import { HttpClient } from "../../utils/request";
 import { dateFormatter } from "../../utils/helper";
 import Paginator from "../../components/Paginator";
 import DateRangeInput from "../../components/DateRangeInput";

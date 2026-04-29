@@ -357,12 +357,19 @@ module.exports = {
             const newBalance = Number(user.walletBalance || 0) - deductAmount;
 
             if (type === "WINNING") {
+                
                 const wallet = await UserWallet.findOne({
                     where: {
                         userId,
                         type: "WINNING",
                     },
                 });
+                if(!wallet){
+                    return res.status(statusCodes.BAD_REQUEST).json({
+                        status: false,
+                        message: "Winning wallet not found"
+                    })
+                }
                 if (Number(wallet.balance) < deductAmount) {
                     return res.status(statusCodes.BAD_REQUEST).json({
                         status: false,

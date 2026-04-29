@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { HttpClient } from "../../utils/request.js";
 import { errorToastr, successToastr } from "../../utils/toastr.js";
 import Service from "../../services/Http.js";
 

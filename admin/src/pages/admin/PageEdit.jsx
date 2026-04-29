@@ -3,7 +3,6 @@ import RangeSlider from "react-range-slider-input";
 import "react-range-slider-input/dist/style.css";
 import { useEffect, useState } from "react";
 import { errorToastr, successToastr } from "../../utils/toastr.js";
-import { HttpClient } from "../../utils/request.js";
 import { useNavigate, useParams } from "react-router-dom";
 import { error } from "toastr";
 import ContentEditor from "./ContentEditor.jsx";

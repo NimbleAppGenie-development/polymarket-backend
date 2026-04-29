@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { AuthenticatedLayout } from "../../layout/AuthenticatedLayout";
-import { HttpClient } from "../../utils/request";
 import Service from "../../services/Http";
 
 

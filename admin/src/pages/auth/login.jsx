@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
-import { HttpClient } from "../../utils/request";
 import { useNavigate } from "react-router";
 import AuthContext from "../../utils/auth/AuthContext";
-import { errorToastr } from '../../utils/toastr.js';
+import { errorToastr } from "../../utils/toastr.js";
+import Service from "../../services/Http.js";
 
 export default function Login() {
     const { login } = useContext(AuthContext);
@@ -11,7 +11,7 @@ export default function Login() {
     const [passwordAttr, setPasswordAttr] = useState("password");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false); // ⏳ optional loader state
+    const [loading, setLoading] = useState(false); // optional loader state
 
     const toggleState = () => {
         setToggle(!toggle);
@@ -20,44 +20,52 @@ export default function Login() {
 
     const handleSubmition = async (e) => {
         e.preventDefault();
+        setLoading(true);
+
+        const originalFetch = window.fetch;
+
+        window.fetch = async (...args) => {
+            const res = await originalFetch(...args);
+
+            if (res.status === 401) {
+                const data = await res.json();
+                return new Response(JSON.stringify(data), {
+                    status: 200,
+                    headers: { "Content-Type": "application/json" },
+                });
+            }
+
+            return res;
+        };
 
         try {
-            const request = new HttpClient({
-                url: "/admin/login",
-                data: { email, password },
-                auth: false
-            });
+            const services = new Service();
+            const response = await services.post("/admin/login", { email, password }, false);
 
-            const { data, status } = await request.post();
-
-            if (status && data?.body) {
-                login(data.body);
+            if (response?.body) {
+                login(response.body);
                 navigate("/dashboard");
             } else {
-                errorToastr(data?.message || "Invalid credentials");
+                errorToastr(response?.message || "Invalid credentials");
             }
         } catch (error) {
             console.error("Login error:", error);
-            errorToastr(error.message || "Login failed");
+            errorToastr(error?.message || "Login failed");
+        } finally {
+            window.fetch = originalFetch;
+            setLoading(false);
         }
-
-        return false; // ✅ prevents form from trying to reload
     };
 
-
-
     return (
-        <form
-            className="position-absolute top-50 start-50 translate-middle w-25 needs-validation"
-            onSubmit={handleSubmition}
-        >
+        <form className="position-absolute top-50 start-50 translate-middle w-25 needs-validation" onSubmit={handleSubmition}>
             <div className="card text-bg-dark shadow-lg px-5">
                 <img
                     src="/img/logo.svg"
                     className="card-img-top mt-5"
                     alt="Admin Logo"
                     style={{
-                        position: "relative"
+                        position: "relative",
                     }}
                 />
                 <div className="card-body">
@@ -88,21 +96,14 @@ export default function Login() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Enter Password"
                             />
-                            <span
-                                className="input-group-text"
-                                id="addon-wrapping"
-                                onClick={() => toggleState()}
-                            >
-                                <i
-                                    className={`fa ${toggle ? "fa-eye-slash" : "fa-eye"
-                                        }`}
-                                ></i>
+                            <span className="input-group-text" id="addon-wrapping" onClick={() => toggleState()}>
+                                <i className={`fa ${toggle ? "fa-eye-slash" : "fa-eye"}`}></i>
                             </span>
                         </div>
                     </div>
                     <div className="d-grid gap-2">
-                        <button className="btn btn-primary" type="submit">
-                            Login
+                        <button className="btn btn-primary" type="submit" disabled={loading}>
+                            {loading ? "Logging in..." : "Login"}
                         </button>
                     </div>
                 </div>

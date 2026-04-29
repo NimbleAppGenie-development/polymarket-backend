@@ -1,7 +1,6 @@
 import { AuthenticatedLayout } from "../../layout/AuthenticatedLayout.jsx";
 import { useEffect, useState } from "react";
 import { errorToastr, successToastr } from "../../utils/toastr.js";
-import { HttpClient } from "../../utils/request.js";
 import Service from "../../services/Http.js";
 import { useNavigate } from "react-router";
 

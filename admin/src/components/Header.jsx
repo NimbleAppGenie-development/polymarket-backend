@@ -1,23 +1,29 @@
 import { useContext, useEffect, useState } from "react";
 import AuthContext from "../utils/auth/AuthContext";
-import { HttpClient } from "../utils/request";
 import { fetchURLfromBackend } from "../utils/helper";
 import { Link } from "react-router";
+import Service from "../services/Http";
 
 export default function Header() {
     const { user } = useContext(AuthContext);
     const [profile, setProfile] = useState({});
 
     const fetchProfile = async () => {
-        let request = new HttpClient({
-            auth: true,
-            data: {},
-            url: "/admin/profile",
-        });
+        try {
+            const services = new Service();
 
-        let { data } = await request.get();
+            const response = await services.get("/admin/profile", {}, true);
 
-        setProfile(data.data);
+            if (response.status && response.data?.data) {
+                setProfile(response.data.data);
+            } else {
+                errorToastr(response?.message || response?.data?.message || "Failed to fetch profile");
+            }
+        } catch (error) {
+            console.error("Fetch profile error:", error);
+
+            errorToastr(error?.message || error?.data?.message || "Error fetching profile");
+        }
     };
 
     useEffect(() => {

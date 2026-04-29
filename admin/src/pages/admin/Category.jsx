@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { AuthenticatedLayout } from "../../layout/AuthenticatedLayout.jsx";
-import { HttpClient } from "../../utils/request.js";
 import { dateFormatter } from "../../utils/helper.js";
 import Paginator from "../../components/Paginator.jsx";
 import Service from "../../services/Http.js";

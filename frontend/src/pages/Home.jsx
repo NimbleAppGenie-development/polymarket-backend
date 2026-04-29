@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { errorToastr, successToastr } from "../utils/toastr.js";
-import { HttpClient } from "../utils/request";
 import { Link } from "react-router-dom";
 import AuthContext from "../utils/auth/AuthContext.jsx";
 import Service from "../services/Http.js";

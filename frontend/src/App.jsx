@@ -9,10 +9,11 @@ import Live from "./pages/Live";
 import Portfolio from "./pages/Portfolio";
 import TransactionHistory from "./pages/TransactionHistory";
 import { PrivateRoute } from "./utils/auth/PrivateRoute";
-
+import AutoLogout from "./utils/auth/AutoLogout";
 export default function App() {
     return (
         <BrowserRouter>
+            <AutoLogout />
             <Routes>
                 <Route path="/" element={<Home key={Date.now()} />} />
                 <Route path="/home-detail/:detailId" element={<HomeDetail />} />

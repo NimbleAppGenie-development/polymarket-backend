@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { AuthenticatedLayout } from "../../layout/AuthenticatedLayout";
-import { HttpClient } from "../../utils/request";
 import { dateFormatter } from "../../utils/helper";
 import { Link } from "react-router";
 import { errorToastr, successToastr } from "../../utils/toastr.js";

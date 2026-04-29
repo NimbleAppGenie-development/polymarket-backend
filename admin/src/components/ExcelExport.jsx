@@ -1,34 +1,38 @@
-import { HttpClient } from "../utils/request";
+import Service from "../services/Http";
 import { utils, write } from "xlsx";
 import { saveAs } from "file-saver";
 
 export default async function excelExport({ url, query, filename }) {
-    let file = filename ?? `download-${new Date().toISOString()}`;
+    try {
+        const file = filename ?? `download-${new Date().toISOString()}`;
 
-    let client = new HttpClient({
-        url: url,
-        data: query,
-        auth: true,
-    });
+        const services = new Service();
 
-    let { data } = await client.get();
+        const response = await services.get(url, query, true);
 
-    let { emails } = data.data;
+        if (!response.status || !response.data) {
+            throw new Error("Failed to fetch export data");
+        }
 
-    const worksheet = utils.json_to_sheet(emails);
+        const emails = response.data?.data?.emails || [];
 
-    const workbook = utils.book_new();
+        const worksheet = utils.json_to_sheet(emails);
+        const workbook = utils.book_new();
 
-    utils.book_append_sheet(workbook, worksheet, "Sheet1");
+        utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
-    const excelBuffer = write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-    });
+        const excelBuffer = write(workbook, {
+            bookType: "xlsx",
+            type: "array",
+        });
 
-    const blob = new Blob([excelBuffer], {
-        type: "application/octet-stream",
-    });
+        const blob = new Blob([excelBuffer], {
+            type: "application/octet-stream",
+        });
 
-    saveAs(blob, `${file}.xlsx`);
+        saveAs(blob, `${file}.xlsx`);
+
+    } catch (error) {
+        console.error("Excel export error:", error);
+    }
 }

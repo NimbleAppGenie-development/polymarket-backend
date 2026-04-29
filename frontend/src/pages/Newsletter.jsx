@@ -2,11 +2,11 @@ import { useEffect } from "react";
 import { useState } from "react";
 import Loader from "../components/Loader";
 import toastr from "toastr";
-import { HttpClient } from "../utils/request";
 import useTitle from "../utils/title";
 import "../assets/css/admin/bootstrap.min.css";
 import "../assets/css/newsletter/media.css";
 import { useNavigate } from "react-router";
+import Service from "../services/Http";
 
 export default function NewsLetter() {
     useTitle("Target", false);
@@ -68,19 +68,19 @@ export default function NewsLetter() {
             return false;
         }
 
-        let client = new HttpClient({
-            url: "/admin/user-newsletter",
-            data: {
-                email: email,
-            },
-            auth: false,
-        });
+        try {
+            const services = new Service();
 
-        let { data } = await client.post();
+            const response = await services.post("/admin/user-newsletter", { email }, false);
 
-        toastr.success(data.message ?? `Email sent to ${email}`, "Success");
+            toastr.success(response?.data?.message || `Email sent to ${email}`, "Success");
 
-        setEmail("");
+            setEmail("");
+        } catch (error) {
+            console.error("Newsletter error:", error);
+
+            toastr.error(error?.message || error?.data?.message || "Something went wrong", "Error");
+        }
     };
 
     if (!stylesLoaded) return <Loader color={"yellow"} />;
