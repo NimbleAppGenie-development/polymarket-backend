@@ -225,7 +225,7 @@ module.exports = {
                 });
             }
 
-            // ✅ APPROVE → deduct
+            // APPROVE → deduct
             if (status === "APPROVED") {
                 if (Number(wallet.balance) < Number(transaction.amount)) {
                     return res.status(statusCodes.BAD_REQUEST).json({
@@ -234,13 +234,13 @@ module.exports = {
                     });
                 }
 
-                wallet.balance = Number(wallet.balance) - Number(transaction.amount);
+                // wallet.balance = Number(wallet.balance) - Number(transaction.amount);
                 await wallet.save();
 
                 await transaction.update({ status: "APPROVED" });
             }
 
-            // ✅ REJECT → refund (ADD BACK)
+            // REJECT → refund (ADD BACK)
             else if (status === "REJECTED") {
                 wallet.balance = Number(wallet.balance) + Number(transaction.amount);
                 await wallet.save();

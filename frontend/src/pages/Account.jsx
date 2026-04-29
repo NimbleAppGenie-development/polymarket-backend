@@ -14,7 +14,7 @@ const Account = () => {
     const [loading, setLoading] = useState(false);
     const [amount, setAmount] = useState("");
     const [data, setData] = useState("");
-    const [actionType, setActionType] = useState(""); // "DEPOSIT" | "WITHDRAW" | ""
+    const [actionType, setActionType] = useState("DEPOSIT"); // "DEPOSIT" | "WITHDRAW" | ""
 
     const getAccountDetails = async () => {
         try {
@@ -92,7 +92,6 @@ const Account = () => {
             <section className="banner-section-content">
                 <div className="container">
                     <div className="row">
-                        {/* ─── LEFT COLUMN ─── */}
                         <div className="col-lg-8">
                             <div className="trending-main-parent">
                                 <h2>
@@ -124,7 +123,6 @@ const Account = () => {
                                                 className={`btn btn-warning ${actionType === "WITHDRAW" ? "active" : ""}`}
                                                 onClick={() => {
                                                     setAmount("");
-                                                    // toggle: agar already WITHDRAW open hai to close karo
                                                     setActionType(actionType === "WITHDRAW" ? "" : "WITHDRAW");
                                                 }}
                                             >
@@ -135,7 +133,6 @@ const Account = () => {
                                                 className={`btn btn-success ${actionType === "DEPOSIT" ? "active" : ""}`}
                                                 onClick={() => {
                                                     setAmount("");
-                                                    // toggle: agar already DEPOSIT open hai to close karo
                                                     setActionType(actionType === "DEPOSIT" ? "" : "DEPOSIT");
                                                 }}
                                             >
@@ -177,7 +174,7 @@ const Account = () => {
                                                     value={amount}
                                                     onChange={(e) => setAmount(e.target.value)}
                                                     placeholder="Enter amount"
-                                                    min="1"
+                                                    min="0"
                                                     max="99999999"
                                                     onKeyDown={(e) => {
                                                         if (["e", "E", "+", "-", "."].includes(e.key)) {
@@ -224,7 +221,7 @@ const Account = () => {
                                                     value={amount}
                                                     onChange={(e) => setAmount(e.target.value)}
                                                     placeholder="Enter amount"
-                                                    min="1"
+                                                    min="0"
                                                     max="99999999"
                                                     onKeyDown={(e) => {
                                                         if (["e", "E", "+", "-", "."].includes(e.key)) {

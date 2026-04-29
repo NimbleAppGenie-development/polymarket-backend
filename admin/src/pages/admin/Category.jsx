@@ -168,7 +168,7 @@ export default function Category() {
                                 <th>CategoryId</th>
                                 <th>Name</th>
                                 <th>Image</th>
-                                <th>Date</th>
+                                <th>Created At</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>

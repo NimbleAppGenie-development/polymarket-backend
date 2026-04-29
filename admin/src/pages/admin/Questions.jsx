@@ -284,6 +284,7 @@ export default function Questions() {
                                             <th>Event End Date</th>
                                             <td>Trending</td>
                                             <td>Show In Slider</td>
+                                            <td>Created At</td>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -351,6 +352,7 @@ export default function Questions() {
                                                         style={{ cursor: "pointer", width: "20px", height: "20px" }}
                                                     />
                                                 </td>
+                                                <td>{formatDateTime(item.createdAt)}</td>
                                                 <td>
                                                     <div className="dropdown">
                                                         <button
@@ -392,6 +394,7 @@ export default function Questions() {
                                     <th>Show In Slider</th>
                                     <th>Result status</th>
                                     <th>Currect option</th>
+                                    <th>Created At</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -457,6 +460,7 @@ export default function Questions() {
                                                 )}
                                             </td>
                                             <td>{item?.options?.find((opt) => opt.resultStatus)?.option || "-"}</td>
+                                            <td>{formatDateTime(item.createdAt)}</td>
                                             <td>
                                                 <div className="dropdown">
                                                     <button

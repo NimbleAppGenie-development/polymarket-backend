@@ -2,6 +2,7 @@ import { AuthenticatedLayout } from "../../layout/AuthenticatedLayout.jsx";
 import { useEffect, useState } from "react";
 import { errorToastr, successToastr } from "../../utils/toastr.js";
 import Service from "../../services/Http.js";
+import { dateFormatter } from "../../utils/helper";
 
 const Withdraw = () => {
     const [amount, setAmount] = useState("");
@@ -79,6 +80,7 @@ const Withdraw = () => {
                                             <th>Transaction ID</th>
                                             <th>Amount</th>
                                             <th>Status</th>
+                                            <th>Created At</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -100,6 +102,8 @@ const Withdraw = () => {
                                                         {tx.status === "APPROVED" && <span className="badge bg-success">APPROVED</span>}
                                                         {tx.status === "REJECTED" && <span className="badge bg-danger">REJECTED</span>}
                                                     </td>
+                                                    {/* <td>{tx.createdAt}</td> */}
+                                                    <td>{dateFormatter(tx.createdAt, "perfectDateTime")}</td>
 
                                                     <td>
                                                         {tx.status === "PENDING" ? (
