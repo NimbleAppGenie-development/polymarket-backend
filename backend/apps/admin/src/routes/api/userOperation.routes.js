@@ -14,6 +14,7 @@ const {
     deleteCategory,
     updateCategoryStatus,
     getQuestions,
+    viewQuestion,
     addQuestion,
     updateQuestionStatus,
     updateQuestionTrending,
@@ -57,6 +58,7 @@ router.route("/category/update-status/:id").get(isAuthenticated, updateCategoryS
 /* Question */
 
 router.route("/questions").get(isAuthenticated, getQuestions).all(methodNotAllowed);
+router.route("/question/view/:id").get(isAuthenticated, viewQuestion).all(methodNotAllowed);
 
 
 router.route("/question/add").post(isAuthenticated,upload("question").array("optionImages", 10),addQuestion,).all(methodNotAllowed);

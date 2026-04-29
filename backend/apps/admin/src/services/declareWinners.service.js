@@ -5,6 +5,7 @@ const Admin = require("@models/adminModel");
 const UserPredictedQuestion = require("@models/userpredictedquestions");
 const Transaction = require("@models/transaction");
 const UserWallet = require("@models/userWallet");
+const { randomUUID } = require("crypto");
 
 
 async function declareWinners({ questionId, answerId, type }) {
@@ -94,6 +95,7 @@ async function declareWinners({ questionId, answerId, type }) {
 
             await Transaction.create({
                 userId: bet.userId,
+                transactionId: `TXN-${randomUUID()}`,
                 amount: winningAmount,
                 type: "WINNING",
                 status: "SUCCESS",

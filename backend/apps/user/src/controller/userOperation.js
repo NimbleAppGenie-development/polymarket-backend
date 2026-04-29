@@ -14,6 +14,8 @@ const Admin = require("@models/adminModel");
 const Transaction = require("@models/transaction");
 const UserWallet = require("@models/userWallet");
 const Category = require("@models/Category");
+const { randomUUID } = require("crypto");
+const TransactionLimit = require("@models/transactionLimit");
 
 module.exports = {
     userLogin: async (req, res, next) => {
@@ -145,7 +147,7 @@ module.exports = {
             const offset = (page - 1) * limit;
 
             if (!id) {
-                return res.status(400).json({
+                return res.status(statusCodes.BAD_REQUEST).json({
                     status: false,
                     message: "ID not found",
                 });
@@ -166,7 +168,7 @@ module.exports = {
             });
 
             if (!user) {
-                return res.status(404).json({
+                return res.status(statusCodes.NOT_FOUND).json({
                     status: false,
                     message: "User not found",
                 });
@@ -279,6 +281,7 @@ module.exports = {
             }
             await Transaction.create({
                 userId,
+                transactionId: `TXN-${randomUUID()}`,
                 amount,
                 type: "DEPOSIT",
                 status: "SUCCESS",
@@ -294,6 +297,108 @@ module.exports = {
             });
         } catch (error) {
             console.error("addMoney ERROR:", error);
+
+            return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({
+                status: false,
+                message: "Internal server error",
+            });
+        }
+    },
+
+    withdrawMoney: async (req, res, next) => {
+        try {
+            const { userId, amount, type } = req.body;
+
+            if (!userId || !amount || !type) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "All fields are required",
+                });
+            }
+
+            const deductAmount = Number(amount);
+
+            if (isNaN(deductAmount) || deductAmount <= 0) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "Invalid amount",
+                });
+            }
+
+            const user = await User.findOne({
+                where: { id: userId },
+                attributes: { exclude: ["password", "accessToken", "refreshToken"] },
+                include: [
+                    {
+                        model: UserWallet,
+                        as: "wallet",
+                        attributes: ["userId", "type", "balance"],
+                    },
+                ],
+            });
+
+            if (!user) {
+                return res.status(statusCodes.NOT_FOUND).json({
+                    status: false,
+                    message: "User not found",
+                });
+            }
+
+            const withdrawLimit = await TransactionLimit.findOne();
+            if (
+                Number(amount) < Number(withdrawLimit.minWithdrawAmount) ||
+                Number(amount) > Number(withdrawLimit.maxWithdrawAmount)
+            ) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: `Amount must be between ${withdrawLimit.minWithdrawAmount} and ${withdrawLimit.maxWithdrawAmount}`,
+                });
+            }
+            const newBalance = Number(user.walletBalance || 0) - deductAmount;
+
+            if (type === "WINNING") {
+                const wallet = await UserWallet.findOne({
+                    where: {
+                        userId,
+                        type: "WINNING",
+                    },
+                });
+                if (Number(wallet.balance) < deductAmount) {
+                    return res.status(statusCodes.BAD_REQUEST).json({
+                        status: false,
+                        message: "Insufficient winning balance",
+                    });
+                }
+                if (!wallet) {
+                    await UserWallet.create({
+                        userId,
+                        type: "WINNING",
+                        balance: deductAmount,
+                    });
+                } else {
+                    await wallet.update({
+                        balance: Number(wallet.balance || 0) - deductAmount,
+                    });
+                }
+            }
+            await Transaction.create({
+                userId,
+                transactionId: `TXN-${randomUUID()}`,
+                amount,
+                type: "WITHDRAW",
+                status: "PENDING",
+                response: JSON.stringify({ userId }),
+            });
+
+            return res.json({
+                status: true,
+                message: "Money withdraw successfully",
+                data: {
+                    walletBalance: newBalance,
+                },
+            });
+        } catch (error) {
+            console.error("Withdraw money ERROR:", error);
 
             return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({
                 status: false,

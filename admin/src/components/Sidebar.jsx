@@ -32,6 +32,14 @@ export default function Sidebar() {
             urls: [],
         },
         {
+            url: "/withdraw",
+            active: "",
+            name: "Withdraw",
+            icon: <i className="fas fa-money-bill-wave" />,
+            levels: [],
+            urls: [],
+        },
+        {
             url: "/user",
             active: "",
             name: "User Management",

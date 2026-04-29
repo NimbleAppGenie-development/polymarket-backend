@@ -26,7 +26,7 @@ module.exports = {
                 }
             })
 
-            if (!pages || pages.length === 0) return res.status(200).json(successResponse([], "No pages found"));
+            if (!pages || pages.length === 0) return res.status(statusCodes.OK).json(successResponse([], "No pages found"));
 
             const formatted = pages.map(page => ({
                 id: page.id,

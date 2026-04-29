@@ -3,6 +3,10 @@ const moment = require("moment");
 const statusCodes = require("../../../../libs/shared/utils/statusCodes");
 const { simpleResponse, successResponse } = require("../../../../libs/shared/utils/response");
 const { escape } = require("mysql2");
+const TransactionLimit = require("@models/transactionLimit");
+const Transaction = require("@models/transaction");
+const User = require("@models/user");
+const UserWallet = require("@models/userWallet");
 
 module.exports = {
     /**
@@ -95,6 +99,11 @@ module.exports = {
         }
     },
 
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     getWalletBalance: async (req, res, next) => {
         try {
             const admin = await Admin.findOne();
@@ -123,6 +132,186 @@ module.exports = {
             });
         }
     },
+
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
+    walletTransactions: async (req, res, next) => {
+        try {
+            const admin = await Admin.findOne();
+
+            if (!admin) {
+                return res.status(statusCodes.NOT_FOUND).json({
+                    status: false,
+                    message: "Admin not found",
+                });
+            }
+
+            const WalletTransaction = await Transaction.findAll({
+                where: { type: "WITHDRAW" },
+                order: [["createdAt", "DESC"]],
+                include: [
+                    {
+                        model: User,
+                        as: "user",
+                        attributes: { exclude: ["password", "accessToken", "refreshToken"] },
+                    },
+                ],
+            });
+
+            return res.status(statusCodes.OK).json({
+                status: true,
+                data: WalletTransaction,
+                message: "Fetch Withdraw successfully",
+            });
+        } catch (error) {}
+    },
+
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
+    updateTransactionStatus: async (req, res, next) => {
+        try {
+            const { status, transactionId } = req.body;
+
+            const admin = await Admin.findOne();
+            if (!admin) {
+                return res.status(statusCodes.NOT_FOUND).json({
+                    status: false,
+                    message: "Admin not found",
+                });
+            }
+
+            if (!status || !transactionId) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "Status and TransactionId are required",
+                });
+            }
+
+            const transaction = await Transaction.findOne({
+                where: { id: transactionId },
+            });
+
+            if (!transaction) {
+                return res.status(statusCodes.NOT_FOUND).json({
+                    status: false,
+                    message: "Transaction not found",
+                });
+            }
+
+            if (transaction.status !== "PENDING") {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "Transaction already processed",
+                });
+            }
+
+            const wallet = await UserWallet.findOne({
+                where: {
+                    userId: transaction.userId,
+                    type: "WINNING",
+                },
+            });
+
+            if (!wallet) {
+                return res.status(statusCodes.NOT_FOUND).json({
+                    status: false,
+                    message: "Wallet not found",
+                });
+            }
+
+            // ✅ APPROVE → deduct
+            if (status === "APPROVED") {
+                if (Number(wallet.balance) < Number(transaction.amount)) {
+                    return res.status(statusCodes.BAD_REQUEST).json({
+                        status: false,
+                        message: "Insufficient balance",
+                    });
+                }
+
+                wallet.balance = Number(wallet.balance) - Number(transaction.amount);
+                await wallet.save();
+
+                await transaction.update({ status: "APPROVED" });
+            }
+
+            // ✅ REJECT → refund (ADD BACK)
+            else if (status === "REJECTED") {
+                wallet.balance = Number(wallet.balance) + Number(transaction.amount);
+                await wallet.save();
+
+                await transaction.update({ status: "REJECTED" });
+            }
+
+            return res.status(statusCodes.OK).json({
+                status: true,
+                message: `Transaction ${status}`,
+            });
+        } catch (error) {
+            console.error("UPDATE TRANSACTION ERROR:", error);
+            return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({
+                status: false,
+                message: "Something went wrong",
+            });
+        }
+    },
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
+    setWithdrawLimit: async (req, res, next) => {
+        try {
+            const admin = await Admin.findOne();
+            const { minWithdrawAmount, maxWithdrawAmount } = req.body;
+
+            if (!admin) {
+                return res.status(statusCodes.NOT_FOUND).json({
+                    status: false,
+                    message: "Admin not found",
+                });
+            }
+
+            if (!minWithdrawAmount || !maxWithdrawAmount) {
+                return res.status(statusCodes.BAD_REQUEST).json({
+                    status: false,
+                    message: "Both min & max amount are required",
+                });
+            }
+
+            let withdrawLimit = await TransactionLimit.findOne();
+
+            if (withdrawLimit) {
+                await withdrawLimit.update({
+                    minWithdrawAmount,
+                    maxWithdrawAmount,
+                });
+            } else {
+                withdrawLimit = await TransactionLimit.create({
+                    minWithdrawAmount,
+                    maxWithdrawAmount,
+                });
+            }
+
+            return res.status(statusCodes.OK).json({
+                status: true,
+                data: withdrawLimit,
+                message: "Withdraw limit set successfully",
+            });
+        } catch (error) {
+            console.error("SET WITHDRAW LIMIT ERROR:", error);
+            return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({
+                status: false,
+                message: "Something went wrong",
+            });
+        }
+    },
+
     /**
      * @param {import('express').Request} req
      * @param {import('express').Response} res

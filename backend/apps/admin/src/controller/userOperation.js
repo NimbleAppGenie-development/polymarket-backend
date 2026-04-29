@@ -436,6 +436,71 @@ module.exports = {
      * @param {import('express').Response} res
      * @param {import('express').NextFunction} next
      */
+    viewQuestion: async (req, res, next) => {
+        try {
+            const admin = req.user;
+
+            if (!admin) {
+                return res.status(statusCode.BAD_REQUEST).json({
+                    status: false,
+                    message: "Admin not found",
+                });
+            }
+
+            const { id } = req.params;
+
+            if (!id) {
+                return res.status(statusCode.BAD_REQUEST).json({
+                    status: false,
+                    message: "Question ID is required",
+                });
+            }
+
+            const predictedQuestion = await UserPredictedQuestion.findAll({
+                where: { questionId: id },
+                include: [
+                    {
+                        model: Category,
+                        as: "category",
+                        attributes: ["name"]
+                    },
+                    // {
+                    //     model: User,
+                    //     as: "user",
+                    //     attributes: {exclude: ["password","accessToken","refreshToken"]}
+                    // }
+                ]
+            });
+            if (!predictedQuestion.length) {
+                return res.status(statusCode.NOT_FOUND).json({
+                    status: false,
+                    message: "No predictions found",
+                });
+            }
+
+            const formattedQuestion = predictedQuestion.map((item) => ({
+                id: item.id,
+                userId: item.userId,
+                categoryId: item.categoryId,
+                questionId: item.questionId,
+                selectedOption: item.selectedOptionName,
+                entryAmount: item.entryAmount,
+                multiplier: item.multiplier,
+                winningStatus: item.winningStatus,
+            }));
+
+            return res.status(statusCode.OK).json(successResponse(formattedQuestion, "Question fetched successfully"));
+        } catch (error) {
+            console.log("VIEW QUESTION ERROR:", error);
+            next(error);
+        }
+    },
+
+    /**
+     * @param {import('express').Request} req
+     * @param {import('express').Response} res
+     * @param {import('express').NextFunction} next
+     */
     addQuestion: async (req, res, next) => {
         try {
             const admin = req.user;

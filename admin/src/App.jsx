@@ -7,6 +7,8 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/login";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminWallet from "./pages/admin/AdminWallet.jsx";
+import Withdraw from "./pages/admin/Withdraw.jsx";
+import SetWithdrawLimit from "./pages/admin/SetWithdrawLimit.jsx";
 import Pages from "./pages/admin/Pages.jsx";
 import PageEdit from "./pages/admin/PageEdit.jsx";
 import Category from "./pages/admin/Category.jsx";
@@ -15,6 +17,7 @@ import EditCategory from "./pages/admin/EditCategory.jsx";
 import Questions from "./pages/admin/Questions.jsx";
 import AddQuestion from "./pages/admin/AddQuestion.jsx";
 import EditQuestion from "./pages/admin/EditQuestion.jsx";
+import ViewQuestion from "./pages/admin/ViewQuestion.jsx";
 import UserManagement from "./pages/admin/UserManagement.jsx";
 
 export default function App() {
@@ -31,6 +34,8 @@ export default function App() {
 
                 <Route path="/dashboard" element={ <PrivateRoute> <Dashboard /> </PrivateRoute> } />
                 <Route path="/adminWallet" element={ <PrivateRoute> <AdminWallet /> </PrivateRoute> } />
+                <Route path="/withdraw" element={ <PrivateRoute> <Withdraw /> </PrivateRoute> } />
+                <Route path="/withdraw-amount" element={ <PrivateRoute> <SetWithdrawLimit /> </PrivateRoute> } />
 
                 <Route path="/user" element={ <PrivateRoute> <UserManagement /> </PrivateRoute> } />
                 <Route path="/category" element={ <PrivateRoute> <Category /> </PrivateRoute> } />
@@ -42,6 +47,7 @@ export default function App() {
                 <Route path="/questions" element={ <PrivateRoute> <Questions /> </PrivateRoute> } />
                 <Route path="/question/add" element={ <PrivateRoute> <AddQuestion /> </PrivateRoute> } />
                 <Route path="/question/edit/:questionId" element={ <PrivateRoute> <EditQuestion /> </PrivateRoute> } />
+                <Route path="/question/view/:questionId" element={ <PrivateRoute> <ViewQuestion /> </PrivateRoute> } />
 
                 <Route path="/pages" element={ <PrivateRoute> <Pages /> </PrivateRoute> } />
 

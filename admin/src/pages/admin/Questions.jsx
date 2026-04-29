@@ -474,6 +474,11 @@ export default function Questions() {
                                                             </Link>
                                                         </li>
                                                         <li>
+                                                            <Link to={`/question/view/${item.questionId}`} className="dropdown-item">
+                                                                <i className="fa fa-key me-2 text-primary"></i> View
+                                                            </Link>
+                                                        </li>
+                                                        <li>
                                                             <button
                                                                 className="dropdown-item text-danger"
                                                                 onClick={() => deleteQuestion(item.questionId)}
