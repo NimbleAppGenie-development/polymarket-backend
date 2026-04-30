@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = (userData) => {
         localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("user_lastActivity", Date.now().toString());  //check user last activity 
         setUser(userData);
         toastr.success("User logged in successfully");
     };

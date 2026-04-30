@@ -34,7 +34,7 @@ export default function Sidebar() {
         {
             url: "/withdraw",
             active: "",
-            name: "Withdraw",
+            name: "Withdraw Management",
             icon: <i className="fas fa-money-bill-wave" />,
             levels: [],
             urls: [],

@@ -7,6 +7,7 @@ const TransactionLimit = require("@models/transactionLimit");
 const Transaction = require("@models/transaction");
 const User = require("@models/user");
 const UserWallet = require("@models/userWallet");
+const { Op } = require("sequelize");
 
 module.exports = {
     /**
@@ -138,6 +139,7 @@ module.exports = {
      * @param {import('express').Response} res
      * @param {import('express').NextFunction} next
      */
+
     walletTransactions: async (req, res, next) => {
         try {
             const admin = await Admin.findOne();
@@ -149,14 +151,22 @@ module.exports = {
                 });
             }
 
-            const WalletTransaction = await Transaction.findAll({
-                where: { type: "WITHDRAW" },
+            const { page = 1, limit = 10, search = "" } = req.query;
+            const offset = (parseInt(page) - 1) * parseInt(limit);
+
+            const whereClause = { type: "WITHDRAW" };
+
+            const { count, rows: WalletTransaction } = await Transaction.findAndCountAll({
+                where: whereClause,
                 order: [["createdAt", "DESC"]],
+                limit: parseInt(limit),
+                offset,
                 include: [
                     {
                         model: User,
                         as: "user",
                         attributes: { exclude: ["password", "accessToken", "refreshToken"] },
+                        ...(search ? { where: { name: { [Op.like]: `%${search}%` } } } : {}),
                     },
                 ],
             });
@@ -164,9 +174,14 @@ module.exports = {
             return res.status(statusCodes.OK).json({
                 status: true,
                 data: WalletTransaction,
+                total: count,
+                page: parseInt(page),
+                limit: parseInt(limit),
                 message: "Fetch Withdraw successfully",
             });
-        } catch (error) {}
+        } catch (error) {
+            next(error);
+        }
     },
 
     /**

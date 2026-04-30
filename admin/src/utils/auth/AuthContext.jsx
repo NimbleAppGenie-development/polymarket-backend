@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = (userData) => {
         localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("admin_lastActivity", Date.now().toString());
         setUser(userData);
         toastr.success("Admin logged in successfully");
     };
