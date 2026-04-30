@@ -28,8 +28,8 @@ export default function ReferDataEdit() {
 
             const response = await services.get("/admin/walletConfig", {}, true);
 
-            if (response.status && response.data?.data) {
-                const cfg = response.data.data;
+            if (response.status && response.data) {
+                const cfg = response.data;
                 setData({
                     textData: cfg.textData || "",
                     bannerImage: cfg.bannerImage || "",

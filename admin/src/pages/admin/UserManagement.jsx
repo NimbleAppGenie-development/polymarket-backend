@@ -350,7 +350,7 @@ export default function UserManagement() {
                                     <td>{item.name == null ? "N/A" : item.name}</td>
                                     <td>{item.email == null ? "N/A" : item.email}</td>
                                     {/* <td>{item.countryCode && item.phoneNumber ? `${item.countryCode} ${item.phoneNumber}` : ""}</td> */}
-                                    <td>{item.walletBalance || 0}</td>
+                                    <td>{item.wallet || 0}</td>
                                     <td>{dateFormatter(item.createdAt, "perfectDateTime")}</td>
                                     <td>
                                         <span

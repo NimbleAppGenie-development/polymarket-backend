@@ -3,6 +3,7 @@ import AuthContext from "../utils/auth/AuthContext";
 import { fetchURLfromBackend } from "../utils/helper";
 import { Link } from "react-router";
 import Service from "../services/Http";
+import { errorToastr, successToastr } from "../utils/toastr";
 
 export default function Header() {
     const { user } = useContext(AuthContext);
@@ -14,8 +15,8 @@ export default function Header() {
 
             const response = await services.get("/admin/profile", {}, true);
 
-            if (response.status && response.data?.data) {
-                setProfile(response.data.data);
+            if (response.status && response.data) {
+                setProfile(response.data);
             } else {
                 errorToastr(response?.message || response?.data?.message || "Failed to fetch profile");
             }

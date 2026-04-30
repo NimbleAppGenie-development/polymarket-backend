@@ -277,6 +277,13 @@ export default function Home() {
     };
 
     const noData = !sliderData.length && !filteredMarketData.length && !filteredTrendingData.length;
+
+    const isLiveEvent = (start, end) => {
+        const now = new Date().getTime();
+        return now >= new Date(start).getTime() && now <= new Date(end).getTime();
+    };
+
+
     return (
         <div className="home-page">
             <Header />
@@ -509,7 +516,23 @@ export default function Home() {
                                                                             <h4 className="text-uppercase">{item.category.name}</h4>
                                                                         </div>
 
-                                                                        <h3>{item.question}</h3>
+                                                                        {/* <h3>{item.question}</h3> */}
+                                                                        <h3>
+                                                                            {item.question}
+
+                                                                            {isLiveEvent(item.eventStartDate, item.eventEndDate) && (
+                                                                                <span
+                                                                                    style={{
+                                                                                        color: "red",
+                                                                                        fontSize: "12px",
+                                                                                        fontWeight: "bold",
+                                                                                        marginLeft: "8px",
+                                                                                    }}
+                                                                                >
+                                                                                     LIVE
+                                                                                </span>
+                                                                            )}
+                                                                        </h3>
                                                                         <p>{formatDateTime(item.eventStartDate)}</p>
 
                                                                         {user ? (
@@ -573,6 +596,7 @@ export default function Home() {
                                                                             <div className="politics-btn-box d-flex flex-column">
                                                                                 {item.options
                                                                                     ?.filter((opt) => opt.option !== "None of the Above")
+                                                                                    .slice(0, 2)
                                                                                     .map((opt) => (
                                                                                         <div
                                                                                             key={opt.id}

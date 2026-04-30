@@ -384,7 +384,7 @@ module.exports = {
         try {
             const liveData = await Question.findAll({
                 where: { status: "true" },
-                attributes: ["id", "question", "description", "status", "eventStartDate", "eventEndDate"],
+                attributes: ["id", "question", "description", "status", "eventStartDate", "eventEndDate","createdAt"],
                 include: [
                     {
                         model: Category,

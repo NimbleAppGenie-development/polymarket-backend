@@ -8,6 +8,7 @@ const { dateGenerate } = require("../../../../libs/shared/utils/dates");
 const Category = require("@models/Category");
 const Question = require("@models/question");
 const statusCode = require("@utils/statusCodes");
+const UserWallet = require("@models/userWallet");
 
 module.exports = {
     /**
@@ -61,12 +62,29 @@ module.exports = {
                 limit: finalLimit,
                 offset,
                 attributes: {
-                    exclude: ["accessToken", "refreshToken", "password"],
+                    exclude: ["accessToken", "refreshToken", "password", "walletBalance"],
                 },
+                include: [
+                    {
+                        model: UserWallet,
+                        as: "wallet",
+                        attributes: ["type", "balance"],
+                    },
+                ],
+            });
+            const formattedUsers = rows.map((user) => {
+                const userData = user.toJSON();
+
+                const mainWallet = userData.wallet.find((w) => w.type === "MAIN");
+
+                return {
+                    ...userData,
+                    wallet: mainWallet ? mainWallet.balance : null,
+                };
             });
 
             const response = {
-                users: rows,
+                users: formattedUsers,
                 total: count,
                 currentPage: defaultPage,
                 firstItem: count === 0 ? 0 : (defaultPage - 1) * finalLimit + 1,
@@ -78,7 +96,6 @@ module.exports = {
                 result: response,
                 message: "User fetched successfully",
             });
-
         } catch (error) {
             console.error("USER LIST ERROR:", error);
             res.status(statusCode.INTERNAL_SERVER_ERROR).json({
@@ -99,23 +116,22 @@ module.exports = {
             if (!id) {
                 return res.status(statusCode.BAD_REQUEST).json({
                     status: false,
-                    message: "User ID is required"
+                    message: "User ID is required",
                 });
             }
 
             await User.destroy({
-                where: { id }
+                where: { id },
             });
 
             return res.status(statusCode.OK).json({
                 status: true,
-                message: "User deleted successfully"
+                message: "User deleted successfully",
             });
-
         } catch (error) {
             return res.status(statusCode.INTERNAL_SERVER_ERROR).json({
                 status: false,
-                message: "Something went wrong"
+                message: "Something went wrong",
             });
         }
     },
@@ -132,7 +148,7 @@ module.exports = {
             if (!id) {
                 return res.status(statusCode.BAD_REQUEST).json({
                     status: false,
-                    message: "User ID is required"
+                    message: "User ID is required",
                 });
             }
 
@@ -140,26 +156,25 @@ module.exports = {
             if (!user) {
                 return res.status(statusCode.NOT_FOUND).json({
                     status: false,
-                    message: "User not found"
+                    message: "User not found",
                 });
             }
 
-            user.isActive = !user.isActive; 
+            user.isActive = !user.isActive;
 
             await user.save();
 
             return res.status(statusCode.OK).json({
                 status: true,
                 message: `User is now ${user.isActive ? "Active" : "Inactive"}`,
-                data: user
+                data: user,
             });
-
         } catch (error) {
             console.error("TOGGLE STATUS ERROR:", error);
             return res.status(statusCode.INTERNAL_SERVER_ERROR).json({
                 status: false,
                 message: "Something went wrong",
-                error: error.message
+                error: error.message,
             });
         }
     },
@@ -240,5 +255,4 @@ module.exports = {
             });
         }
     },
-
 };

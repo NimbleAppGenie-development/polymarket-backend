@@ -18,19 +18,15 @@ export default function Live() {
     };
 
     const formatDateTime = (dateString) => {
-        const date = new Date(dateString);
+        if (!dateString) return "-";
 
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const year = date.getFullYear();
-
-        let hours = date.getHours();
-        const minutes = String(date.getMinutes()).padStart(2, "0");
-
-        const ampm = hours >= 12 ? "PM" : "AM";
-        hours = hours % 12 || 12;
-
-        return `${day}-${month}-${year} ${hours}:${minutes} ${ampm}`;
+        return new Intl.DateTimeFormat("en-GB", {
+            day: "2-digit",
+            month: "long",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+        }).format(new Date(dateString));
     };
 
     const getLiveRecords = (data) => {
@@ -51,7 +47,7 @@ export default function Live() {
             const services = new Service();
 
             const response = await services.get("/user/get-live-data", {}, false);
-            console.log("============Radhe============", response.data);
+            
             if (response?.status) {
                 setLiveData(response?.data || []);
             } else {
@@ -70,7 +66,10 @@ export default function Live() {
         getLiveData();
     }, []);
 
-    const filteredLive = getLiveRecords(liveData);
+    // const filteredLive = getLiveRecords(liveData);
+    const filteredLive = getLiveRecords(liveData).filter((item) => {
+        return !item.options?.some((opt) => String(opt.resultStatus).toLowerCase() === "true");
+    });
 
     return (
         <div className="home-page">
@@ -112,7 +111,7 @@ export default function Live() {
                                                     <span style={{ color: "red", fontSize: "14px", fontWeight: "bold" }}>● LIVE</span>
                                                 )}
                                             </h3>
-
+                                            <p>{formatDateTime(item.createdAt)}</p>
                                             {/* OPTIONS */}
                                             <div className="politics-btn-box d-flex flex-column">
                                                 {item.options
